@@ -19,11 +19,16 @@
         .badge { padding: 5px 8px; border-radius: 5px; font-size: 0.75rem; color: white; font-weight: bold; }
         .bg-ok { background: var(--success); } .bg-warn { background: #f39c12; } .bg-err { background: var(--danger); } .bg-info { background: #3498db; }
         
-        /* DASHBOARD STATS (HERRAMIENTAS Y CONTENEDORES) */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px 10px; border-radius: 8px; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
+        /* DASHBOARD STATS (NORMAL Y COMPACTO) */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         .stat-card h3 { font-size: 1.8rem; margin: 0 0 5px 0; color: var(--primary); }
-        .stat-card p { font-size: 0.8rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
+        .stat-card p { font-size: 0.85rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
+
+        .stats-grid-small { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .stat-card-small { background: white; padding: 10px 5px; border-radius: 6px; border-left: 4px solid var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
+        .stat-card-small h3 { font-size: 1.3rem; margin: 0 0 2px 0; color: var(--primary); }
+        .stat-card-small p { font-size: 0.65rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
 
         /* PANTALLAS DE CARGA Y LOGIN */
         #splash-screen, #login-screen, #loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10000; }
@@ -38,7 +43,7 @@
         #intro-video { display: none; width: 100%; max-width: 1000px; outline: none; }
         #skip-btn { display: none; margin-top: 20px; color: #777; background: none; border: none; text-decoration: underline; cursor: pointer; }
 
-        /* MODALES HOJA DE VIDA (VENTANAS FLOTANTES) */
+        /* MODALES HOJA DE VIDA */
         .modal { display: none; position: fixed; z-index: 10005; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.3s; position: relative; }
         @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -78,17 +83,17 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; color: var(--secondary); }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; margin-top: 10px; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: var(--secondary); color: white; }
         tr:hover { background: #fcfcfc; }
-        .filter-container { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .filter-container { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
         
         /* IMPRESIÓN */
         #print-header, #print-details { display: none; }
         @media print {
-            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid { display: none !important; }
+            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid, .stats-grid-small { display: none !important; }
             .main-content { padding: 0; width: 100%; }
             .section h1 { display: none; } 
             #print-header, #print-details { display: block !important; }
@@ -245,9 +250,13 @@
                 </form>
             </div>
             <div class="filter-container">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <label style="font-weight:bold;">📍 Filtrar Ubicación Actual:</label>
-                    <select id="filter-her-obra" onchange="renderHerramientas()" style="padding:10px; border-radius:5px; min-width:250px;"><option value="ALL">Todas las Bodegas/Estados</option></select>
+                <div style="display:flex; align-items:center; gap:15px; flex: 1; min-width: 250px;">
+                    <label style="font-weight:bold;">📍 Filtrar Ubicación:</label>
+                    <select id="filter-her-obra" onchange="renderHerramientas()" style="padding:10px; border-radius:5px; width:100%;"><option value="ALL">Todas las Bodegas/Estados</option></select>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px; flex: 1; min-width: 250px;">
+                    <label style="font-weight:bold;">🔍 Buscar Herramienta:</label>
+                    <input type="text" id="search-herramienta" placeholder="Escribe nombre, marca, modelo o serie..." onkeyup="renderHerramientas()" style="padding:10px; border-radius:5px; border:1px solid #ccc; width:100%;">
                 </div>
             </div>
             <table><thead><tr><th>Equipo</th><th>Marca / Modelo</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
@@ -256,7 +265,7 @@
         <div id="contenedores" class="section">
             <h1>Inventario de Contenedores</h1>
             
-            <div class="stats-grid" id="c-stats"></div>
+            <div class="stats-grid-small" id="c-stats"></div>
             
             <div class="card" id="form-cont-card">
                 <form onsubmit="event.preventDefault(); addContenedor();">
@@ -274,17 +283,17 @@
                         <div class="form-group"><label>Ubicación (Obra Actual)</label><select id="c-obr" required></select></div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group"><label>Detalle Exterior (Color, Estado, Puertas)</label><input type="text" id="c-ext" required placeholder="Ej: Pintura azul, puerta doble operativa"></div>
-                        <div class="form-group"><label>Detalle Interior (Luces, Repisas, etc.)</label><input type="text" id="c-int" required placeholder="Ej: 3 repisas de acero, luz LED operativa"></div>
+                        <div class="form-group"><label>Detalle Exterior (Color, Estado, Puertas)</label><input type="text" id="c-ext" required placeholder="Ej: Pintura azul, puerta doble"></div>
+                        <div class="form-group"><label>Detalle Interior (Luces, Repisas, etc.)</label><input type="text" id="c-int" required placeholder="Ej: 3 repisas de acero, luz LED"></div>
                     </div>
                     <button class="btn btn-primary">Registrar Contenedor a la Nube</button>
                 </form>
             </div>
             
             <div class="filter-container">
-                <div style="display:flex; align-items:center; gap:15px;">
+                <div style="display:flex; align-items:center; gap:15px; width:100%;">
                     <label style="font-weight:bold;">📍 Filtrar por Obra:</label>
-                    <select id="filter-cont-obra" onchange="renderContenedores()" style="padding:10px; border-radius:5px; min-width:250px;"><option value="ALL">Todas las Obras</option></select>
+                    <select id="filter-cont-obra" onchange="renderContenedores()" style="padding:10px; border-radius:5px; flex:1;"><option value="ALL">Todas las Obras</option></select>
                 </div>
             </div>
             <table><thead><tr><th>Ubicación / Obra</th><th>Total Contenedores</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
@@ -409,6 +418,11 @@
             if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } 
         }
 
+        function toggleOCDetails(id) { 
+            const el = document.getElementById(id); 
+            if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; 
+        }
+
         // --- LÓGICA DE ORDENAMIENTO DE OBRAS ---
         function getSortedObras() {
             return [...db.obras].sort((a, b) => {
@@ -467,9 +481,20 @@
 
         function renderHerramientas() {
             const fV = document.getElementById('filter-her-obra').value;
+            const searchQ = document.getElementById('search-herramienta').value.toLowerCase().trim();
+            
             let list = db.herramientas.map((h, i) => ({...h, originalIndex: i}));
             if (fV !== "ALL") list = list.filter(h => h.obra === fV);
             else if (currentUser.rol === 'bodeguero') list = list.filter(h => h.obra === currentUser.obraId);
+
+            if (searchQ) {
+                list = list.filter(h => 
+                    h.nombre.toLowerCase().includes(searchQ) || 
+                    h.marca.toLowerCase().includes(searchQ) || 
+                    h.modelo.toLowerCase().includes(searchQ) || 
+                    h.serie.toLowerCase().includes(searchQ)
+                );
+            }
 
             let tTot = list.length; let tDisp = 0; let tObr = 0; let tRep = 0;
             list.forEach(h => {
@@ -482,17 +507,18 @@
             list.forEach(h => { const k = `${h.nombre} | ${h.marca} | ${h.modelo}`; if (!grouped[k]) grouped[k] = { nom: h.nombre, mar: h.marca, mod: h.modelo, items: [] }; grouped[k].items.push(h); });
 
             let html = '';
+            let gIdx = 0;
             for (const k in grouped) {
-                const g = grouped[k]; const sId = k.replace(/[^a-zA-Z0-9]/g, '_');
-                html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('her-det-${sId}')">
+                const g = grouped[k]; const sId = 'herr_grp_' + gIdx++;
+                html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
                     <td><b>${g.nom}</b></td><td>${g.mar} / ${g.mod}</td><td><b>${g.items.length}</b> unid.</td><td><button class="btn btn-primary btn-small">Ver Series ⬇️</button></td></tr>
-                    <tr id="her-det-${sId}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd;">
-                    <thead style="background:#34495e;"><tr><th>N° Serie</th><th>Ubicación Actual</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
+                    <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd;">
+                    <thead style="background:#34495e; color:white;"><tr><th>N° Serie</th><th>Ubicación Actual</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
                     ${g.items.map(u => {
                         const est = getEstadoHerramienta(getObraNameById(u.obra));
                         return `<tr><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td>
-                        <td><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex})">📋 Hoja de Vida</button>
-                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('herramientas', ${u.originalIndex})">X</button>` : ''}</td></tr>`;
+                        <td><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex}); event.stopPropagation();">📋 Hoja de Vida</button>
+                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('herramientas', ${u.originalIndex}); event.stopPropagation();">X</button>` : ''}</td></tr>`;
                     }).join('')}</tbody></table></td></tr>`;
             }
             document.querySelector('#table-herramientas-body').innerHTML = html;
@@ -524,7 +550,6 @@
             if (fV !== "ALL") list = list.filter(c => c.obra === fV);
             else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId);
 
-            // Dashboard Stats
             let tTot = list.length; let tOfi = 0; let tBod = 0; let tBan = 0; let tDuc = 0; let tMix = 0;
             list.forEach(c => {
                 if(c.tipo === 'Oficina') tOfi++;
@@ -533,22 +558,22 @@
                 else if(c.tipo === 'Duchas') tDuc++;
                 else if(c.tipo === 'Mixtos') tMix++;
             });
-            document.getElementById('c-stats').innerHTML = `<div class="stat-card" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total</p></div><div class="stat-card" style="border-left-color: #2ecc71;"><h3>${tOfi}</h3><p>Oficinas</p></div><div class="stat-card" style="border-left-color: #e67e22;"><h3>${tBod}</h3><p>Bodegas</p></div><div class="stat-card" style="border-left-color: #9b59b6;"><h3>${tBan}</h3><p>Baños</p></div><div class="stat-card" style="border-left-color: #34495e;"><h3>${tDuc}</h3><p>Duchas</p></div><div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tMix}</h3><p>Mixtos</p></div>`;
+            document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tOfi}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tBod}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBan}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tDuc}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tMix}</h3><p>Mixtos</p></div>`;
 
-            // Tabla Acordeón
             const grouped = {};
             list.forEach(c => { if (!grouped[c.obra]) grouped[c.obra] = { obraName: getObraNameById(c.obra), items: [] }; grouped[c.obra].items.push(c); });
 
             let html = '';
+            let gIdx = 0;
             for (const oId in grouped) {
-                const g = grouped[oId]; const sId = oId.replace(/[^a-zA-Z0-9]/g, '_');
-                html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('cont-det-${sId}')">
+                const g = grouped[oId]; const sId = 'cont_grp_' + gIdx++;
+                html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
                     <td><b>${g.obraName}</b></td><td><b>${g.items.length}</b> Contenedores</td><td><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
-                    <tr id="cont-det-${sId}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd;">
-                    <thead style="background:#34495e;"><tr><th>Tipo y Número</th><th>Detalle Exterior</th><th>Detalle Interior</th><th>Acción</th></tr></thead><tbody>
-                    ${g.items.map(u => `<tr><td><b>${u.tipo}</b> - ${u.num}</td><td>${u.detExt}</td><td>${u.detInt}</td>
-                        <td><button class="btn btn-success btn-small" onclick="abrirCV('contenedores', ${u.originalIndex})">📋 Hoja Traslados</button>
-                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('contenedores', ${u.originalIndex})">X</button>` : ''}</td></tr>`
+                    <tr id="${sId}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;">
+                    <thead style="background:#34495e; color:white;"><tr><th>Tipo y Número</th><th>Detalle Exterior</th><th>Detalle Interior</th><th>Acción</th></tr></thead><tbody>
+                    ${g.items.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td>
+                        <td><button class="btn btn-success btn-small" onclick="abrirCV('contenedores', ${u.originalIndex}); event.stopPropagation();">📋 Hoja Traslados</button>
+                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('contenedores', ${u.originalIndex}); event.stopPropagation();">X</button>` : ''}</td></tr>`
                     ).join('')}</tbody></table></td></tr>`;
             }
             document.querySelector('#table-contenedores-body').innerHTML = html;
@@ -626,15 +651,16 @@
             document.getElementById('print-obra-name').innerText = (fV !== "ALL") ? `Obra: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Obra: ${getObraNameById(currentUser.obraId)}` : "Todas las Obras");
 
             const gr = {}; list.forEach(o => { if(!gr[o.id]) gr[o.id] = { obra: getObraNameById(o.obra), items: [] }; gr[o.id].items.push(o); });
-            let h = ''; for (const id in gr) {
-                const sId = id.replace(/[^a-zA-Z0-9]/g, '_');
+            let h = ''; let gIdx = 0;
+            for (const id in gr) {
+                const sId = 'res_grp_' + gIdx++;
                 let allRec = true; let allEnt = true;
                 gr[id].items.forEach(it => { const s = calculateStats(id, it.material); if (s.rec < s.comp) allRec = false; if (s.desp < s.comp) allEnt = false; });
                 let cls = allEnt ? "row-entregado" : (allRec ? "row-recibido" : "row-pendiente");
-                h += `<tr class="${cls}" onclick="toggleOCDetails('res-det-${sId}')" style="cursor:pointer;"><td><b>${id}</b></td><td>${gr[id].obra}</td>
+                h += `<tr class="${cls}" onclick="toggleOCDetails('${sId}')" style="cursor:pointer;"><td><b>${id}</b></td><td>${gr[id].obra}</td>
                 <td><span class="badge ${allEnt?'bg-info':(allRec?'bg-ok':'bg-warn')}">${allEnt?'Entregado':(allRec?'Completo':'Pendiente')}</span></td>
                 <td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr>
-                <tr id="res-det-${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa;">
+                <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa; width:100%;">
                 <thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Comprado</th><th>Recibido</th><th>Diferencia Faltante</th><th>Stock</th></tr></thead><tbody>
                 ${gr[id].items.map(it => { 
                     const s = calculateStats(id, it.material); const dif = s.comp - s.rec;
@@ -680,10 +706,9 @@
             const isB = currentUser.rol === 'bodeguero';
             const fOId = isB ? currentUser.obraId : null;
             
-            // Llenar TODOS los selectores de Obras asegurando que B-CEN va primero
             const fullOptions = getObrasOptionsHtml(false, null);
             const filterOptions = getObrasOptionsHtml(true, fOId);
-            const userOptions = getObrasOptionsHtml(false, fOId); // Para bodeguero es solo su obra
+            const userOptions = getObrasOptionsHtml(false, fOId);
 
             document.getElementById('oc-obra').innerHTML = userOptions;
             document.getElementById('h-obr').innerHTML = userOptions;
@@ -708,14 +733,15 @@
             }).join('');
 
             const bPdf = (u) => u === "⏳ Subiendo..." ? `<b>${u}</b>` : (u ? `<a href="${u}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>` : '-');
-            const dTh = isB ? '' : '<th>Eliminar</th>'; const dTd = (t, i) => isB ? '' : `<td><button class="btn btn-danger btn-small" onclick="deleteRecord('${t}', ${i})">X</button></td>`;
+            const dTh = isB ? '' : '<th>Eliminar</th>'; const dTd = (t, i) => isB ? '' : `<td><button class="btn btn-danger btn-small" onclick="deleteRecord('${t}', ${i}); event.stopPropagation();">X</button></td>`;
 
             const rendAcc = (data, t, pre, cols, rowFn) => {
                 const gr = {}; data.forEach(o => { const k = o.ocId || o.id; if(!gr[k]) gr[k] = { o: getObraNameByOcId(k), p: o.prov, it: [] }; gr[k].it.push(o); });
-                let h = ''; for(const id in gr){
-                    const sId = id.replace(/[^a-zA-Z0-9]/g, '_');
-                    h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${pre}-${sId}')"><td><b>${id}</b></td><td>${gr[id].o}</td><td>${gr[id].it.length} registros</td><td><button class="btn btn-primary btn-small">Ver</button></td></tr>
-                    <tr id="${pre}-${sId}" style="display:none;"><td colspan="4"><table><thead><tr>${cols}${dTh}</tr></thead><tbody>${gr[id].it.map(rowFn).join('')}</tbody></table></td></tr>`;
+                let h = ''; let gIdx = 0; for(const id in gr){
+                    const sId = pre + '_grp_' + gIdx++;
+                    h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')"><td><b>${id}</b></td><td>${gr[id].o}</td><td>${gr[id].it.length} registros</td><td><button class="btn btn-primary btn-small">Ver ⬇️</button></td></tr>
+                    <tr id="${sId}" style="display:none;"><td colspan="4"><table style="width:100%; border:1px solid #ddd;">
+                    <thead style="background:#34495e; color:white;"><tr>${cols}${dTh}</tr></thead><tbody>${gr[id].it.map(rowFn).join('')}</tbody></table></td></tr>`;
                 } return h;
             };
 
