@@ -19,6 +19,12 @@
         .badge { padding: 5px 8px; border-radius: 5px; font-size: 0.75rem; color: white; font-weight: bold; }
         .bg-ok { background: var(--success); } .bg-warn { background: #f39c12; } .bg-err { background: var(--danger); } .bg-info { background: #3498db; }
         
+        /* DASHBOARD STATS (HERRAMIENTAS) */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
+        .stat-card h3 { font-size: 1.8rem; margin: 0 0 5px 0; color: var(--primary); }
+        .stat-card p { font-size: 0.85rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
+
         /* PANTALLAS DE CARGA Y LOGIN */
         #splash-screen, #login-screen, #loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10000; }
         #splash-screen { background: white; transition: opacity 0.8s ease; }
@@ -32,7 +38,7 @@
         #intro-video { display: none; width: 100%; max-width: 1000px; outline: none; }
         #skip-btn { display: none; margin-top: 20px; color: #777; background: none; border: none; text-decoration: underline; cursor: pointer; }
 
-        /* MODAL HOJA DE VIDA (VENTANA FLOTANTE) */
+        /* MODALES HOJA DE VIDA (VENTANAS FLOTANTES) */
         .modal { display: none; position: fixed; z-index: 10005; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.3s; position: relative; }
         @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -82,7 +88,7 @@
         /* IMPRESIÓN */
         #print-header, #print-details { display: none; }
         @media print {
-            .sidebar, .btn, .card, .no-print, .filter-container { display: none !important; }
+            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid { display: none !important; }
             .main-content { padding: 0; width: 100%; }
             .section h1 { display: none; } 
             #print-header, #print-details { display: block !important; }
@@ -94,7 +100,7 @@
             th { background-color: #e9ecef !important; color: #000 !important; font-weight: bold; border: 1px solid #ccc;}
             td { border: 1px solid #ccc; }
             .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
-            tr[id^="res-det-"], tr[id^="her-det-"] { display: table-row !important; }
+            tr[id^="res-det-"], tr[id^="her-det-"], tr[id^="cont-det-"] { display: table-row !important; }
         }
     </style>
 </head>
@@ -109,7 +115,6 @@
         <video id="intro-video" playsinline><source src="video.mp4" type="video/mp4"></video>
         <button id="skip-btn" onclick="closeSplash()">Omitir intro</button>
     </div>
-
     <div id="login-screen">
         <div class="login-box">
             <img src="logo.png" alt="WEBSYSNET">
@@ -121,35 +126,49 @@
             </form>
         </div>
     </div>
-
     <div id="loading"><div class="spinner">☁️</div><h2 id="loading-text">Sincronizando...</h2></div>
 
-    <div id="modal-cv" class="modal">
+    <div id="modal-cv-her" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="cerrarCV()">&times;</span>
-            <h2 id="cv-titulo" class="cv-header">Hoja de Vida</h2>
-            
-            <div class="cv-grid" id="cv-datos">
-                </div>
-            
+            <span class="close-btn" onclick="cerrarCV('modal-cv-her')">&times;</span>
+            <h2 id="cv-her-titulo" class="cv-header">Hoja de Vida</h2>
+            <div class="cv-grid" id="cv-her-datos"></div>
             <h3 style="margin-top:10px; margin-bottom:10px; color:var(--secondary);">🔄 Historial de Movimientos</h3>
             <table class="cv-history-table">
                 <thead><tr><th>Fecha</th><th>Ubicación / Estado</th><th>Detalle</th></tr></thead>
-                <tbody id="cv-historial-body"></tbody>
+                <tbody id="cv-her-historial-body"></tbody>
             </table>
-
-            <div id="cv-action-box" style="background:#f1f2f6; padding:20px; border-radius:8px; border-left: 5px solid var(--accent);">
+            <div id="cv-her-action-box" style="background:#f1f2f6; padding:20px; border-radius:8px; border-left: 5px solid var(--accent);">
                 <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4>
                 <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
-                    <div style="flex:1; min-width: 200px;">
-                        <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
-                        <select id="cv-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select>
-                    </div>
-                    <div style="flex:2; min-width: 250px;">
-                        <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label>
-                        <input type="text" id="cv-comentario" placeholder="Ej: Enviado a reparación por falla eléctrica" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
-                    </div>
-                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button>
+                    <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
+                        <select id="cv-her-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
+                    <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label>
+                        <input type="text" id="cv-her-comentario" placeholder="Ej: Enviado a reparación" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
+                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimiento('herramientas')">Guardar Movimiento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-cv-cont" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarCV('modal-cv-cont')">&times;</span>
+            <h2 id="cv-cont-titulo" class="cv-header">Hoja de Vida Contenedor</h2>
+            <div class="cv-grid" id="cv-cont-datos"></div>
+            <h3 style="margin-top:10px; margin-bottom:10px; color:var(--secondary);">🔄 Historial de Movimientos</h3>
+            <table class="cv-history-table">
+                <thead><tr><th>Fecha</th><th>Ubicación</th><th>Detalle de Movimiento</th></tr></thead>
+                <tbody id="cv-cont-historial-body"></tbody>
+            </table>
+            <div id="cv-cont-action-box" style="background:#f1f2f6; padding:20px; border-radius:8px; border-left: 5px solid var(--accent);">
+                <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Traslado de Obra</h4>
+                <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
+                    <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Trasladar a Obra:</label>
+                        <select id="cv-cont-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
+                    <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Guía Traslado:</label>
+                        <input type="text" id="cv-cont-comentario" placeholder="Ej: Traslado con grúa, Guía 123" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
+                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimiento('contenedores')">Confirmar Traslado</button>
                 </div>
             </div>
         </div>
@@ -173,11 +192,12 @@
         <button class="menu-category" onclick="toggleSubmenu('sub-herramientas')">🧰 Activos Fijos <span>▼</span></button>
         <div id="sub-herramientas" class="submenu">
             <button class="nav-btn" onclick="showSection('herramientas', this)">🛠️ Inventario Herramientas</button>
+            <button class="nav-btn" onclick="showSection('contenedores', this)">🏗️ Inventario Contenedores</button>
         </div>
 
         <button class="menu-category" id="cat-creacion" onclick="toggleSubmenu('sub-creacion')">⚙️ Configuración <span>▼</span></button>
         <div id="sub-creacion" class="submenu">
-            <button class="nav-btn" onclick="showSection('obras', this)">🏗️ Maestro de Obras</button>
+            <button class="nav-btn" onclick="showSection('obras', this)">🏢 Maestro de Obras</button>
             <button class="nav-btn" onclick="showSection('usuarios', this)">👥 Usuarios</button>
         </div>
         
@@ -206,6 +226,10 @@
 
         <div id="herramientas" class="section">
             <h1>Inventario de Herramientas y Maquinaria</h1>
+            
+            <div class="stats-grid" id="h-stats">
+                </div>
+
             <div class="card" id="form-her-card">
                 <form onsubmit="event.preventDefault(); addHerramienta();">
                     <div class="form-grid">
@@ -230,6 +254,42 @@
             <table><thead><tr><th>Equipo</th><th>Marca / Modelo</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
         </div>
 
+        <div id="contenedores" class="section">
+            <h1>Inventario de Contenedores</h1>
+            
+            <div class="card" id="form-cont-card">
+                <form onsubmit="event.preventDefault(); addContenedor();">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Tipo de Contenedor</label>
+                            <select id="c-tip" required>
+                                <option value="Bodega">Bodega</option>
+                                <option value="Oficina">Oficina</option>
+                                <option value="Baño">Baño</option>
+                                <option value="Dormitorio">Dormitorio</option>
+                                <option value="Refrigerado">Refrigerado</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>N° Contenedor / ID</label><input type="text" id="c-num" required placeholder="Ej: CONT-01"></div>
+                        <div class="form-group"><label>Ubicación (Obra Actual)</label><select id="c-obr" required></select></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Detalle Exterior (Color, Estado, Puertas)</label><input type="text" id="c-ext" required placeholder="Ej: Pintura azul, puerta doble operativa"></div>
+                        <div class="form-group"><label>Detalle Interior (Luces, Repisas, Baños)</label><input type="text" id="c-int" required placeholder="Ej: 3 repisas de acero, luz LED operativa"></div>
+                    </div>
+                    <button class="btn btn-primary">Registrar Contenedor a la Nube</button>
+                </form>
+            </div>
+            
+            <div class="filter-container">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <label style="font-weight:bold;">📍 Filtrar por Obra:</label>
+                    <select id="filter-cont-obra" onchange="renderContenedores()" style="padding:10px; border-radius:5px; min-width:250px;"><option value="ALL">Todas las Obras</option></select>
+                </div>
+            </div>
+            <table><thead><tr><th>Ubicación / Obra</th><th>Total Contenedores</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
+        </div>
+
         <div id="usuarios" class="section"><h1>Gestión de Usuarios</h1><div class="card"><form onsubmit="event.preventDefault(); addUser();"><div class="form-grid"><div class="form-group"><label>Nombre Real</label><input type="text" id="u-nombre" required></div><div class="form-group"><label>Usuario Login</label><input type="text" id="u-user" required></div><div class="form-group"><label>Contraseña</label><input type="text" id="u-pass" required></div><div class="form-group"><label>Rol</label><select id="u-rol" onchange="toggleObraUser()"><option value="admin">👑 Administrador</option><option value="jefe">👔 Jefe de Bodega</option><option value="bodeguero">👷 Bodeguero (Lectura)</option></select></div><div class="form-group" id="div-u-obra" style="display:none;"><label>Obra Fija</label><select id="u-obra"></select></div></div><button class="btn btn-primary">Crear Usuario</button></form></div><table id="table-usuarios"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Obra Limitada</th><th>X</th></tr></thead><tbody></tbody></table></div>
         
         <div id="obras" class="section"><h1>Maestro de Ubicaciones (Obras/Bodegas)</h1><div class="card"><form onsubmit="event.preventDefault(); addObra();"><div class="form-grid"><div class="form-group"><label>ID (Corto)</label><input type="text" id="o-id" required placeholder="Ej: B-CEN"></div><div class="form-group"><label>Nombre Ubicación</label><input type="text" id="o-nom" required placeholder="Ej: Bodega Central"></div><div class="form-group"><label>Dirección/Comuna</label><input type="text" id="o-ub" required></div></div><button class="btn btn-primary">Registrar Ubicación</button></form></div><table id="table-obras"><thead><tr><th>ID</th><th>Nombre</th><th>Ubicación</th><th>X</th></tr></thead><tbody></tbody></table></div>
@@ -238,7 +298,7 @@
         
         <div id="ingresos" class="section"><h1>Ingreso a Bodega (Guías)</h1><div class="card" id="form-ing-card"><div class="form-grid"><div class="form-group"><label>N° Guía / Factura</label><input type="text" id="ing-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="ing-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Vincular a OC</label><select id="ing-oc-select" onchange="updateIngMaterialSelect()"></select></div><div class="form-group"><label>Material que llega</label><select id="ing-mat-select"></select></div><div class="form-group"><label>Sector/Sub-Bodega</label><input type="text" id="ing-bodega" placeholder="Opcional"></div><div class="form-group"><label>Cantidad Recibida</label><input type="number" id="ing-cant"></div><button class="btn btn-primary" onclick="addToDraft('ing')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Sector</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="ing-draft"></tbody></table><button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="saveFinal('ing')">Procesar Ingreso</button></div><table id="table-ingresos"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Registros</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
         
-        <div id="salidas" class="section"><h1>Despachos / Salidas</h1><div class="card" id="form-sal-card"><div class="form-grid"><div class="form-group"><label>N° Vale Despacho</label><input type="text" id="sal-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="sal-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Buscar por OC</label><select id="sal-oc-select" onchange="updateSalMaterialSelect()"></select></div><div class="form-group"><label>Material en Stock</label><select id="sal-mat-select"></select></div><div class="form-group"><label>Cantidad a Sacar</label><input type="number" id="sal-cant"></div><button class="btn btn-primary" onclick="addToDraft('sal')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Cantidad Extraída</th><th>X</th></tr></thead><tbody id="sal-draft"></tbody></table><button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="saveFinal('sal')">Confirmar Salida</button></div><table id="table-salidas"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Despachos</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
+        <div id="salidas" class="section"><h1>Despachos / Salidas a Terreno</h1><div class="card" id="form-sal-card"><div class="form-grid"><div class="form-group"><label>N° Vale Despacho</label><input type="text" id="sal-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="sal-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Buscar por OC</label><select id="sal-oc-select" onchange="updateSalMaterialSelect()"></select></div><div class="form-group"><label>Material en Stock</label><select id="sal-mat-select"></select></div><div class="form-group"><label>Cantidad a Sacar</label><input type="number" id="sal-cant"></div><button class="btn btn-primary" onclick="addToDraft('sal')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Cantidad Extraída</th><th>X</th></tr></thead><tbody id="sal-draft"></tbody></table><button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="saveFinal('sal')">Confirmar Salida Definitiva</button></div><table id="table-salidas"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Despachos</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <script>
@@ -248,10 +308,10 @@
         const MASTER_ADMIN = { nombre: "Osvaldo San Juan", user: "osvaldo", pass: "lobito", rol: "admin", obraId: null };
         let currentUser = null;
         let cvActivoIndex = null;
-        let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [] };
+        let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [] };
         let drafts = { oc: [], ing: [], sal: [] };
 
-        // --- FUNCIONES BÁSICAS ---
+        // --- SISTEMA BÁSICO Y NAVEGACIÓN ---
         function toggleSubmenu(id) {
             const menu = document.getElementById(id); const isOpen = menu.classList.contains('open');
             document.querySelectorAll('.submenu').forEach(m => m.classList.remove('open'));
@@ -272,9 +332,17 @@
 
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Por favor configura la URL de Google en el código."); document.getElementById('login-screen').style.display = 'flex'; return; }
-            try { document.getElementById('loading').style.display = 'flex'; const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; } 
-            catch (e) { document.getElementById('loading').style.display = 'none'; }
-            if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = [];
+            try {
+                document.getElementById('loading').style.display = 'flex';
+                const r = await fetch(API_URL); db = await r.json();
+                document.getElementById('loading').style.display = 'none';
+            } catch (e) { document.getElementById('loading').style.display = 'none'; }
+            
+            // Garantizar estructura BD y Bodega Central
+            if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
+            if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) {
+                db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' });
+            }
             document.getElementById('login-screen').style.display = 'flex';
         }
 
@@ -282,7 +350,7 @@
             document.getElementById('loading').style.display = 'flex';
             try { const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; renderAll(); } 
             catch (e) { document.getElementById('loading').style.display = 'none'; }
-            if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = [];
+            if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
         }
 
         function procesarLogin() {
@@ -298,10 +366,13 @@
                 
                 document.getElementById('btn-borrar-bd').style.display = (currentUser.rol==='admin') ? 'block' : 'none';
                 document.getElementById('cat-creacion').style.display = isB ? 'none' : 'flex';
+                
+                // Ocultar formularios si es bodeguero
                 document.getElementById('form-oc-card').style.display = isB ? 'none' : 'block';
                 document.getElementById('form-ing-card').style.display = isB ? 'none' : 'block';
                 document.getElementById('form-sal-card').style.display = isB ? 'none' : 'block';
                 document.getElementById('form-her-card').style.display = isB ? 'none' : 'block';
+                document.getElementById('form-cont-card').style.display = isB ? 'none' : 'block';
                 
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-sidebar').style.display = 'flex';
@@ -319,8 +390,10 @@
         }
 
         async function clearAll() {
-            if (confirm("¿Limpiar historial? (Los usuarios creados se mantendrán)")) {
-                const u = db.usuarios; db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [] }; await saveDatabase();
+            if (confirm("¿Limpiar historial? (Los usuarios creados y Bodega Central se mantendrán)")) {
+                const u = db.usuarios; const bCen = db.obras.find(o => o.nombre.toLowerCase().includes('central'));
+                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [] }; 
+                await saveDatabase();
             }
         }
 
@@ -331,15 +404,45 @@
             btn.classList.add('active');
         }
 
-        function deleteRecord(t, i) { if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } }
+        function deleteRecord(t, i) { 
+            if (t === 'obras' && db.obras[i].nombre.toLowerCase().includes('central')) {
+                return alert("⚠️ No puedes eliminar la Bodega Central, es el corazón del sistema.");
+            }
+            if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } 
+        }
 
-        // --- SISTEMA DE HERRAMIENTAS Y HOJA DE VIDA ---
+        // --- LÓGICA DE ORDENAMIENTO DE OBRAS (BODEGA CENTRAL PRIMERO) ---
+        function getSortedObras() {
+            return [...db.obras].sort((a, b) => {
+                let aCen = a.nombre.toLowerCase().includes('central');
+                let bCen = b.nombre.toLowerCase().includes('central');
+                if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0;
+            });
+        }
+
+        function getObrasOptionsHtml(includeAll = false, filteredId = null) {
+            let html = '';
+            if (includeAll) html += '<option value="ALL">Todas las Obras/Ubicaciones</option>';
+            const sortedObras = getSortedObras();
+            
+            if (filteredId) {
+                let fObra = sortedObras.find(o => o.id === filteredId);
+                if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`;
+            } else {
+                sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`);
+            }
+            return html;
+        }
+
         function getObraNameById(id) {
             if (id === 'REP-01') return 'Taller / En Reparación';
             if (id === 'MAN-01') return 'Taller / En Mantención';
             const o = db.obras.find(x => x.id === id); return o ? o.nombre : id;
         }
 
+        function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
+
+        // --- GESTIÓN HERRAMIENTAS ---
         function getEstadoHerramienta(nomUbicacion) {
             const low = nomUbicacion.toLowerCase();
             if (low.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' };
@@ -349,6 +452,7 @@
 
         function addHerramienta() {
             const h = {
+                id_unico: Date.now().toString(),
                 nombre: document.getElementById('h-nom').value.trim().toUpperCase(),
                 cat: document.getElementById('h-cat').value,
                 marca: document.getElementById('h-mar').value.trim().toUpperCase(),
@@ -357,9 +461,8 @@
                 obra: document.getElementById('h-obr').value,
                 fecha: document.getElementById('h-fec').value,
                 valor: parseFloat(document.getElementById('h-val').value),
-                historial: []
+                historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial" }]
             };
-            h.historial.push({ fecha: h.fecha, ubicacion: h.obra, detalle: "Ingreso inicial" });
             db.herramientas.push(h); saveDatabase();
             ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = '');
             showToast("✅ Herramienta registrada");
@@ -371,18 +474,26 @@
             if (fV !== "ALL") list = list.filter(h => h.obra === fV);
             else if (currentUser.rol === 'bodeguero') list = list.filter(h => h.obra === currentUser.obraId);
 
-            // Agrupar por Nombre, Marca y Modelo
-            const grouped = {};
+            // Dashboard Stats
+            let tTot = list.length; let tDisp = 0; let tObr = 0; let tRep = 0;
             list.forEach(h => {
-                const k = `${h.nombre} | ${h.marca} | ${h.modelo}`;
-                if (!grouped[k]) grouped[k] = { nom: h.nombre, mar: h.marca, mod: h.modelo, items: [] };
-                grouped[k].items.push(h);
+                const est = getEstadoHerramienta(getObraNameById(h.obra));
+                if(est.txt.includes('Disponible')) tDisp++; else if(est.txt.includes('Mantención')) tRep++; else tObr++;
             });
+            document.getElementById('h-stats').innerHTML = `
+                <div class="stat-card" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total Activos</p></div>
+                <div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>Disponibles (Central)</p></div>
+                <div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>Asignadas en Obra</p></div>
+                <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Reparación</p></div>
+            `;
+
+            // Tabla Acordeón
+            const grouped = {};
+            list.forEach(h => { const k = `${h.nombre} | ${h.marca} | ${h.modelo}`; if (!grouped[k]) grouped[k] = { nom: h.nombre, mar: h.marca, mod: h.modelo, items: [] }; grouped[k].items.push(h); });
 
             let html = '';
             for (const k in grouped) {
-                const g = grouped[k];
-                const sId = k.replace(/[^a-zA-Z0-9]/g, '_');
+                const g = grouped[k]; const sId = k.replace(/[^a-zA-Z0-9]/g, '_');
                 html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('her-det-${sId}')">
                     <td><b>${g.nom}</b></td><td>${g.mar} / ${g.mod}</td><td><b>${g.items.length}</b> unid.</td><td><button class="btn btn-primary btn-small">Ver Series ⬇️</button></td></tr>
                     <tr id="her-det-${sId}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd;">
@@ -390,53 +501,99 @@
                     ${g.items.map(u => {
                         const est = getEstadoHerramienta(getObraNameById(u.obra));
                         return `<tr><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td>
-                        <td><button class="btn btn-success btn-small" onclick="abrirCV(${u.originalIndex})">📋 Hoja de Vida</button>
+                        <td><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex})">📋 Hoja de Vida</button>
                         ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('herramientas', ${u.originalIndex})">X</button>` : ''}</td></tr>`;
                     }).join('')}</tbody></table></td></tr>`;
             }
             document.querySelector('#table-herramientas-body').innerHTML = html;
-
-            // Actualizar Opciones del Modal
-            let op = db.obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
-            op += `<option value="REP-01">Taller / En Reparación</option><option value="MAN-01">Taller / En Mantención</option>`;
-            document.getElementById('cv-nueva-ub').innerHTML = op;
         }
 
-        function abrirCV(idx) {
-            cvActivoIndex = idx; const h = db.herramientas[idx];
-            document.getElementById('cv-titulo').innerText = `Herramienta: ${h.nombre}`;
-            const est = getEstadoHerramienta(getObraNameById(h.obra));
-            document.getElementById('cv-datos').innerHTML = `
-                <div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Modelo</b> ${h.marca} ${h.modelo}</div>
-                <div class="cv-item"><b>Serie Única</b> ${h.serie}</div><div class="cv-item"><b>Valor Compra</b> $${h.valor.toLocaleString()}</div>
-                <div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;">
-                    <b>Estado y Ubicación Actual:</b> <span class="badge ${est.cls}">${est.txt}</span> en <span>${getObraNameById(h.obra)}</span>
-                </div>`;
-            
-            const tbody = document.getElementById('cv-historial-body');
-            tbody.innerHTML = (h.historial && h.historial.length > 0) ? h.historial.map(m => `<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle}</td></tr>`).join('') : `<tr><td colspan="3">Sin movimientos</td></tr>`;
-            
-            document.getElementById('cv-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
-            document.getElementById('modal-cv').style.display = 'block';
+        // --- GESTIÓN CONTENEDORES ---
+        function addContenedor() {
+            const c = {
+                id_unico: Date.now().toString(),
+                tipo: document.getElementById('c-tip').value,
+                num: document.getElementById('c-num').value.trim().toUpperCase(),
+                obra: document.getElementById('c-obr').value,
+                detExt: document.getElementById('c-ext').value.trim(),
+                detInt: document.getElementById('c-int').value.trim(),
+                historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Creación de registro" }]
+            };
+            db.contenedores.push(c); saveDatabase();
+            ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = '');
+            showToast("✅ Contenedor registrado");
         }
-        function cerrarCV() { document.getElementById('modal-cv').style.display = 'none'; cvActivoIndex = null; }
 
-        function registrarMovimientoHerramienta() {
-            if(cvActivoIndex === null) return;
-            const nuevaUb = document.getElementById('cv-nueva-ub').value;
-            const comentario = document.getElementById('cv-comentario').value.trim() || "Cambio de estado o ubicación";
+        function renderContenedores() {
+            const fV = document.getElementById('filter-cont-obra').value;
+            let list = db.contenedores.map((c, i) => ({...c, originalIndex: i}));
+            if (fV !== "ALL") list = list.filter(c => c.obra === fV);
+            else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId);
+
+            // Agrupar por Obra
+            const grouped = {};
+            list.forEach(c => { if (!grouped[c.obra]) grouped[c.obra] = { obraName: getObraNameById(c.obra), items: [] }; grouped[c.obra].items.push(c); });
+
+            let html = '';
+            for (const oId in grouped) {
+                const g = grouped[oId]; const sId = oId.replace(/[^a-zA-Z0-9]/g, '_');
+                html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('cont-det-${sId}')">
+                    <td><b>${g.obraName}</b></td><td><b>${g.items.length}</b> Contenedores en Terreno</td><td><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
+                    <tr id="cont-det-${sId}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd;">
+                    <thead style="background:#34495e;"><tr><th>Tipo y Número</th><th>Detalle Exterior</th><th>Detalle Interior</th><th>Acción</th></tr></thead><tbody>
+                    ${g.items.map(u => `<tr><td><b>${u.tipo}</b> - ${u.num}</td><td>${u.detExt}</td><td>${u.detInt}</td>
+                        <td><button class="btn btn-success btn-small" onclick="abrirCV('contenedores', ${u.originalIndex})">📋 Hoja Traslados</button>
+                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('contenedores', ${u.originalIndex})">X</button>` : ''}</td></tr>`
+                    ).join('')}</tbody></table></td></tr>`;
+            }
+            document.querySelector('#table-contenedores-body').innerHTML = html;
+        }
+
+        // --- SISTEMA HOJA DE VIDA COMPARTIDO (MODALES) ---
+        function abrirCV(tipo, idx) {
+            cvActivoIndex = { tipo, idx };
+            if(tipo === 'herramientas') {
+                const h = db.herramientas[idx];
+                document.getElementById('cv-her-titulo').innerText = `Herramienta: ${h.nombre}`;
+                const est = getEstadoHerramienta(getObraNameById(h.obra));
+                document.getElementById('cv-her-datos').innerHTML = `<div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Modelo</b> ${h.marca} ${h.modelo}</div><div class="cv-item"><b>Serie Única</b> ${h.serie}</div><div class="cv-item"><b>Valor Compra</b> $${h.valor.toLocaleString()}</div><div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;"><b>Estado:</b> <span class="badge ${est.cls}">${est.txt}</span> en <span>${getObraNameById(h.obra)}</span></div>`;
+                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length > 0) ? h.historial.map(m => `<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle}</td></tr>`).join('') : `<tr><td colspan="3">Sin movimientos</td></tr>`;
+                document.getElementById('cv-her-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
+                
+                let op = getObrasOptionsHtml(); op += `<option value="REP-01">Taller / En Reparación</option><option value="MAN-01">Taller / En Mantención</option>`;
+                document.getElementById('cv-her-nueva-ub').innerHTML = op;
+                document.getElementById('modal-cv-her').style.display = 'block';
+            } else if (tipo === 'contenedores') {
+                const c = db.contenedores[idx];
+                document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.tipo} - ${c.num}`;
+                document.getElementById('cv-cont-datos').innerHTML = `<div class="cv-item"><b>Ubicación Actual</b> ${getObraNameById(c.obra)}</div><div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;"><b>Detalles:</b> Ext: ${c.detExt} | Int: ${c.detInt}</div>`;
+                document.getElementById('cv-cont-historial-body').innerHTML = (c.historial && c.historial.length > 0) ? c.historial.map(m => `<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle}</td></tr>`).join('') : `<tr><td colspan="3">Sin movimientos</td></tr>`;
+                document.getElementById('cv-cont-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
+                
+                document.getElementById('cv-cont-nueva-ub').innerHTML = getObrasOptionsHtml();
+                document.getElementById('modal-cv-cont').style.display = 'block';
+            }
+        }
+        function cerrarCV(modalId) { document.getElementById(modalId).style.display = 'none'; cvActivoIndex = null; }
+
+        function registrarMovimiento(tipo) {
+            if(!cvActivoIndex) return;
+            const idx = cvActivoIndex.idx;
+            const pre = tipo === 'herramientas' ? 'cv-her' : 'cv-cont';
+            const nuevaUb = document.getElementById(`${pre}-nueva-ub`).value;
+            const comentario = document.getElementById(`${pre}-comentario`).value.trim() || "Cambio de ubicación/estado";
             const fechaHoy = new Date().toISOString().split('T')[0];
 
-            db.herramientas[cvActivoIndex].obra = nuevaUb;
-            if(!db.herramientas[cvActivoIndex].historial) db.herramientas[cvActivoIndex].historial = [];
-            db.herramientas[cvActivoIndex].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: comentario });
+            db[tipo][idx].obra = nuevaUb;
+            if(!db[tipo][idx].historial) db[tipo][idx].historial = [];
+            db[tipo][idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: comentario });
             
-            document.getElementById('cv-comentario').value = '';
-            saveDatabase(true); abrirCV(cvActivoIndex); showToast("Historial actualizado"); renderHerramientas();
+            document.getElementById(`${pre}-comentario`).value = ''; saveDatabase(true); 
+            abrirCV(tipo, idx); showToast("Historial actualizado"); 
+            if(tipo === 'herramientas') renderHerramientas(); else renderContenedores();
         }
 
         // --- SISTEMA MATERIALES Y RENDER GENERAL ---
-        function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
         function calculateStats(ocId, mat) {
             const oc = db.ocs.find(o => o.id === ocId && o.material === mat);
             const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0);
@@ -477,7 +634,7 @@
                 <td><span class="badge ${allEnt?'bg-info':(allRec?'bg-ok':'bg-warn')}">${allEnt?'Entregado':(allRec?'Completo':'Pendiente')}</span></td>
                 <td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr>
                 <tr id="res-det-${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa;">
-                <thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Comprado</th><th>Recibido</th><th>Diferencia Faltante</th><th>Stock</th></tr></thead><tbody>
+                <thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Comprado</th><th>Recibido</th><th>Faltante</th><th>Stock</th></tr></thead><tbody>
                 ${gr[id].items.map(it => { 
                     const s = calculateStats(id, it.material); const dif = s.comp - s.rec;
                     const ings = db.ingresos.filter(i => i.ocId === id && i.material === it.material); const b = [...new Set(ings.map(i => i.bodega))].join(', ') || '-';
@@ -489,7 +646,6 @@
             document.getElementById('print-details-body').innerHTML = db.ingresos.filter(i => vIds.includes(i.ocId)).map(i => `<tr><td>${getObraNameByOcId(i.ocId)}</td><td>${i.ocId}</td><td>${i.id}</td><td>${(db.ocs.find(o=>o.id===i.ocId)||{}).prov||'-'}</td><td>${i.material}</td><td>${i.cant}</td></tr>`).join('');
         }
 
-        // --- FUNCIONES SECUNDARIAS DE MATERIALES ---
         function updateIngMaterialSelect() { const o = document.getElementById('ing-oc-select').value; const sel = document.getElementById('ing-mat-select'); sel.innerHTML = o ? db.ocs.filter(x => x.id === o).map(x => `<option value="${x.material}">${x.material}</option>`).join('') : ''; }
         function updateSalMaterialSelect() { const o = document.getElementById('sal-oc-select').value; const sel = document.getElementById('sal-mat-select'); sel.innerHTML = o ? db.ocs.filter(x => x.id === o).map(x => { const s = calculateStats(x.id, x.material); return `<option value="${x.material}">${x.material} (Stock: ${s.stock})</option>`; }).join('') : ''; }
         
@@ -521,30 +677,34 @@
 
         function renderAll() {
             const isB = currentUser.rol === 'bodeguero';
-            const vOb = db.obras.filter(o => isB ? o.id === currentUser.obraId : true);
+            
+            // Llenar TODOS los selectores de Obras asegurando que B-CEN va primero
+            const fOId = isB ? currentUser.obraId : null;
+            const fullOptions = getObrasOptionsHtml(false, null);
+            const filterOptions = getObrasOptionsHtml(true, fOId);
+            const userOptions = getObrasOptionsHtml(false, fOId); // Para bodeguero es solo su obra
+
+            document.getElementById('oc-obra').innerHTML = userOptions;
+            document.getElementById('h-obr').innerHTML = userOptions;
+            document.getElementById('c-obr').innerHTML = userOptions;
+            
+            document.getElementById('filter-obra').innerHTML = filterOptions; document.getElementById('filter-obra').disabled = isB;
+            document.getElementById('filter-her-obra').innerHTML = filterOptions; document.getElementById('filter-her-obra').disabled = isB;
+            document.getElementById('filter-cont-obra').innerHTML = filterOptions; document.getElementById('filter-cont-obra').disabled = isB;
+            
             const vOc = db.ocs.map((o,i)=>({...o, idx:i})).filter(o => isB ? o.obra === currentUser.obraId : true);
             const vIng = db.ingresos.map((o,i)=>({...o, idx:i})).filter(o => isB ? getObraNameByOcId(o.ocId) === getObraNameById(currentUser.obraId) : true);
             const vSal = db.salidas.map((o,i)=>({...o, idx:i})).filter(o => isB ? getObraNameByOcId(o.ocId) === getObraNameById(currentUser.obraId) : true);
 
-            // Selectores Obras
-            const obHtml = vOb.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
-            document.getElementById('oc-obra').innerHTML = obHtml; document.getElementById('h-obr').innerHTML = obHtml;
-            
-            const filO = document.getElementById('filter-obra'); const filH = document.getElementById('filter-her-obra');
-            if(isB) {
-                filO.innerHTML = `<option value="${currentUser.obraId}">${getObraNameById(currentUser.obraId)}</option>`; filO.disabled = true;
-                filH.innerHTML = `<option value="${currentUser.obraId}">${getObraNameById(currentUser.obraId)}</option>`; filH.disabled = true;
-            } else {
-                const ops = '<option value="ALL">Todas las Obras/Bodegas</option>' + obHtml;
-                filO.innerHTML = ops; filH.innerHTML = ops; filO.disabled = false; filH.disabled = false;
-            }
+            const uOcs = [...new Set(vOc.map(o => o.id))]; const ocOps = uOcs.map(id => `<option value="${id}">${id} - ${getObraNameByOcId(id)}</option>`).join('');
+            document.getElementById('ing-oc-select').innerHTML = ocOps; updateIngMaterialSelect();
+            document.getElementById('sal-oc-select').innerHTML = ocOps; updateSalMaterialSelect();
 
-            // Selectores OC Materiales
-            const ocH = [...new Set(vOc.map(o => o.id))].map(id => `<option value="${id}">${id} - ${getObraNameByOcId(id)}</option>`).join('');
-            document.getElementById('ing-oc-select').innerHTML = ocH; updateIngMaterialSelect();
-            document.getElementById('sal-oc-select').innerHTML = ocH; updateSalMaterialSelect();
-
-            document.querySelector('#table-obras tbody').innerHTML = db.obras.map((o,i) => `<tr><td>${o.id}</td><td>${o.nombre}</td><td>${o.ub}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('obras', ${i})">X</button></td></tr>`).join('');
+            document.querySelector('#table-obras tbody').innerHTML = getSortedObras().map((o) => {
+                const isCen = o.nombre.toLowerCase().includes('central');
+                const idx = db.obras.indexOf(o);
+                return `<tr><td>${o.id}</td><td><b>${o.nombre}</b></td><td>${o.ub}</td><td>${isCen ? '-' : `<button class="btn btn-danger btn-small" onclick="deleteRecord('obras', ${idx})">X</button>`}</td></tr>`;
+            }).join('');
 
             const bPdf = (u) => u === "⏳ Subiendo..." ? `<b>${u}</b>` : (u ? `<a href="${u}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>` : '-');
             const dTh = isB ? '' : '<th>Eliminar</th>'; const dTd = (t, i) => isB ? '' : `<td><button class="btn btn-danger btn-small" onclick="deleteRecord('${t}', ${i})">X</button></td>`;
@@ -562,10 +722,10 @@
             document.querySelector('#table-ingresos tbody').innerHTML = rendAcc(vIng, 'ingresos', 'ind', '<th>Guía</th><th>Mat</th><th>Bod</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.bodega}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('ingresos', i.idx)}</tr>`);
             document.querySelector('#table-salidas tbody').innerHTML = rendAcc(vSal, 'salidas', 'sad', '<th>Despacho</th><th>Mat</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('salidas', i.idx)}</tr>`);
 
-            renderResumenMateriales(); renderHerramientas();
+            renderResumenMateriales(); renderHerramientas(); renderContenedores();
             
-            document.getElementById('u-obra').innerHTML = db.obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
-            document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId||'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
+            document.getElementById('u-obra').innerHTML = fullOptions;
+            document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
         }
 
         function toggleObraUser() { document.getElementById('div-u-obra').style.display = (document.getElementById('u-rol').value === 'bodeguero') ? 'flex' : 'none'; }
