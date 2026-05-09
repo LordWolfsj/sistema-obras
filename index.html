@@ -43,7 +43,7 @@
         #intro-video { display: none; width: 100%; max-width: 1000px; outline: none; }
         #skip-btn { display: none; margin-top: 20px; color: #777; background: none; border: none; text-decoration: underline; cursor: pointer; }
 
-        /* MODALES HOJA DE VIDA */
+        /* MODALES HOJA DE VIDA (VENTANAS FLOTANTES) */
         .modal { display: none; position: fixed; z-index: 10005; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.3s; position: relative; }
         @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -113,11 +113,17 @@
     <div id="toast">Notificación</div>
 
     <div id="splash-screen">
-        <div id="start-box"><img src="logo.png" alt="WEBSYSNET"><br><button class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 40px;" onclick="startIntro()">Ingresar al Sistema</button></div>
-        <video id="intro-video" playsinline><source src="video.mp4" type="video/mp4"></video><button id="skip-btn" onclick="closeSplash()">Omitir intro</button>
+        <div id="start-box">
+            <img src="logo.png" alt="WEBSYSNET">
+            <br><button class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 40px;" onclick="startIntro()">Ingresar al Sistema</button>
+        </div>
+        <video id="intro-video" playsinline><source src="video.mp4" type="video/mp4"></video>
+        <button id="skip-btn" onclick="closeSplash()">Omitir intro</button>
     </div>
     <div id="login-screen">
-        <div class="login-box"><img src="logo.png" alt="WEBSYSNET"><h2>Inicio de Sesión</h2>
+        <div class="login-box">
+            <img src="logo.png" alt="WEBSYSNET">
+            <h2>Inicio de Sesión</h2>
             <form onsubmit="event.preventDefault(); procesarLogin();">
                 <input type="text" id="login-user" placeholder="Usuario" required autocomplete="username">
                 <input type="password" id="login-pass" placeholder="Contraseña" required autocomplete="current-password">
@@ -158,7 +164,7 @@
                         <select id="cv-cont-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
                     <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Guía Traslado:</label>
                         <input type="text" id="cv-cont-comentario" placeholder="Ej: Traslado con grúa, Guía 123" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
-                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimiento('contenedores')">Confirmar Traslado</button>
+                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoContenedor()">Confirmar Traslado</button>
                 </div>
             </div>
         </div>
@@ -216,6 +222,7 @@
 
         <div id="herramientas" class="section">
             <h1>Inventario de Herramientas y Maquinaria</h1>
+            
             <div class="stats-grid" id="h-stats"></div>
 
             <div class="card" id="form-her-card">
@@ -275,15 +282,15 @@
         </div>
 
         <div id="usuarios" class="section"><h1>Gestión de Usuarios</h1><div class="card"><form onsubmit="event.preventDefault(); addUser();"><div class="form-grid"><div class="form-group"><label>Nombre Real</label><input type="text" id="u-nombre" required></div><div class="form-group"><label>Usuario Login</label><input type="text" id="u-user" required></div><div class="form-group"><label>Contraseña</label><input type="text" id="u-pass" required></div><div class="form-group"><label>Rol</label><select id="u-rol" onchange="toggleObraUser()"><option value="admin">👑 Administrador</option><option value="jefe">👔 Jefe de Bodega</option><option value="bodeguero">👷 Bodeguero (Lectura)</option></select></div><div class="form-group" id="div-u-obra" style="display:none;"><label>Obra Fija</label><select id="u-obra"></select></div></div><button class="btn btn-primary">Crear Usuario</button></form></div><table id="table-usuarios"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Obra Limitada</th><th>X</th></tr></thead><tbody></tbody></table></div>
-        <div id="obras" class="section"><h1>Maestro de Ubicaciones</h1><div class="card"><form onsubmit="event.preventDefault(); addObra();"><div class="form-grid"><div class="form-group"><label>ID (Corto)</label><input type="text" id="o-id" required placeholder="Ej: B-CEN"></div><div class="form-group"><label>Nombre Ubicación</label><input type="text" id="o-nom" required placeholder="Ej: Bodega Central"></div><div class="form-group"><label>Dirección/Comuna</label><input type="text" id="o-ub" required></div></div><button class="btn btn-primary">Registrar Ubicación</button></form></div><table id="table-obras"><thead><tr><th>ID</th><th>Nombre</th><th>Ubicación</th><th>X</th></tr></thead><tbody></tbody></table></div>
+        <div id="obras" class="section"><h1>Maestro de Ubicaciones (Obras/Bodegas)</h1><div class="card"><form onsubmit="event.preventDefault(); addObra();"><div class="form-grid"><div class="form-group"><label>ID (Corto)</label><input type="text" id="o-id" required placeholder="Ej: B-CEN"></div><div class="form-group"><label>Nombre Ubicación</label><input type="text" id="o-nom" required placeholder="Ej: Bodega Central"></div><div class="form-group"><label>Dirección/Comuna</label><input type="text" id="o-ub" required></div></div><button class="btn btn-primary">Registrar Ubicación</button></form></div><table id="table-obras"><thead><tr><th>ID</th><th>Nombre</th><th>Ubicación</th><th>X</th></tr></thead><tbody></tbody></table></div>
         
-        <div id="oc" class="section"><h1>Órdenes de Compra</h1><div class="card" id="form-oc-card"><div class="form-grid"><div class="form-group"><label>N° OC</label><input type="text" id="oc-id"></div><div class="form-group"><label>Obra Asignada</label><select id="oc-obra"></select></div><div class="form-group"><label>Proveedor</label><input type="text" id="oc-prov"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="oc-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Nombre Material</label><input type="text" id="oc-mat"></div><div class="form-group"><label>Cantidad Comprada</label><input type="number" id="oc-cant"></div><button class="btn btn-primary" onclick="addToDraft('oc')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>Material</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="oc-draft"></tbody></table><button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="saveFinal('oc')">Guardar OC</button></div><table id="table-oc"><thead><tr><th>OC</th><th>Obra Destino</th><th>Proveedor</th><th>Total Items</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
+        <div id="oc" class="section"><h1>Órdenes de Compra</h1><div class="card" id="form-oc-card"><div class="form-grid"><div class="form-group"><label>N° OC</label><input type="text" id="oc-id"></div><div class="form-group"><label>Obra Asignada</label><select id="oc-obra"></select></div><div class="form-group"><label>Proveedor</label><input type="text" id="oc-prov"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="oc-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Nombre Material</label><input type="text" id="oc-mat"></div><div class="form-group"><label>Cantidad Comprada</label><input type="number" id="oc-cant"></div><button class="btn btn-primary" onclick="addToDraft('oc')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>Material</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="oc-draft"></tbody></table><button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="saveFinal('oc')">Guardar OC en la Nube</button></div><table id="table-oc"><thead><tr><th>OC</th><th>Obra Destino</th><th>Proveedor</th><th>Total Items</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
         <div id="ingresos" class="section"><h1>Ingreso a Bodega (Guías)</h1><div class="card" id="form-ing-card"><div class="form-grid"><div class="form-group"><label>N° Guía / Factura</label><input type="text" id="ing-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="ing-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Vincular a OC</label><select id="ing-oc-select" onchange="updateIngMaterialSelect()"></select></div><div class="form-group"><label>Material que llega</label><select id="ing-mat-select"></select></div><div class="form-group"><label>Sector/Sub-Bodega</label><input type="text" id="ing-bodega" placeholder="Opcional"></div><div class="form-group"><label>Cantidad Recibida</label><input type="number" id="ing-cant"></div><button class="btn btn-primary" onclick="addToDraft('ing')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Sector</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="ing-draft"></tbody></table><button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="saveFinal('ing')">Procesar Ingreso</button></div><table id="table-ingresos"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Registros</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
-        <div id="salidas" class="section"><h1>Despachos / Salidas a Terreno</h1><div class="card" id="form-sal-card"><div class="form-grid"><div class="form-group"><label>N° Vale Despacho</label><input type="text" id="sal-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="sal-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Buscar por OC</label><select id="sal-oc-select" onchange="updateSalMaterialSelect()"></select></div><div class="form-group"><label>Material en Stock</label><select id="sal-mat-select"></select></div><div class="form-group"><label>Cantidad a Sacar</label><input type="number" id="sal-cant"></div><button class="btn btn-primary" onclick="addToDraft('sal')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Cantidad Extraída</th><th>X</th></tr></thead><tbody id="sal-draft"></tbody></table><button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="saveFinal('sal')">Confirmar Salida</button></div><table id="table-salidas"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Despachos</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
+        <div id="salidas" class="section"><h1>Despachos / Salidas a Terreno</h1><div class="card" id="form-sal-card"><div class="form-grid"><div class="form-group"><label>N° Vale Despacho</label><input type="text" id="sal-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="sal-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Buscar por OC</label><select id="sal-oc-select" onchange="updateSalMaterialSelect()"></select></div><div class="form-group"><label>Material en Stock</label><select id="sal-mat-select"></select></div><div class="form-group"><label>Cantidad a Sacar</label><input type="number" id="sal-cant"></div><button class="btn btn-primary" onclick="addToDraft('sal')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Cantidad Extraída</th><th>X</th></tr></thead><tbody id="sal-draft"></tbody></table><button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="saveFinal('sal')">Confirmar Salida Definitiva</button></div><table id="table-salidas"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Despachos</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <script>
-        // PEGA AQUÍ TU URL DE GOOGLE (ENTRE LAS COMILLAS)
+        // PEGA AQUÍ TU URL DE GOOGLE ENTRE LAS COMILLAS
         const API_URL = "https://script.google.com/macros/s/AKfycbwdgb8eOCqtkMEYXJDmG34rEoPsnkioGCMoEoVhkjG-va5EoI3qj5h1HulKebf6bUs2/exec"; 
 
         const MASTER_ADMIN = { nombre: "Osvaldo San Juan", user: "osvaldo", pass: "lobito", rol: "admin", obraId: null };
@@ -291,17 +298,16 @@
         let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [] };
         let drafts = { oc: [], ing: [], sal: [] };
 
+        // --- SISTEMA BASICO Y UI ---
         function toggleSubmenu(id) {
             const menu = document.getElementById(id); const isOpen = menu.classList.contains('open');
             document.querySelectorAll('.submenu').forEach(m => m.classList.remove('open'));
             if (!isOpen) menu.classList.add('open');
         }
-
         function showToast(msg) {
             const t = document.getElementById("toast"); t.innerText = msg; t.className = "show";
             setTimeout(() => { t.className = t.className.replace("show", ""); }, 4000);
         }
-
         function startIntro() {
             document.getElementById('start-box').style.display = 'none';
             const v = document.getElementById('intro-video'); v.style.display = 'block';
@@ -309,6 +315,7 @@
         }
         function closeSplash() { document.getElementById('splash-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); }
 
+        // --- CARGA DE DATOS ---
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Por favor configura la URL de Google en el código."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { document.getElementById('loading').style.display = 'flex'; const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; } catch (e) { document.getElementById('loading').style.display = 'none'; }
@@ -316,13 +323,13 @@
             if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
             document.getElementById('login-screen').style.display = 'flex';
         }
-
         async function loadDataAndRender() {
             document.getElementById('loading').style.display = 'flex';
             try { const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; renderAll(); } catch (e) { document.getElementById('loading').style.display = 'none'; }
             if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
         }
 
+        // --- LOGIN Y SEGURIDAD ---
         function procesarLogin() {
             const uI = document.getElementById('login-user').value.toLowerCase().trim(); const pI = document.getElementById('login-pass').value;
             let f = db.usuarios.find(u => u.user.toLowerCase() === uI && u.pass === pI);
@@ -338,34 +345,30 @@
                 renderAll();
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
-
         function logout() { location.reload(); }
 
+        // --- BASE DE DATOS ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'saveDB', db: db }) }); document.getElementById('loading').style.display = 'none'; renderAll(); } catch (e) { alert("Error de conexión"); document.getElementById('loading').style.display = 'none'; }
         }
-
         async function clearAll() {
             if (confirm("¿Limpiar historial? (Los usuarios creados y Bodega Central se mantendrán)")) {
                 const u = db.usuarios; const bCen = db.obras.find(o => o.nombre.toLowerCase().includes('central'));
                 db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [] }; await saveDatabase();
             }
         }
-
         function showSection(id, btn) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
         }
-
         function deleteRecord(t, i) { 
             if (t === 'obras' && db.obras[i].nombre.toLowerCase().includes('central')) return alert("⚠️ No puedes eliminar la Bodega Central.");
             if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } 
         }
-
         function toggleOCDetails(id) { const el = document.getElementById(id); if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; }
 
-        // --- LÓGICA DE ORDENAMIENTO DE OBRAS ---
+        // --- ORDENAMIENTO Y BÚSQUEDA OBRAS ---
         function getSortedObras() {
             return [...db.obras].sort((a, b) => {
                 let aCen = a.nombre.toLowerCase().includes('central'); let bCen = b.nombre.toLowerCase().includes('central');
@@ -379,30 +382,24 @@
             else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); }
             return html;
         }
-
         function getObraNameById(id) {
-            if (id === 'REP-01') return 'Taller / En Mantención';
+            if (id === 'MAN-01') return 'Taller / En Mantención';
             if (id === 'BAJ-01') return 'Dada de Baja';
             const o = db.obras.find(x => x.id === id); return o ? o.nombre : id;
         }
         function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
 
-        // --- GESTIÓN HERRAMIENTAS ---
+        // --- GESTIÓN HERRAMIENTAS Y HOJAS DE VIDA ---
         function getEstadoHerramienta(nomUbicacion, idUb) {
             if (idUb === 'BAJ-01') return { txt: '⚫ Dada de Baja', cls: 'bg-dark' };
             const low = nomUbicacion.toLowerCase();
             if (low.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' };
-            if (low.includes('reparaci') || low.includes('mantenci') || low.includes('taller') || idUb === 'REP-01') return { txt: '🔴 En Mantención', cls: 'bg-err' };
+            if (low.includes('reparaci') || low.includes('mantenci') || low.includes('taller') || idUb === 'MAN-01') return { txt: '🔴 En Mantención', cls: 'bg-err' };
             return { txt: '🟡 En Obra', cls: 'bg-warn' };
         }
 
         function addHerramienta() {
-            const h = {
-                id_unico: Date.now().toString(), nombre: document.getElementById('h-nom').value.trim().toUpperCase(), cat: document.getElementById('h-cat').value,
-                marca: document.getElementById('h-mar').value.trim().toUpperCase(), modelo: document.getElementById('h-mod').value.trim().toUpperCase(),
-                serie: document.getElementById('h-ser').value.trim().toUpperCase(), obra: document.getElementById('h-obr').value, fecha: document.getElementById('h-fec').value,
-                valor: parseFloat(document.getElementById('h-val').value), historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial" }]
-            };
+            const h = { id_unico: Date.now().toString(), nombre: document.getElementById('h-nom').value.trim().toUpperCase(), cat: document.getElementById('h-cat').value, marca: document.getElementById('h-mar').value.trim().toUpperCase(), modelo: document.getElementById('h-mod').value.trim().toUpperCase(), serie: document.getElementById('h-ser').value.trim().toUpperCase(), obra: document.getElementById('h-obr').value, fecha: document.getElementById('h-fec').value, valor: parseFloat(document.getElementById('h-val').value), historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial" }] };
             db.herramientas.push(h); saveDatabase(); ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); showToast("✅ Herramienta registrada");
         }
 
@@ -420,6 +417,7 @@
             listActivas.forEach(h => { const est = getEstadoHerramienta(getObraNameById(h.obra), h.obra); if(est.txt.includes('Disponible')) tDisp++; else if(est.txt.includes('Mantención')) tRep++; else tObr++; });
             document.getElementById('h-stats').innerHTML = `<div class="stat-card" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total Activos (Sin Bajas)</p></div><div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>En Bodega Central</p></div><div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>`;
 
+            // RENDER TABLA HERRAMIENTAS ACTIVAS
             const grouped = {};
             listActivas.forEach(h => { const k = h.nombre; if (!grouped[k]) grouped[k] = { nom: h.nombre, items: [] }; grouped[k].items.push(h); });
             let html = ''; let gIdx = 0;
@@ -432,12 +430,12 @@
                         const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const isMant = est.txt.includes('Mantención');
                         const lastProv = (isMant && u.historial && u.historial.length > 0 && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-';
                         return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${lastProv}</td>
-                        <td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex}); event.stopPropagation();">📋 Hoja de Vida</button>
-                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('herramientas', ${u.originalIndex}); event.stopPropagation();">X</button>` : ''}</td></tr>`;
+                        <td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex}); event.stopPropagation();">📋 Hoja de Vida</button></td></tr>`;
                     }).join('')}</tbody></table></td></tr>`;
             }
             document.querySelector('#table-herramientas-body').innerHTML = html;
 
+            // RENDER TABLA BAJAS
             let htmlBajas = listBajas.map(b => {
                 const lastMov = (b.historial && b.historial.length > 0) ? b.historial[b.historial.length - 1] : null;
                 return `<tr><td><b>${b.nombre}</b></td><td>${b.marca} / ${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${lastMov ? lastMov.detalle : 'Baja'} <br><small>(${lastMov ? lastMov.fecha : b.fecha})</small></td>
@@ -446,10 +444,10 @@
             document.getElementById('table-herramientas-bajas-body').innerHTML = htmlBajas;
         }
 
-        // --- SISTEMA HOJA DE VIDA Y MOVIMIENTOS ---
         function toggleProveedorTaller() {
             const ub = document.getElementById('cv-her-nueva-ub').value;
-            document.getElementById('div-prov-taller').style.display = (ub === 'REP-01') ? 'block' : 'none';
+            const provDiv = document.getElementById('div-prov-taller');
+            if(provDiv) provDiv.style.display = (ub === 'MAN-01') ? 'block' : 'none';
         }
 
         function toggleResolucion() {
@@ -479,7 +477,7 @@
                         actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución de Mantención</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false, null)}</select></div><div style="grid-column: 1 / -1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-comentario-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-valor" placeholder="0" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
                         setTimeout(toggleResolucion, 50);
                     } else {
-                        actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="REP-01">Taller / En Mantención</option></select></div><div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Proveedor / Taller:</label><input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla de motor" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button></div>`;
+                        actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01">Taller / En Mantención</option></select></div><div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Proveedor / Taller:</label><input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla de motor" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button></div>`;
                     }
                 }
                 document.getElementById('modal-cv-her').style.display = 'block';
@@ -499,7 +497,8 @@
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
             const nuevaUb = document.getElementById('cv-her-nueva-ub').value;
             const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación/estado";
-            const prov = (document.getElementById('cv-her-proveedor') && document.getElementById('div-prov-taller').style.display !== 'none') ? document.getElementById('cv-her-proveedor').value.trim() : "";
+            const provDiv = document.getElementById('div-prov-taller');
+            const prov = (document.getElementById('cv-her-proveedor') && provDiv && provDiv.style.display !== 'none') ? document.getElementById('cv-her-proveedor').value.trim() : "";
             const fechaHoy = new Date().toISOString().split('T')[0];
             let detFinal = comentario; if (prov) detFinal += ` | Proveedor: ${prov}`;
 
@@ -638,8 +637,8 @@
             const fullOps = getObrasOptionsHtml(false, null); const filterOps = getObrasOptionsHtml(true, fOId); const userOps = getObrasOptionsHtml(false, fOId); 
 
             document.getElementById('oc-obra').innerHTML = userOps; document.getElementById('h-obr').innerHTML = userOps; document.getElementById('c-obr').innerHTML = userOps;
-            document.getElementById('filter-obra').innerHTML = filterOptions; document.getElementById('filter-obra').disabled = isB;
-            document.getElementById('filter-her-obra').innerHTML = filterOptions; document.getElementById('filter-her-obra').disabled = isB;
+            document.getElementById('filter-obra').innerHTML = filterOps; document.getElementById('filter-obra').disabled = isB;
+            document.getElementById('filter-her-obra').innerHTML = filterOps; document.getElementById('filter-her-obra').disabled = isB;
             
             const vOc = db.ocs.map((o,i)=>({...o, idx:i})).filter(o => isB ? o.obra === currentUser.obraId : true);
             const vIng = db.ingresos.map((o,i)=>({...o, idx:i})).filter(o => isB ? getObraNameByOcId(o.ocId) === getObraNameById(currentUser.obraId) : true);
@@ -660,7 +659,7 @@
             document.querySelector('#table-salidas tbody').innerHTML = rendAcc(vSal, 'salidas', 'sad', '<th>Despacho</th><th>Mat</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('salidas', i.idx)}</tr>`);
 
             renderResumenMateriales(); renderHerramientas(); renderContenedores();
-            document.getElementById('u-obra').innerHTML = fullOptions; document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
+            document.getElementById('u-obra').innerHTML = fullOps; document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
         }
 
         function toggleObraUser() { document.getElementById('div-u-obra').style.display = (document.getElementById('u-rol').value === 'bodeguero') ? 'flex' : 'none'; }
