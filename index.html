@@ -17,7 +17,7 @@
         .btn-small { padding: 5px 10px; font-size: 0.75rem; text-decoration: none; display: inline-block;}
         .btn:hover { opacity: 0.8; }
         .badge { padding: 5px 8px; border-radius: 5px; font-size: 0.75rem; color: white; font-weight: bold; }
-        .bg-ok { background: var(--success); } .bg-warn { background: #f39c12; } .bg-err { background: var(--danger); } .bg-info { background: #3498db; }
+        .bg-ok { background: var(--success); } .bg-warn { background: #f39c12; } .bg-err { background: var(--danger); } .bg-info { background: #3498db; } .bg-dark { background: #34495e; }
         
         /* DASHBOARD STATS */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
@@ -138,21 +138,12 @@
             <span class="close-btn" onclick="cerrarCV('modal-cv-her')">&times;</span>
             <h2 id="cv-her-titulo" class="cv-header">Hoja de Vida</h2>
             <div class="cv-grid" id="cv-her-datos"></div>
-            <h3 style="margin-top:10px; margin-bottom:10px; color:var(--secondary);">🔄 Historial de Movimientos</h3>
+            <h3 style="margin-top:10px; margin-bottom:10px; color:var(--secondary);">🔄 Historial de Movimientos / Revisiones</h3>
             <table class="cv-history-table">
-                <thead><tr><th>Fecha</th><th>Ubicación / Estado</th><th>Detalle</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Ubicación / Estado</th><th>Detalle Técnico</th><th class="no-print">Acción</th></tr></thead>
                 <tbody id="cv-her-historial-body"></tbody>
             </table>
-            <div id="cv-her-action-box" style="background:#f1f2f6; padding:20px; border-radius:8px; border-left: 5px solid var(--accent);">
-                <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4>
-                <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
-                    <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
-                        <select id="cv-her-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
-                    <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label>
-                        <input type="text" id="cv-her-comentario" placeholder="Ej: Enviado a reparación" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
-                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimiento('herramientas')">Guardar Movimiento</button>
-                </div>
-            </div>
+            <div id="cv-her-action-box" style="background:#f1f2f6; padding:20px; border-radius:8px; border-left: 5px solid var(--accent);"></div>
         </div>
     </div>
 
@@ -163,7 +154,7 @@
             <div class="cv-grid" id="cv-cont-datos"></div>
             <h3 style="margin-top:10px; margin-bottom:10px; color:var(--secondary);">🔄 Historial de Movimientos</h3>
             <table class="cv-history-table">
-                <thead><tr><th>Fecha</th><th>Ubicación</th><th>Detalle de Movimiento</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Ubicación</th><th>Detalle de Movimiento</th><th class="no-print">Acción</th></tr></thead>
                 <tbody id="cv-cont-historial-body"></tbody>
             </table>
             <div id="cv-cont-action-box" style="background:#f1f2f6; padding:20px; border-radius:8px; border-left: 5px solid var(--accent);">
@@ -173,7 +164,7 @@
                         <select id="cv-cont-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
                     <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Guía Traslado:</label>
                         <input type="text" id="cv-cont-comentario" placeholder="Ej: Traslado con grúa, Guía 123" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
-                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimiento('contenedores')">Confirmar Traslado</button>
+                    <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoContenedor()">Confirmar Traslado</button>
                 </div>
             </div>
         </div>
@@ -260,6 +251,12 @@
                 </div>
             </div>
             <table><thead><tr><th>Equipo</th><th>Marca / Modelo</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
+            
+            <h2 style="margin-top:50px; color:var(--danger); border-bottom: 2px solid var(--danger); display:inline-block; padding-bottom:5px;">🗑️ Herramientas Dadas de Baja</h2>
+            <table style="opacity: 0.85; margin-top:15px;">
+                <thead style="background:#e74c3c;"><tr><th>Equipo</th><th>Marca / Modelo</th><th>Serie</th><th>Fecha y Motivo de Baja</th><th class="no-print">Acción</th></tr></thead>
+                <tbody id="table-herramientas-bajas-body"></tbody>
+            </table>
         </div>
 
         <div id="contenedores" class="section">
@@ -335,49 +332,32 @@
 
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Por favor configura la URL de Google en el código."); document.getElementById('login-screen').style.display = 'flex'; return; }
-            try {
-                document.getElementById('loading').style.display = 'flex';
-                const r = await fetch(API_URL); db = await r.json();
-                document.getElementById('loading').style.display = 'none';
-            } catch (e) { document.getElementById('loading').style.display = 'none'; }
+            try { document.getElementById('loading').style.display = 'flex'; const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; } catch (e) { document.getElementById('loading').style.display = 'none'; }
             
             if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
-            if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) {
-                db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' });
-            }
+            if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
             document.getElementById('login-screen').style.display = 'flex';
         }
 
         async function loadDataAndRender() {
             document.getElementById('loading').style.display = 'flex';
-            try { const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; renderAll(); } 
-            catch (e) { document.getElementById('loading').style.display = 'none'; }
+            try { const r = await fetch(API_URL); db = await r.json(); document.getElementById('loading').style.display = 'none'; renderAll(); } catch (e) { document.getElementById('loading').style.display = 'none'; }
             if (!db.usuarios) db.usuarios = []; if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
         }
 
         function procesarLogin() {
-            const uI = document.getElementById('login-user').value.toLowerCase().trim();
-            const pI = document.getElementById('login-pass').value;
+            const uI = document.getElementById('login-user').value.toLowerCase().trim(); const pI = document.getElementById('login-pass').value;
             let f = db.usuarios.find(u => u.user.toLowerCase() === uI && u.pass === pI);
             if (!f && uI === MASTER_ADMIN.user && pI === MASTER_ADMIN.pass) f = MASTER_ADMIN;
             
             if (f) {
                 currentUser = f; const isB = currentUser.rol === 'bodeguero';
-                document.getElementById('ui-username').innerText = currentUser.nombre;
-                document.getElementById('ui-rol').innerText = currentUser.rol.toUpperCase();
-                
+                document.getElementById('ui-username').innerText = currentUser.nombre; document.getElementById('ui-rol').innerText = currentUser.rol.toUpperCase();
                 document.getElementById('btn-borrar-bd').style.display = (currentUser.rol==='admin') ? 'block' : 'none';
                 document.getElementById('cat-creacion').style.display = isB ? 'none' : 'flex';
                 
-                document.getElementById('form-oc-card').style.display = isB ? 'none' : 'block';
-                document.getElementById('form-ing-card').style.display = isB ? 'none' : 'block';
-                document.getElementById('form-sal-card').style.display = isB ? 'none' : 'block';
-                document.getElementById('form-her-card').style.display = isB ? 'none' : 'block';
-                document.getElementById('form-cont-card').style.display = isB ? 'none' : 'block';
-                
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-sidebar').style.display = 'flex';
-                document.getElementById('app-main').style.display = 'block';
+                ['form-oc-card', 'form-ing-card', 'form-sal-card', 'form-her-card', 'form-cont-card'].forEach(id => document.getElementById(id).style.display = isB ? 'none' : 'block');
+                document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('app-main').style.display = 'block';
                 renderAll();
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
@@ -386,72 +366,56 @@
 
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
-            try { await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'saveDB', db: db }) }); document.getElementById('loading').style.display = 'none'; renderAll(); } 
-            catch (e) { alert("Error de conexión"); document.getElementById('loading').style.display = 'none'; }
+            try { await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'saveDB', db: db }) }); document.getElementById('loading').style.display = 'none'; renderAll(); } catch (e) { alert("Error de conexión"); document.getElementById('loading').style.display = 'none'; }
         }
 
         async function clearAll() {
             if (confirm("¿Limpiar historial? (Los usuarios creados y Bodega Central se mantendrán)")) {
                 const u = db.usuarios; const bCen = db.obras.find(o => o.nombre.toLowerCase().includes('central'));
-                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [] }; 
-                await saveDatabase();
+                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [] }; await saveDatabase();
             }
         }
 
         function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
         }
 
         function deleteRecord(t, i) { 
-            if (t === 'obras' && db.obras[i].nombre.toLowerCase().includes('central')) {
-                return alert("⚠️ No puedes eliminar la Bodega Central, es el corazón del sistema.");
-            }
+            if (t === 'obras' && db.obras[i].nombre.toLowerCase().includes('central')) return alert("⚠️ No puedes eliminar la Bodega Central.");
             if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } 
         }
 
-        function toggleOCDetails(id) { 
-            const el = document.getElementById(id); 
-            if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; 
-        }
+        function toggleOCDetails(id) { const el = document.getElementById(id); if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; }
 
         // --- LÓGICA DE ORDENAMIENTO DE OBRAS ---
         function getSortedObras() {
             return [...db.obras].sort((a, b) => {
-                let aCen = a.nombre.toLowerCase().includes('central');
-                let bCen = b.nombre.toLowerCase().includes('central');
+                let aCen = a.nombre.toLowerCase().includes('central'); let bCen = b.nombre.toLowerCase().includes('central');
                 if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0;
             });
         }
-
         function getObrasOptionsHtml(includeAll = false, filteredId = null) {
-            let html = '';
-            if (includeAll) html += '<option value="ALL">Todas las Obras/Ubicaciones</option>';
+            let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : '';
             const sortedObras = getSortedObras();
-            
-            if (filteredId) {
-                let fObra = sortedObras.find(o => o.id === filteredId);
-                if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`;
-            } else {
-                sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`);
-            }
+            if (filteredId) { let fObra = sortedObras.find(o => o.id === filteredId); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } 
+            else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); }
             return html;
         }
 
         function getObraNameById(id) {
-            if (id === 'REP-01') return 'Taller / En Reparación';
             if (id === 'MAN-01') return 'Taller / En Mantención';
+            if (id === 'BAJ-01') return 'Dada de Baja';
             const o = db.obras.find(x => x.id === id); return o ? o.nombre : id;
         }
         function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
 
         // --- GESTIÓN HERRAMIENTAS ---
-        function getEstadoHerramienta(nomUbicacion) {
+        function getEstadoHerramienta(nomUbicacion, idUb) {
+            if (idUb === 'BAJ-01') return { txt: '⚫ Dada de Baja', cls: 'bg-dark' };
             const low = nomUbicacion.toLowerCase();
             if (low.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' };
-            if (low.includes('reparaci') || low.includes('mantenci') || low.includes('taller')) return { txt: '🔴 En Mantención', cls: 'bg-err' };
+            if (low.includes('mantenci') || low.includes('taller')) return { txt: '🔴 En Mantención', cls: 'bg-err' };
             return { txt: '🟡 En Obra', cls: 'bg-warn' };
         }
 
@@ -477,31 +441,30 @@
             const fV = document.getElementById('filter-her-obra').value;
             const searchQ = document.getElementById('search-herramienta').value.toLowerCase().trim();
             
-            let list = db.herramientas.map((h, i) => ({...h, originalIndex: i}));
-            if (fV !== "ALL") list = list.filter(h => h.obra === fV);
-            else if (currentUser.rol === 'bodeguero') list = list.filter(h => h.obra === currentUser.obraId);
+            let allTools = db.herramientas.map((h, i) => ({...h, originalIndex: i}));
+            
+            // SEPARAR ACTIVAS DE BAJAS
+            let listActivas = allTools.filter(h => h.obra !== 'BAJ-01');
+            let listBajas = allTools.filter(h => h.obra === 'BAJ-01');
+
+            if (fV !== "ALL") listActivas = listActivas.filter(h => h.obra === fV);
+            else if (currentUser.rol === 'bodeguero') listActivas = listActivas.filter(h => h.obra === currentUser.obraId);
 
             if (searchQ) {
-                list = list.filter(h => 
-                    h.nombre.toLowerCase().includes(searchQ) || 
-                    h.marca.toLowerCase().includes(searchQ) || 
-                    h.modelo.toLowerCase().includes(searchQ) || 
-                    h.serie.toLowerCase().includes(searchQ)
-                );
+                listActivas = listActivas.filter(h => h.nombre.toLowerCase().includes(searchQ) || h.marca.toLowerCase().includes(searchQ) || h.modelo.toLowerCase().includes(searchQ) || h.serie.toLowerCase().includes(searchQ));
             }
 
-            let tTot = list.length; let tDisp = 0; let tObr = 0; let tRep = 0;
-            list.forEach(h => {
-                const est = getEstadoHerramienta(getObraNameById(h.obra));
+            let tTot = listActivas.length; let tDisp = 0; let tObr = 0; let tRep = 0;
+            listActivas.forEach(h => {
+                const est = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
                 if(est.txt.includes('Disponible')) tDisp++; else if(est.txt.includes('Mantención')) tRep++; else tObr++;
             });
-            document.getElementById('h-stats').innerHTML = `<div class="stat-card" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total Activos</p></div><div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>En Bodega Central</p></div><div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>`;
+            document.getElementById('h-stats').innerHTML = `<div class="stat-card" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total Activos (Sin Bajas)</p></div><div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>En Bodega Central</p></div><div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>`;
 
+            // RENDER TABLA ACTIVAS
             const grouped = {};
-            list.forEach(h => { const k = `${h.nombre} | ${h.marca} | ${h.modelo}`; if (!grouped[k]) grouped[k] = { nom: h.nombre, mar: h.marca, mod: h.modelo, items: [] }; grouped[k].items.push(h); });
-
-            let html = '';
-            let gIdx = 0;
+            listActivas.forEach(h => { const k = `${h.nombre} | ${h.marca} | ${h.modelo}`; if (!grouped[k]) grouped[k] = { nom: h.nombre, mar: h.marca, mod: h.modelo, items: [] }; grouped[k].items.push(h); });
+            let html = ''; let gIdx = 0;
             for (const k in grouped) {
                 const g = grouped[k]; const sId = 'herr_grp_' + gIdx++;
                 html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
@@ -509,18 +472,80 @@
                     <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd;">
                     <thead style="background:#34495e; color:white;"><tr><th>N° Serie</th><th>Ubicación Actual</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
                     ${g.items.map(u => {
-                        const est = getEstadoHerramienta(getObraNameById(u.obra));
+                        const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra);
                         return `<tr><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td>
-                        <td><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex}); event.stopPropagation();">📋 Hoja de Vida</button>
-                        ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('herramientas', ${u.originalIndex}); event.stopPropagation();">X</button>` : ''}</td></tr>`;
+                        <td><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.originalIndex}); event.stopPropagation();">📋 Hoja de Vida</button></td></tr>`;
                     }).join('')}</tbody></table></td></tr>`;
             }
             document.querySelector('#table-herramientas-body').innerHTML = html;
 
-            let op = db.obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
-            op += `<option value="REP-01">Taller / En Reparación</option><option value="MAN-01">Taller / En Mantención</option>`;
-            document.getElementById('cv-her-nueva-ub').innerHTML = op;
+            // RENDER TABLA BAJAS
+            let htmlBajas = listBajas.map(b => {
+                const lastMov = (b.historial && b.historial.length > 0) ? b.historial[b.historial.length - 1] : null;
+                return `<tr><td><b>${b.nombre}</b></td><td>${b.marca} / ${b.modelo}</td><td>${b.serie}</td>
+                <td style="font-size:0.85rem;">${lastMov ? lastMov.detalle : 'Baja'} <br><small>(${lastMov ? lastMov.fecha : b.fecha})</small></td>
+                <td><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.originalIndex})">Hoja Vida</button></td></tr>`;
+            }).join('') || '<tr><td colspan="5" style="text-align:center;">No hay herramientas dadas de baja.</td></tr>';
+            document.getElementById('table-herramientas-bajas-body').innerHTML = htmlBajas;
         }
+
+        function toggleResolucion() {
+            const res = document.getElementById('cv-res-tipo').value;
+            document.getElementById('div-res-ub').style.display = res === 'BAJA' ? 'none' : 'block';
+            document.getElementById('div-res-val').style.display = res === 'BAJA' ? 'none' : 'block';
+            document.getElementById('div-res-pdf').style.display = res === 'BAJA' ? 'none' : 'block';
+        }
+
+        async function procesarResolucionMantencion() {
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
+            const res = document.getElementById('cv-res-tipo').value;
+            const comentario = document.getElementById('cv-her-comentario-res').value.trim();
+            const fechaHoy = new Date().toISOString().split('T')[0];
+
+            let nuevaUb = ''; let detalleFinal = ''; let valorRep = 0;
+            
+            if (res === 'BAJA') {
+                if(!comentario) return alert("Debes ingresar el motivo de la baja.");
+                nuevaUb = 'BAJ-01'; detalleFinal = `DADA DE BAJA: ${comentario}`;
+            } else {
+                nuevaUb = document.getElementById('cv-res-nueva-ub').value;
+                valorRep = parseFloat(document.getElementById('cv-her-valor').value) || 0;
+                detalleFinal = `REPARADA: ${comentario} | Costo: $${valorRep}`;
+            }
+
+            const fileInput = document.getElementById('cv-her-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo PDF..." : null;
+
+            db.herramientas[idx].obra = nuevaUb;
+            if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder });
+            const movIdx = db.herramientas[idx].historial.length - 1;
+
+            await saveDatabase(true); abrirCV('herramientas', idx); showToast("Resolución guardada"); renderHerramientas();
+
+            if (file) {
+                const r = new FileReader(); r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; const docId = `REP_${db.herramientas[idx].id_unico}_${Date.now()}`;
+                    const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
+                    const url = await resp.text(); 
+                    if(db.herramientas[idx].historial[movIdx]) {
+                        db.herramientas[idx].historial[movIdx].pdfUrl = url; saveDatabase(true);
+                        if (cvActivoIndex && cvActivoIndex.idx === idx) abrirCV('herramientas', idx);
+                    }
+                };
+            }
+        }
+
+        function eliminarMovimientoHerramienta(movIdx) {
+            if(!confirm("¿Eliminar este movimiento del historial?")) return;
+            const hIdx = cvActivoIndex.idx; db.herramientas[hIdx].historial.splice(movIdx, 1);
+            const lastMov = db.herramientas[hIdx].historial[db.herramientas[hIdx].historial.length - 1];
+            db.herramientas[hIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN';
+            saveDatabase(true); abrirCV('herramientas', hIdx); renderHerramientas(); showToast("Movimiento eliminado");
+        }
+
+        const bPdfMini = (u) => u === "⏳ Subiendo PDF..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver PDF</a>` : '');
 
         // --- GESTIÓN CONTENEDORES ---
         function addContenedor() {
@@ -544,11 +569,7 @@
 
             let tTot = list.length; let tOfi = 0; let tBod = 0; let tBan = 0; let tDuc = 0; let tMix = 0;
             list.forEach(c => {
-                if(c.tipo === 'Oficina') tOfi++;
-                else if(c.tipo === 'Bodega') tBod++;
-                else if(c.tipo === 'Baños') tBan++;
-                else if(c.tipo === 'Duchas') tDuc++;
-                else if(c.tipo === 'Mixtos') tMix++;
+                if(c.tipo === 'Oficina') tOfi++; else if(c.tipo === 'Bodega') tBod++; else if(c.tipo === 'Baños') tBan++; else if(c.tipo === 'Duchas') tDuc++; else if(c.tipo === 'Mixtos') tMix++;
             });
             document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total Global</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tOfi}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tBod}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBan}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tDuc}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tMix}</h3><p>Mixtos</p></div>`;
 
@@ -556,23 +577,16 @@
             list.forEach(c => { 
                 if (!grouped[c.obra]) grouped[c.obra] = { obraName: getObraNameById(c.obra), items: [], counts: {} }; 
                 grouped[c.obra].items.push(c); 
-                const t = c.tipo || 'Otro';
-                grouped[c.obra].counts[t] = (grouped[c.obra].counts[t] || 0) + 1;
+                const t = c.tipo || 'Otro'; grouped[c.obra].counts[t] = (grouped[c.obra].counts[t] || 0) + 1;
             });
 
-            let html = '';
-            let gIdx = 0;
+            let html = ''; let gIdx = 0;
             for (const oId in grouped) {
                 const g = grouped[oId]; const sId = 'cont_grp_' + gIdx++;
-                
-                let breakdown = Object.entries(g.counts).map(([tipo, qty]) => `${tipo}: ${qty}`);
-                let breakdownStr = breakdown.join(' | ') || 'Sin especificar';
+                let breakdownStr = Object.entries(g.counts).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | ') || 'Sin especificar';
 
                 html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
-                    <td><b>${g.obraName}</b></td>
-                    <td style="font-size:0.85rem; color:#555;">${breakdownStr}</td>
-                    <td><b>${g.items.length}</b> en Total</td>
-                    <td><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
+                    <td><b>${g.obraName}</b></td><td style="font-size:0.85rem; color:#555;">${breakdownStr}</td><td><b>${g.items.length}</b> Unid.</td><td><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
                     <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;">
                     <thead style="background:#34495e; color:white;"><tr><th>Tipo y Número</th><th>Detalle Exterior</th><th>Detalle Interior</th><th>Acción</th></tr></thead><tbody>
                     ${g.items.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td>
@@ -589,10 +603,21 @@
             if(tipo === 'herramientas') {
                 const h = db.herramientas[idx];
                 document.getElementById('cv-her-titulo').innerText = `Herramienta: ${h.nombre}`;
-                const est = getEstadoHerramienta(getObraNameById(h.obra));
+                const est = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
                 document.getElementById('cv-her-datos').innerHTML = `<div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Modelo</b> ${h.marca} ${h.modelo}</div><div class="cv-item"><b>Serie Única</b> ${h.serie}</div><div class="cv-item"><b>Valor Compra</b> $${h.valor.toLocaleString()}</div><div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;"><b>Estado:</b> <span class="badge ${est.cls}">${est.txt}</span> en <span>${getObraNameById(h.obra)}</span></div>`;
-                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length > 0) ? h.historial.map(m => `<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle}</td></tr>`).join('') : `<tr><td colspan="3">Sin movimientos</td></tr>`;
-                document.getElementById('cv-her-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
+                
+                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length > 0) ? h.historial.map((m, i) => `<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl ? bPdfMini(m.pdfUrl) : ''}</td><td class="no-print">${(currentUser.rol !== 'bodeguero' && i > 0) ? `<button class="btn btn-danger btn-small" onclick="eliminarMovimientoHerramienta(${i})">X</button>` : '-'}</td></tr>`).join('') : `<tr><td colspan="4">Sin movimientos</td></tr>`;
+                
+                const actBox = document.getElementById('cv-her-action-box');
+                if (currentUser.rol === 'bodeguero' || h.obra === 'BAJ-01') { actBox.style.display = 'none'; } 
+                else {
+                    actBox.style.display = 'block';
+                    if (h.obra === 'MAN-01') {
+                        actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución de Mantención</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false, null)}</select></div><div style="grid-column: 1 / -1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-comentario-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-valor" placeholder="0" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
+                    } else {
+                        actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label><select id="cv-her-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01">Taller / En Mantención</option></select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Enviado a obra para perforaciones" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimiento('herramientas')">Guardar Movimiento</button></div>`;
+                    }
+                }
                 document.getElementById('modal-cv-her').style.display = 'block';
             } else if (tipo === 'contenedores') {
                 const c = db.contenedores[idx];
@@ -607,21 +632,20 @@
         function cerrarCV(modalId) { document.getElementById(modalId).style.display = 'none'; cvActivoIndex = null; }
 
         function registrarMovimiento(tipo) {
-            if(!cvActivoIndex) return;
-            const idx = cvActivoIndex.idx;
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
             const pre = tipo === 'herramientas' ? 'cv-her' : 'cv-cont';
             const nuevaUb = document.getElementById(`${pre}-nueva-ub`).value;
             const comentario = document.getElementById(`${pre}-comentario`).value.trim() || "Cambio de ubicación/estado";
             const fechaHoy = new Date().toISOString().split('T')[0];
 
-            db[tipo][idx].obra = nuevaUb;
-            if(!db[tipo][idx].historial) db[tipo][idx].historial = [];
+            db[tipo][idx].obra = nuevaUb; if(!db[tipo][idx].historial) db[tipo][idx].historial = [];
             db[tipo][idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: comentario });
-            
             document.getElementById(`${pre}-comentario`).value = ''; saveDatabase(true); 
             abrirCV(tipo, idx); showToast("Historial actualizado"); 
             if(tipo === 'herramientas') renderHerramientas(); else renderContenedores();
         }
+
+        function registrarMovimientoContenedor() { registrarMovimiento('contenedores'); }
 
         // --- SISTEMA MATERIALES Y RENDER GENERAL ---
         function calculateStats(ocId, mat) {
