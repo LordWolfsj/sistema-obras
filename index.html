@@ -19,7 +19,7 @@
         .badge { padding: 5px 8px; border-radius: 5px; font-size: 0.75rem; color: white; font-weight: bold; }
         .bg-ok { background: var(--success); } .bg-warn { background: #f39c12; } .bg-err { background: var(--danger); } .bg-info { background: #3498db; }
         
-        /* DASHBOARD STATS (NORMAL Y COMPACTO) */
+        /* DASHBOARD STATS */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         .stat-card h3 { font-size: 1.8rem; margin: 0 0 5px 0; color: var(--primary); }
@@ -43,7 +43,7 @@
         #intro-video { display: none; width: 100%; max-width: 1000px; outline: none; }
         #skip-btn { display: none; margin-top: 20px; color: #777; background: none; border: none; text-decoration: underline; cursor: pointer; }
 
-        /* MODALES HOJA DE VIDA */
+        /* MODALES HOJA DE VIDA (VENTANAS FLOTANTES) */
         .modal { display: none; position: fixed; z-index: 10005; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.3s; position: relative; }
         @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -290,13 +290,7 @@
                 </form>
             </div>
             
-            <div class="filter-container">
-                <div style="display:flex; align-items:center; gap:15px; width:100%;">
-                    <label style="font-weight:bold;">📍 Filtrar por Obra:</label>
-                    <select id="filter-cont-obra" onchange="renderContenedores()" style="padding:10px; border-radius:5px; flex:1;"><option value="ALL">Todas las Obras</option></select>
-                </div>
-            </div>
-            <table><thead><tr><th>Ubicación / Obra</th><th>Total Contenedores</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
+            <table><thead><tr><th>Ubicación / Obra</th><th>Detalle por Tipo</th><th>Total</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
         </div>
 
         <div id="usuarios" class="section"><h1>Gestión de Usuarios</h1><div class="card"><form onsubmit="event.preventDefault(); addUser();"><div class="form-grid"><div class="form-group"><label>Nombre Real</label><input type="text" id="u-nombre" required></div><div class="form-group"><label>Usuario Login</label><input type="text" id="u-user" required></div><div class="form-group"><label>Contraseña</label><input type="text" id="u-pass" required></div><div class="form-group"><label>Rol</label><select id="u-rol" onchange="toggleObraUser()"><option value="admin">👑 Administrador</option><option value="jefe">👔 Jefe de Bodega</option><option value="bodeguero">👷 Bodeguero (Lectura)</option></select></div><div class="form-group" id="div-u-obra" style="display:none;"><label>Obra Fija</label><select id="u-obra"></select></div></div><button class="btn btn-primary">Crear Usuario</button></form></div><table id="table-usuarios"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Obra Limitada</th><th>X</th></tr></thead><tbody></tbody></table></div>
@@ -545,10 +539,8 @@
         }
 
         function renderContenedores() {
-            const fV = document.getElementById('filter-cont-obra').value;
             let list = db.contenedores.map((c, i) => ({...c, originalIndex: i}));
-            if (fV !== "ALL") list = list.filter(c => c.obra === fV);
-            else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId);
+            if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId);
 
             let tTot = list.length; let tOfi = 0; let tBod = 0; let tBan = 0; let tDuc = 0; let tMix = 0;
             list.forEach(c => {
@@ -558,21 +550,33 @@
                 else if(c.tipo === 'Duchas') tDuc++;
                 else if(c.tipo === 'Mixtos') tMix++;
             });
-            document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tOfi}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tBod}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBan}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tDuc}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tMix}</h3><p>Mixtos</p></div>`;
+            document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${tTot}</h3><p>Total Global</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tOfi}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tBod}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBan}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tDuc}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tMix}</h3><p>Mixtos</p></div>`;
 
             const grouped = {};
-            list.forEach(c => { if (!grouped[c.obra]) grouped[c.obra] = { obraName: getObraNameById(c.obra), items: [] }; grouped[c.obra].items.push(c); });
+            list.forEach(c => { 
+                if (!grouped[c.obra]) grouped[c.obra] = { obraName: getObraNameById(c.obra), items: [], counts: {} }; 
+                grouped[c.obra].items.push(c); 
+                const t = c.tipo || 'Otro';
+                grouped[c.obra].counts[t] = (grouped[c.obra].counts[t] || 0) + 1;
+            });
 
             let html = '';
             let gIdx = 0;
             for (const oId in grouped) {
                 const g = grouped[oId]; const sId = 'cont_grp_' + gIdx++;
+                
+                let breakdown = Object.entries(g.counts).map(([tipo, qty]) => `${tipo}: ${qty}`);
+                let breakdownStr = breakdown.join(' | ') || 'Sin especificar';
+
                 html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
-                    <td><b>${g.obraName}</b></td><td><b>${g.items.length}</b> Contenedores</td><td><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
-                    <tr id="${sId}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;">
+                    <td><b>${g.obraName}</b></td>
+                    <td style="font-size:0.85rem; color:#555;">${breakdownStr}</td>
+                    <td><b>${g.items.length}</b> en Total</td>
+                    <td><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
+                    <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;">
                     <thead style="background:#34495e; color:white;"><tr><th>Tipo y Número</th><th>Detalle Exterior</th><th>Detalle Interior</th><th>Acción</th></tr></thead><tbody>
                     ${g.items.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td>
-                        <td><button class="btn btn-success btn-small" onclick="abrirCV('contenedores', ${u.originalIndex}); event.stopPropagation();">📋 Hoja Traslados</button>
+                        <td><button class="btn btn-small" style="background:#3498db; color:white; border:none;" onclick="abrirCV('contenedores', ${u.originalIndex}); event.stopPropagation();">🚚 Trasladar</button>
                         ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('contenedores', ${u.originalIndex}); event.stopPropagation();">X</button>` : ''}</td></tr>`
                     ).join('')}</tbody></table></td></tr>`;
             }
@@ -708,7 +712,7 @@
             
             const fullOptions = getObrasOptionsHtml(false, null);
             const filterOptions = getObrasOptionsHtml(true, fOId);
-            const userOptions = getObrasOptionsHtml(false, fOId);
+            const userOptions = getObrasOptionsHtml(false, fOId); 
 
             document.getElementById('oc-obra').innerHTML = userOptions;
             document.getElementById('h-obr').innerHTML = userOptions;
@@ -716,7 +720,6 @@
             
             document.getElementById('filter-obra').innerHTML = filterOptions; document.getElementById('filter-obra').disabled = isB;
             document.getElementById('filter-her-obra').innerHTML = filterOptions; document.getElementById('filter-her-obra').disabled = isB;
-            document.getElementById('filter-cont-obra').innerHTML = filterOptions; document.getElementById('filter-cont-obra').disabled = isB;
             
             const vOc = db.ocs.map((o,i)=>({...o, idx:i})).filter(o => isB ? o.obra === currentUser.obraId : true);
             const vIng = db.ingresos.map((o,i)=>({...o, idx:i})).filter(o => isB ? getObraNameByOcId(o.ocId) === getObraNameById(currentUser.obraId) : true);
