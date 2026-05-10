@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SJ Systemweb - Gestión de Obras</title>
     <style>
-        :root { 
-            --primary: #2c3e50; --secondary: #34495e; --accent: #118180; 
-            --success: #27ae60; --danger: #e74c3c; --bg: #f8f9fa; --text: #333; 
-        }
+        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #118180; --success: #27ae60; --danger: #e74c3c; --bg: #f8f9fa; --text: #333; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { display: flex; height: 100vh; background-color: var(--bg); color: var(--text); overflow: hidden; }
 
@@ -739,13 +736,21 @@
                 document.getElementById('loading').style.display = 'none'; 
             }
             
-            // Garantizar estructura
+            // Garantizar estructura de datos (EL PARACAÍDAS)
+            if (!db) db = {};
+            if (!db.obras) db.obras = []; 
+            if (!db.ocs) db.ocs = []; 
+            if (!db.ingresos) db.ingresos = []; 
+            if (!db.salidas) db.salidas = []; 
             if (!db.usuarios) db.usuarios = []; 
             if (!db.herramientas) db.herramientas = []; 
             if (!db.contenedores) db.contenedores = [];
+            
+            // Proteger Bodega Central
             if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) {
                 db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' });
             }
+            
             document.getElementById('login-screen').style.display = 'flex';
         }
 
@@ -755,13 +760,17 @@
                 const r = await fetch(API_URL); 
                 db = await r.json(); 
                 document.getElementById('loading').style.display = 'none'; 
+                
+                // Garantizar estructura
+                if (!db) db = {};
+                if (!db.obras) db.obras = []; if (!db.ocs) db.ocs = []; if (!db.ingresos) db.ingresos = []; 
+                if (!db.salidas) db.salidas = []; if (!db.usuarios) db.usuarios = []; 
+                if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
+                
                 renderAll(); 
             } catch (e) { 
                 document.getElementById('loading').style.display = 'none'; 
             }
-            if (!db.usuarios) db.usuarios = []; 
-            if (!db.herramientas) db.herramientas = []; 
-            if (!db.contenedores) db.contenedores = [];
         }
 
         async function saveDatabase(silent = false) {
@@ -957,7 +966,6 @@
                 <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>
             `;
 
-            // Agrupar solo por nombre genérico
             const grouped = {};
             listActivas.forEach(h => { 
                 const k = h.nombre; 
