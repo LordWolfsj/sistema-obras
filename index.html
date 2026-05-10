@@ -374,7 +374,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Equipo</th>
+                        <th>Equipo (Nombre Genérico)</th>
                         <th>Total Unidades</th>
                         <th class="no-print">Acción</th>
                     </tr>
@@ -736,7 +736,7 @@
                 document.getElementById('loading').style.display = 'none'; 
             }
             
-            // Garantizar estructura de datos (EL PARACAÍDAS)
+            // Garantizar estructura de datos para que nada falle
             if (!db) db = {};
             if (!db.obras) db.obras = []; 
             if (!db.ocs) db.ocs = []; 
@@ -886,7 +886,7 @@
         }
 
         function getObraNameById(id) {
-            if (id === 'MAN-01') return 'Taller / En Mantención';
+            if (id === 'REP-01') return 'Taller / En Mantención';
             if (id === 'BAJ-01') return 'Dada de Baja';
             const o = db.obras.find(x => x.id === id);
             return o ? o.nombre : id;
@@ -902,7 +902,7 @@
             if (idUb === 'BAJ-01') return { txt: '⚫ Dada de Baja', cls: 'bg-dark' };
             const low = nomUbicacion.toLowerCase();
             if (low.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' };
-            if (low.includes('reparaci') || low.includes('mantenci') || low.includes('taller') || idUb === 'MAN-01') {
+            if (low.includes('reparaci') || low.includes('mantenci') || low.includes('taller') || idUb === 'REP-01') {
                 return { txt: '🔴 En Mantención', cls: 'bg-err' };
             }
             return { txt: '🟡 En Obra', cls: 'bg-warn' };
@@ -966,6 +966,7 @@
                 <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>
             `;
 
+            // Agrupar solo por nombre genérico
             const grouped = {};
             listActivas.forEach(h => { 
                 const k = h.nombre; 
@@ -1038,7 +1039,7 @@
         function toggleProveedorTaller() {
             const ub = document.getElementById('cv-her-nueva-ub').value;
             const provDiv = document.getElementById('div-prov-taller');
-            if(provDiv) provDiv.style.display = (ub === 'MAN-01') ? 'block' : 'none';
+            if(provDiv) provDiv.style.display = (ub === 'REP-01') ? 'block' : 'none';
         }
 
         function toggleResolucion() {
@@ -1126,7 +1127,7 @@
                                     <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
                                     <select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
                                         ${getObrasOptionsHtml(false, null)}
-                                        <option value="MAN-01">Taller / En Mantención</option>
+                                        <option value="REP-01">🛠️ Taller / En Mantención</option>
                                     </select>
                                 </div>
                                 <div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;">
