@@ -30,15 +30,15 @@
         .stat-card-small h3 { font-size: 1.3rem; margin: 0 0 2px 0; color: var(--primary); }
         .stat-card-small p { font-size: 0.65rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
 
-        /* PANTALLAS DE CARGA Y LOGIN (ESTILO SJ SYSTEMWEB MEJORADO) */
+        /* PANTALLAS DE CARGA Y LOGIN CON ESTILO SJ SYSTEMWEB MEJORADO */
         #splash-screen, #login-screen, #loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10000; }
         #splash-screen { background: white; transition: opacity 0.8s ease; }
         #login-screen { background: linear-gradient(135deg, #2c3e50 0%, #118180 100%); display: none; }
         #loading { background: rgba(44, 62, 80, 0.9); color: white; display: none; z-index: 10002; }
         
         .login-box { background: white; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 420px; text-align: center; overflow: hidden; }
-        .login-logo-header { background: black; padding: 30px; border-bottom: 3px solid var(--accent); }
-        .login-logo-header img { width: 250px; height: auto; display: block; margin: 0 auto; }
+        .logo-container-black { background: black; padding: 30px; border-bottom: 3px solid var(--accent); }
+        .logo-container-black img { width: 250px; height: auto; display: block; margin: 0 auto; }
         .login-form-content { padding: 30px 40px 40px 40px; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
         
@@ -50,7 +50,7 @@
         #intro-video { display: none; width: 100%; max-width: 1000px; outline: none; }
         #skip-btn { display: none; margin-top: 20px; color: #777; background: none; border: none; text-decoration: underline; cursor: pointer; }
 
-        /* MODALES HOJA DE VIDA */
+        /* MODALES HOJA DE VIDA (VENTANAS FLOTANTES) */
         .modal { display: none; position: fixed; z-index: 10005; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.3s; position: relative; }
         @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -118,7 +118,7 @@
             th { background-color: #e9ecef !important; color: #000 !important; font-weight: bold; border: 1px solid #ccc;}
             td { border: 1px solid #ccc; }
             .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
-            tr[id^="res_grp_"], tr[id^="h_g_"], tr[id^="c_g_"], tr[id^="ind_grp_"], tr[id^="sad_grp_"], tr[id^="bi_grp_"] { display: table-row !important; }
+            tr[id^="res-det-"], tr[id^="her-det-"], tr[id^="cont-det-"], tr[id^="bi_grp_"] { display: table-row !important; }
         }
     </style>
 </head>
@@ -191,7 +191,7 @@
                     
                     <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Adjuntar Foto/PDF (Opcional):</label>
                         <input type="file" id="cv-cont-file" accept=".pdf,image/*" style="width:100%; padding:7px; border-radius:5px; border:1px solid #ccc; background:white;"></div>
-                        
+
                     <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoContenedor()">Confirmar Traslado</button>
                 </div>
             </div>
@@ -435,6 +435,7 @@
                     <div class="form-grid">
                         <div class="form-group"><label>Detalle Exterior</label><input type="text" id="c-ext" required placeholder="Ej: Pintura azul, puerta doble"></div>
                         <div class="form-group"><label>Detalle Interior</label><input type="text" id="c-int" required placeholder="Ej: 3 repisas de acero, luz LED"></div>
+                        <div class="form-group"><label>Adjuntar Foto/PDF (Opcional)</label><input type="file" id="c-file" accept=".pdf,image/*"></div>
                     </div>
                     <button class="btn btn-primary">Registrar Contenedor</button>
                 </form>
@@ -639,7 +640,7 @@
             });
             const mIdx = db.invBodegas.length - 1;
 
-            saveDatabase(true); 
+            saveDatabase(true); // Guardado inicial
             ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = '');
             if(fileInput) fileInput.value = '';
             showToast("Material ingresado a " + currentBodegaName);
@@ -795,7 +796,7 @@
             let h = '';
             db.despachosBodegas.forEach((d, idx) => {
                 h += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${getObraNameById(d.obra)}</td><td>${d.items.length} items</td><td>
-                ${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>`) : '-'}
+                ${d.pdfUrl ? `<a href="${d.pdfUrl}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>` : '-'}
                 <button class="btn btn-danger btn-small" onclick="deleteRecord('despachosBodegas', ${idx}); renderBodegasSalidas();" style="margin-left:5px;">X</button></td></tr>`;
             });
             document.getElementById('table-bod-sal-body').innerHTML = h || '<tr><td colspan="5" style="text-align:center;">No hay despachos registrados.</td></tr>';
@@ -810,7 +811,7 @@
             let html = '';
             db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => {
                 d.items.forEach(it => {
-                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td>${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>`) : '-'}</td></tr>`;
+                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td>${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>` : '-'}</td></tr>`;
                 });
             });
             document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
@@ -909,43 +910,167 @@
             document.getElementById('div-res-pdf').style.display = res === 'BAJA' ? 'none' : 'block';
         }
 
-        const bPdfMini = (u) => u === "⏳ Subiendo PDF..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver Archivo</a>` : '');
+        const bPdfMini = (u) => u === "⏳ Subiendo PDF..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver PDF</a>` : '');
 
         function abrirCV(tipo, idx) {
             cvActivoIndex = { tipo, idx };
             if(tipo === 'herramientas') {
-                const h = db.herramientas[idx]; const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
+                const h = db.herramientas[idx];
                 document.getElementById('cv-her-titulo').innerText = `Herramienta: ${h.nombre}`;
-                document.getElementById('cv-her-datos').innerHTML = `<div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Mod</b> ${h.marca} ${h.modelo}</div><div class="cv-item"><b>Serie</b> ${h.serie}</div><div class="cv-item" style="grid-column: 1/-1; background:#fff; padding:10px; border:1px dashed #ccc;"><b>Estado:</b> <span class="badge ${e.cls}">${e.txt}</span> en ${getObraNameById(h.obra)}</div>`;
-                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length) ? h.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl?bPdfMini(m.pdfUrl):''}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovHer(${i})">X</button>`:'-'}</td></tr>`).join('') : `<tr><td colspan="4">Vacio</td></tr>`;
-                const bx = document.getElementById('cv-her-action-box');
-                if(currentUser.rol === 'bodeguero' || h.obra === 'BAJ-01') bx.style.display = 'none';
+                const est = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
+                document.getElementById('cv-her-datos').innerHTML = `<div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Modelo</b> ${h.marca} ${h.modelo}</div><div class="cv-item"><b>Serie Única</b> ${h.serie}</div><div class="cv-item"><b>Valor Compra</b> $${h.valor.toLocaleString()}</div><div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;"><b>Estado y Ubicación Actual:</b> <span class="badge ${est.cls}">${est.txt}</span> en <span>${getObraNameById(h.obra)}</span></div>`;
+                
+                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length > 0) ? h.historial.map((m, i) => `<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl ? bPdfMini(m.pdfUrl) : ''}</td><td class="no-print">${(currentUser.rol !== 'bodeguero' && i > 0) ? `<button class="btn btn-danger btn-small" onclick="eliminarMovimientoHerramienta(${i})">X</button>` : '-'}</td></tr>`).join('') : `<tr><td colspan="4">Sin movimientos</td></tr>`;
+                
+                const actBox = document.getElementById('cv-her-action-box');
+                if (currentUser.rol === 'bodeguero' || h.obra === 'BAJ-01') { actBox.style.display = 'none'; } 
                 else {
-                    bx.style.display = 'block';
-                    if(e.txt.includes('Mantención')) {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px;">Resolución</h4><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Acción</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada</option><option value="BAJA">🗑️ Baja</option></select></div><div id="div-res-ub"><label>A Obra</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label>Detalle Técnico</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label>Costo ($)</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label>PDF Respaldo</label><input type="file" id="cv-her-file" style="width:100%; padding:8px;" accept=".pdf,image/*"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar</button>`;
+                    actBox.style.display = 'block';
+                    if (est.txt.includes('Mantención')) {
+                        actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false, null)}</select></div><div style="grid-column: 1 / -1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-comentario-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-valor" placeholder="0" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
                         setTimeout(toggleResolucion, 50);
                     } else {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px;">Nuevo Movimiento</h4><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1;"><label>Destino</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}<option value="MAN-01">Taller / Mantención</option></select></div><div id="div-prov-taller" style="display:none;"><label>Taller</label><input type="text" id="cv-her-prov" style="width:100%; padding:8px;"></div><div style="flex:1;"><label>Comentario</label><input type="text" id="cv-her-com" style="width:100%; padding:8px;"></div><button class="btn btn-primary" onclick="registrarMovimientoHerramienta()">Registrar</button></div>`;
+                        actBox.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01">🛠️ Taller / En Mantención</option></select></div><div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Proveedor / Taller:</label><input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla de motor" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button></div>`;
                     }
                 }
                 document.getElementById('modal-cv-her').style.display = 'block';
-            } else {
-                const c = db.contenedores[idx]; document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.num}`;
-                document.getElementById('cv-cont-datos').innerHTML = `<div class="cv-item"><b>Ubicación</b> ${getObraNameById(c.obra)}</div><div class="cv-item"><b>Detalle</b> ${c.detExt} | ${c.detInt}</div>`;
-                document.getElementById('cv-cont-historial-body').innerHTML = c.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl?bPdfMini(m.pdfUrl):''}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovCon(${i})">X</button>`:'-'}</td></tr>`).join('');
+            } else if (tipo === 'contenedores') {
+                const c = db.contenedores[idx];
+                document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.tipo} - ${c.num}`;
+                
+                document.getElementById('cv-cont-datos').innerHTML = `
+                    <div class="cv-item"><b>Ubicación Actual</b> ${getObraNameById(c.obra)}</div>
+                    <div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;">
+                        <b>Detalles:</b> Ext: ${c.detExt} | Int: ${c.detInt}
+                    </div>
+                `;
+                
+                document.getElementById('cv-cont-historial-body').innerHTML = (c.historial && c.historial.length > 0) 
+                    ? c.historial.map((m, i) => `
+                        <tr>
+                            <td>${m.fecha}</td>
+                            <td><b>${getObraNameById(m.ubicacion)}</b></td>
+                            <td>${m.detalle} ${m.pdfUrl ? bPdfMini(m.pdfUrl) : ''}</td>
+                            <td class="no-print">
+                                ${(currentUser.rol !== 'bodeguero' && i > 0) ? `<button class="btn btn-danger btn-small" onclick="eliminarMovimientoContenedor(${i})">X</button>` : '-'}
+                            </td>
+                        </tr>`).join('') 
+                    : `<tr><td colspan="4">Sin movimientos</td></tr>`;
+                
                 document.getElementById('cv-cont-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
                 document.getElementById('cv-cont-nueva-ub').innerHTML = getObrasOptionsHtml(false, null);
                 document.getElementById('modal-cv-cont').style.display = 'block';
             }
         }
-        function cerrarCV(id) { document.getElementById(id).style.display = 'none'; cvActivoIndex = null; }
+        function cerrarCV(modalId) { document.getElementById(modalId).style.display = 'none'; cvActivoIndex = null; }
 
-        function registrarMovimientoHerramienta() { const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); }
-        async function procesarResolucionMantencion() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; await saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); if(cvActivoIndex && cvActivoIndex.idx===idx) abrirCV('herramientas',idx); } }; } }
-        function eliminarMovimientoHerramienta(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); }
-        
-        // --- MATERIALES GLOBALES ---
+        function registrarMovimientoHerramienta() {
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
+            const nuevaUb = document.getElementById('cv-her-nueva-ub').value;
+            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación/estado";
+            const provDiv = document.getElementById('div-prov-taller');
+            const prov = (document.getElementById('cv-her-proveedor') && provDiv && provDiv.style.display !== 'none') ? document.getElementById('cv-her-proveedor').value.trim() : "";
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            let detFinal = comentario; if (prov) detFinal += ` | Proveedor: ${prov}`;
+
+            db.herramientas[idx].obra = nuevaUb;
+            if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detFinal, proveedor: prov });
+            
+            saveDatabase(true); abrirCV('herramientas', idx); showToast("Movimiento registrado"); renderHerramientas();
+        }
+
+        async function procesarResolucionMantencion() {
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
+            const res = document.getElementById('cv-res-tipo').value;
+            const comentario = document.getElementById('cv-her-comentario-res').value.trim();
+            const fechaHoy = new Date().toISOString().split('T')[0];
+
+            let nuevaUb = ''; let detalleFinal = '';
+            if (res === 'BAJA') {
+                if(!comentario) return alert("Debes ingresar el motivo de la baja.");
+                nuevaUb = 'BAJ-01'; detalleFinal = `DADA DE BAJA: ${comentario}`;
+            } else {
+                nuevaUb = document.getElementById('cv-res-nueva-ub').value;
+                const valorRep = parseFloat(document.getElementById('cv-her-valor').value) || 0;
+                detalleFinal = `REPARADA: ${comentario} | Costo: $${valorRep}`;
+            }
+
+            const fileInput = document.getElementById('cv-her-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo PDF..." : null;
+
+            db.herramientas[idx].obra = nuevaUb;
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder });
+            const movIdx = db.herramientas[idx].historial.length - 1;
+
+            await saveDatabase(true); abrirCV('herramientas', idx); showToast("Resolución guardada"); renderHerramientas();
+
+            if (file) {
+                const r = new FileReader(); r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; const docId = `REP_${db.herramientas[idx].id_unico}_${Date.now()}`;
+                    const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
+                    const url = await resp.text(); 
+                    if(db.herramientas[idx].historial[movIdx]) { db.herramientas[idx].historial[movIdx].pdfUrl = url; saveDatabase(true); if (cvActivoIndex && cvActivoIndex.idx === idx) abrirCV('herramientas', idx); }
+                };
+            }
+        }
+
+        function eliminarMovimientoHerramienta(movIdx) {
+            if(!confirm("¿Eliminar este movimiento del historial?")) return;
+            const hIdx = cvActivoIndex.idx; db.herramientas[hIdx].historial.splice(movIdx, 1);
+            const lastMov = db.herramientas[hIdx].historial[db.herramientas[hIdx].historial.length - 1];
+            db.herramientas[hIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN';
+            saveDatabase(true); abrirCV('herramientas', hIdx); renderHerramientas(); showToast("Movimiento eliminado");
+        }
+
+        async function registrarMovimientoContenedor() { 
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
+            const ub = document.getElementById(`cv-cont-nueva-ub`).value; 
+            const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; 
+            const f = new Date().toISOString().split('T')[0];
+            
+            const fileInput = document.getElementById('cv-cont-file');
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo..." : null;
+
+            db.contenedores[idx].obra = ub; 
+            db.contenedores[idx].historial.push({ fecha: f, ubicacion: ub, detalle: c, pdfUrl: placeholder }); 
+            const mI = db.contenedores[idx].historial.length - 1;
+
+            document.getElementById(`cv-cont-comentario`).value = ''; 
+            if(fileInput) fileInput.value = '';
+            
+            await saveDatabase(true); 
+            abrirCV('contenedores', idx); showToast("Traslado actualizado"); renderContenedores(); 
+
+            if (file) {
+                const r = new FileReader(); r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop();
+                    const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`;
+                    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                    const url = await res.text(); 
+                    if(db.contenedores[idx].historial[mI]) { db.contenedores[idx].historial[mI].pdfUrl = url; saveDatabase(true); if (cvActivoIndex && cvActivoIndex.idx === idx) abrirCV('contenedores', idx); }
+                };
+            }
+        }
+
+        function eliminarMovimientoContenedor(movIdx) {
+            if(!confirm("¿Eliminar este movimiento del historial?")) return;
+            const cIdx = cvActivoIndex.idx; db.contenedores[cIdx].historial.splice(movIdx, 1);
+            const lastMov = db.contenedores[cIdx].historial[db.contenedores[cIdx].historial.length - 1];
+            db.contenedores[cIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN';
+            saveDatabase(true); abrirCV('contenedores', cIdx); renderContenedores(); showToast("Movimiento eliminado");
+        }
+
+        // --- EXPORTACIONES ---
+        function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
+        function exportExcelContenedores() { const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL"; let list = db.contenedores; if (fV !== "ALL") list = list.filter(c => c.obra === fV); else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId); let csv = "\uFEFFUbicación/Obra;Tipo;N° Contenedor;Detalle Exterior;Detalle Interior\n"; list.forEach(c => { csv += `${getObraNameById(c.obra)};${c.tipo};${c.num};${c.detExt};${c.detInt}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Contenedores.csv`); link.click(); }
+        function exportExcelBodegaInv() { const sQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const gr = {}; db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => { const k = `${i.material}_${i.unidad}`; if(!gr[k]) gr[k] = { m: i.material, u: i.unidad, c: [] }; if(i.comentario) gr[k].c.push(`${i.fecha}: ${i.comentario}`); }); let ls = Object.values(gr); if(sQ) ls = ls.filter(x => x.m.toLowerCase().includes(sQ)); let csv = `\uFEFFInventario Bodega: ${currentBodegaName}\nMaterial;Unidad;T. Ingresado;T. Despachado;Stock Actual;Comentarios\n`; ls.forEach(x => { const s = getStockBodega(currentBodegaName, x.m, x.u); const cm = x.c.length > 0 ? x.c.join(' | ') : '-'; csv += `${x.m};${x.u};${s.ing};${s.sal};${s.stock};${cm}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_${currentBodegaName}.csv`); link.click(); }
+        function exportExcelBodegasReporte() { const selObra = document.getElementById('filter-bod-rep-obra'); const obraId = selObra.value; if(!obraId) return; let csv = `\uFEFFReporte de Entregas Internas - Obra: ${getObraNameById(obraId)}\nFecha;Guía Despacho;Bodega Origen;Material Entregado;Cantidad;Unidad\n`; db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { csv += `${d.fecha};${d.guia};${it.bodega};${it.material};${it.cant};${it.unidad}\n`; }); }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Entregas_${getObraNameById(obraId)}.csv`); link.click(); }
+
+        // --- SISTEMA MATERIALES Y RENDER GENERAL ---
         function calculateStats(ocId, mat) { const oc = db.ocs.find(o => o.id === ocId && o.material === mat); const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0); const d = db.salidas.filter(s => s.ocId === ocId && s.material === mat).reduce((s, i) => s + i.cant, 0); return { comp: oc ? oc.cant : 0, rec: r, desp: d, stock: r - d }; }
         function exportExcelMateriales() { const fV = document.getElementById('filter-obra').value; let list = db.ocs.filter(o => currentUser.rol === 'bodeguero' ? o.obra === currentUser.obraId : (fV === "ALL" || o.obra === fV)); let csv = "\uFEFFOC;Obra;Material;Bodegas Físicas;Comprado;Recibido;Diferencia Faltante;Stock Real;Estado\n"; list.forEach(oc => { const s = calculateStats(oc.id, oc.material); const dif = s.comp - s.rec; const ings = db.ingresos.filter(i => i.ocId === oc.id && i.material === oc.material); const b = [...new Set(ings.map(i => i.bodega))].join(' - ') || '-'; csv += `${oc.id};${getObraNameById(oc.obra)};${oc.material};${b};${s.comp};${s.rec};${dif};${s.stock};${dif<=0?'Completo':'Pendiente'}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Materiales.csv`); link.click(); }
         
