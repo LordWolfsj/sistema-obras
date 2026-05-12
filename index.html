@@ -502,7 +502,7 @@
             setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); 
         }
 
-        // --- CARGA DE DATOS ---
+        // --- CARGA DE DATOS EVITANDO CACHÉ (?t=fecha) ---
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Falta configurar URL de Google."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { 
@@ -554,7 +554,7 @@
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS (NO ENVIAR CABECERAS EXTRAÑAS QUE GOOGLE BLOQUEE) ---
+        // --- BASE DE DATOS SILENCIOSA ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { 
@@ -562,9 +562,11 @@
                     method:'POST', 
                     body: JSON.stringify({ action:'saveDB', db: db }) 
                 }); 
-                document.getElementById('loading').style.display = 'none'; 
-                renderAll(); 
-            } catch (e) { alert("Error de conexión al guardar."); document.getElementById('loading').style.display = 'none'; }
+            } catch (e) { 
+                console.warn("Aviso de red ignorado."); 
+            }
+            document.getElementById('loading').style.display = 'none'; 
+            renderAll(); 
         }
         
         async function clearAll() {
@@ -640,7 +642,7 @@
             });
             const mIdx = db.invBodegas.length - 1;
 
-            saveDatabase(true); 
+            saveDatabase(true); // Guardado inicial
             ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = '');
             if(fileInput) fileInput.value = '';
             showToast("Material ingresado a " + currentBodegaName);
@@ -681,6 +683,7 @@
             const searchQ = document.getElementById('search-bod-inv').value.toLowerCase().trim();
             const grouped = {};
             
+            // Inyectar indice original para poder borrar luego
             db.invBodegas.forEach((i, idx) => { i.oIdx = idx; });
             
             db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => {
@@ -989,6 +992,12 @@
         }
         function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
+        // --- EXPORTACIONES ---
+        function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
+        function exportExcelContenedores() { const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL"; let list = db.contenedores; if (fV !== "ALL") list = list.filter(c => c.obra === fV); else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId); let csv = "\uFEFFUbicación/Obra;Tipo;N° Contenedor;Detalle Exterior;Detalle Interior\n"; list.forEach(c => { csv += `${getObraNameById(c.obra)};${c.tipo};${c.num};${c.detExt};${c.detInt}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Contenedores.csv`); link.click(); }
+        function exportExcelBodegaInv() { const sQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const gr = {}; db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => { const k = `${i.material}_${i.unidad}`; if(!gr[k]) gr[k] = { m: i.material, u: i.unidad, c: [] }; if(i.comentario) gr[k].c.push(`${i.fecha}: ${i.comentario}`); }); let ls = Object.values(gr); if(sQ) ls = ls.filter(x => x.m.toLowerCase().includes(sQ)); let csv = `\uFEFFInventario Bodega: ${currentBodegaName}\nMaterial;Unidad;T. Ingresado;T. Despachado;Stock Actual;Comentarios\n`; ls.forEach(x => { const s = getStockBodega(currentBodegaName, x.m, x.u); const cm = x.c.length > 0 ? x.c.join(' | ') : '-'; csv += `${x.m};${x.u};${s.ing};${s.sal};${s.stock};${cm}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_${currentBodegaName}.csv`); link.click(); }
+        function exportExcelBodegasReporte() { const selObra = document.getElementById('filter-bod-rep-obra'); const obraId = selObra.value; if(!obraId) return; let csv = `\uFEFFReporte de Entregas Internas - Obra: ${getObraNameById(obraId)}\nFecha;Guía Despacho;Bodega Origen;Material Entregado;Cantidad;Unidad\n`; db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { csv += `${d.fecha};${d.guia};${it.bodega};${it.material};${it.cant};${it.unidad}\n`; }); }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Entregas_${getObraNameById(obraId)}.csv`); link.click(); }
+
         // --- MATERIALES GLOBALES ---
         function calculateStats(ocId, mat) { const oc = db.ocs.find(o => o.id === ocId && o.material === mat); const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0); const d = db.salidas.filter(s => s.ocId === ocId && s.material === mat).reduce((s, i) => s + i.cant, 0); return { comp: oc ? oc.cant : 0, rec: r, desp: d, stock: r - d }; }
         function exportExcelMateriales() { const fV = document.getElementById('filter-obra').value; let list = db.ocs.filter(o => currentUser.rol === 'bodeguero' ? o.obra === currentUser.obraId : (fV === "ALL" || o.obra === fV)); let csv = "\uFEFFOC;Obra;Material;Bodegas Físicas;Comprado;Recibido;Diferencia Faltante;Stock Real;Estado\n"; list.forEach(oc => { const s = calculateStats(oc.id, oc.material); const dif = s.comp - s.rec; const ings = db.ingresos.filter(i => i.ocId === oc.id && i.material === oc.material); const b = [...new Set(ings.map(i => i.bodega))].join(' - ') || '-'; csv += `${oc.id};${getObraNameById(oc.obra)};${oc.material};${b};${s.comp};${s.rec};${dif};${s.stock};${dif<=0?'Completo':'Pendiente'}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Materiales.csv`); link.click(); }
@@ -1048,10 +1057,13 @@
             document.querySelector('#table-ingresos tbody').innerHTML = rendAcc(vIng, 'ingresos', 'ind', '<th>Guía</th><th>Mat</th><th>Bod</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.bodega}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('ingresos', i.idx)}</tr>`);
             document.querySelector('#table-salidas tbody').innerHTML = rendAcc(vSal, 'salidas', 'sad', '<th>Despacho</th><th>Mat</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('salidas', i.idx)}</tr>`);
 
-            renderResumenMateriales(); renderHerramientas(); renderContenedores();
-            if(document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
-            if(document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
-            if(document.getElementById('bodegas-reporte').classList.contains('active')) renderBodegasReporte();
+            renderResumenMateriales(); 
+            renderHerramientas(); 
+            renderContenedores();
+
+            if(document.getElementById('bodegas-inv') && document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
+            if(document.getElementById('bodegas-salidas') && document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
+            if(document.getElementById('bodegas-reporte') && document.getElementById('bodegas-reporte').classList.contains('active')) renderBodegasReporte();
 
             document.getElementById('u-obra').innerHTML = opsFull; document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
         }
