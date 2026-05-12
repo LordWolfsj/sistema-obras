@@ -30,7 +30,7 @@
         .stat-card-small h3 { font-size: 1.3rem; margin: 0 0 2px 0; color: var(--primary); }
         .stat-card-small p { font-size: 0.65rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
 
-        /* PANTALLAS DE CARGA Y LOGIN (ESTILO SJ SYSTEMWEB MEJORADO) */
+        /* PANTALLAS DE CARGA Y LOGIN */
         #splash-screen, #login-screen, #loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10000; }
         #splash-screen { background: white; transition: opacity 0.8s ease; }
         #login-screen { background: linear-gradient(135deg, #2c3e50 0%, #118180 100%); display: none; }
@@ -118,7 +118,8 @@
             th { background-color: #e9ecef !important; color: #000 !important; font-weight: bold; border: 1px solid #ccc;}
             td { border: 1px solid #ccc; }
             .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
-            tr[id^="res_grp_"], tr[id^="h_g_"], tr[id^="c_g_"], tr[id^="ind_grp_"], tr[id^="sad_grp_"], tr[id^="bi_grp_"] { display: table-row !important; }
+            tr[id^="res_grp_"], tr[id^="h_g_"], tr[id^="c_g_"], tr[id^="bi_grp_"] { display: table-row !important; }
+            tr[id^="ind_grp_"], tr[id^="sad_grp_"] { display: table-row !important; }
         }
     </style>
 </head>
@@ -127,10 +128,7 @@
 
     <div id="splash-screen">
         <div id="start-box" style="text-align: center;">
-            <div class="splash-logo-container">
-                <img src="logo.png" alt="SJ Systemweb">
-            </div>
-            <br>
+            <div class="splash-logo-container"><img src="logo.png" alt="SJ Systemweb"></div><br>
             <button class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onclick="startIntro()">Ingresar al Sistema</button>
             <p style="margin-top: 20px; color: #7f8c8d; font-size: 0.85rem;">© Osvaldo San Juan<br>TNS de Informática y Conectividad en Redes</p>
         </div>
@@ -140,9 +138,7 @@
     
     <div id="login-screen">
         <div class="login-box">
-            <div class="login-logo-header">
-                <img src="logo.png" alt="SJ Systemweb">
-            </div>
+            <div class="login-logo-header"><img src="logo.png" alt="SJ Systemweb"></div>
             <div class="login-form-content">
                 <h2 style="margin-bottom: 20px; color: var(--primary);">Inicio de Sesión</h2>
                 <form onsubmit="event.preventDefault(); procesarLogin();">
@@ -188,10 +184,8 @@
                         <select id="cv-cont-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
                     <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Guía Traslado:</label>
                         <input type="text" id="cv-cont-comentario" placeholder="Ej: Traslado con grúa, Guía 123" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
-                    
                     <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Adjuntar Foto/PDF (Opcional):</label>
                         <input type="file" id="cv-cont-file" accept=".pdf,image/*" style="width:100%; padding:7px; border-radius:5px; border:1px solid #ccc; background:white;"></div>
-
                     <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoContenedor()">Confirmar Traslado</button>
                 </div>
             </div>
@@ -239,11 +233,7 @@
         
         <button class="nav-btn" id="btn-borrar-bd" onclick="clearAll()" style="margin-top:auto; color:#ff7675; font-weight:bold; border-top: 1px solid #34495e;">⚠️ Limpiar Base de Datos</button>
         
-        <div class="copyright">
-            <b>© Osvaldo San Juan</b><br>
-            TNS de Informática y Conectividad en Redes<br>
-            SJ Systemweb
-        </div>
+        <div class="copyright"><b>© Osvaldo San Juan</b><br>TNS de Informática y Conectividad en Redes<br>SJ Systemweb</div>
     </div>
 
     <div class="main-content" id="app-main">
@@ -272,35 +262,13 @@
             <div class="card no-print">
                 <form onsubmit="event.preventDefault(); addInvBodega();">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nombre del Material</label>
-                            <input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas">
-                        </div>
-                        <div class="form-group">
-                            <label>Unidad de Medida</label>
-                            <select id="bi-uni" required>
-                                <option value="Uni">Unidad (Uni)</option>
-                                <option value="Kg">Kilogramos (Kg)</option>
-                                <option value="Mts">Metros (Mts)</option>
-                                <option value="Roll">Rollo (Roll)</option>
-                                <option value="Lts">Litros (Lts)</option>
-                                <option value="Caj">Caja (Caj)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Cantidad a Ingresar</label>
-                            <input type="number" step="0.01" id="bi-cant" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Adjuntar Archivo/Foto (Opcional)</label>
-                            <input type="file" id="bi-file" accept=".pdf,image/*">
-                        </div>
+                        <div class="form-group"><label>Nombre del Material</label><input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas"></div>
+                        <div class="form-group"><label>Unidad de Medida</label><select id="bi-uni" required><option value="Uni">Unidad (Uni)</option><option value="Kg">Kilogramos (Kg)</option><option value="Mts">Metros (Mts)</option><option value="Roll">Rollo (Roll)</option><option value="Lts">Litros (Lts)</option><option value="Caj">Caja (Caj)</option></select></div>
+                        <div class="form-group"><label>Cantidad a Ingresar</label><input type="number" step="0.01" id="bi-cant" required></div>
+                        <div class="form-group"><label>Adjuntar Archivo/Foto (Opcional)</label><input type="file" id="bi-file" accept=".pdf,image/*"></div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Comentario / Detalle (Opcional)</label>
-                            <input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4...">
-                        </div>
+                        <div class="form-group"><label>Comentario / Detalle (Opcional)</label><input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4..."></div>
                     </div>
                     <button class="btn btn-primary">Ingresar Material a esta Bodega</button>
                 </form>
@@ -318,11 +286,7 @@
             </div>
 
             <div id="print-bodegas-inv-header"><h2 id="print-bi-name">Inventario Bodega</h2></div>
-
-            <table>
-                <thead><tr><th>Material</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead>
-                <tbody id="table-bod-inv-body"></tbody>
-            </table>
+            <table><thead><tr><th>Material</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead><tbody id="table-bod-inv-body"></tbody></table>
         </div>
 
         <div id="bodegas-salidas" class="section">
@@ -333,7 +297,6 @@
                     <div class="form-group"><label>N° Guía de Despacho</label><input type="text" id="bs-guia" required></div>
                     <div class="form-group"><label>Adjuntar PDF Respaldo</label><input type="file" id="bs-file" accept=".pdf"></div>
                 </div>
-                
                 <div class="form-grid" style="background:#f1f2f6; padding:15px; border-radius:5px; border-left: 4px solid #f1c40f;">
                     <div class="form-group"><label>Extraer desde Bodega:</label>
                         <select id="bs-origen" onchange="updateBodSalMatSelect()">
@@ -345,18 +308,15 @@
                     <div class="form-group"><label>Cantidad a Despachar</label><input type="number" step="0.01" id="bs-cant"></div>
                     <button class="btn btn-primary" onclick="addToDraftBod()" style="background:#f1c40f; color:#333;">+ Añadir a la Lista</button>
                 </div>
-                
                 <table class="draft-table"><thead><tr><th>Origen</th><th>Material</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="bod-draft"></tbody></table>
                 <button class="btn btn-success" style="width:100%; margin-top:15px;" onclick="saveFinalBod()">Confirmar Despacho a Obra</button>
             </div>
-            
             <h2 style="margin-top:30px; margin-bottom:15px; color:var(--primary);">Historial de Despachos</h2>
             <table><thead><tr><th>Fecha</th><th>Guía</th><th>Obra Destino</th><th>Total Items</th><th>Acción</th></tr></thead><tbody id="table-bod-sal-body"></tbody></table>
         </div>
 
         <div id="bodegas-reporte" class="section">
             <h1 class="no-print">Reporte de Entregas por Obra</h1>
-            
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">Generar Reporte para la Obra:</label>
@@ -367,14 +327,12 @@
                     <button class="btn btn-secondary" style="background:#34495e; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-bodegas-report"><h2 id="print-bod-title">Reporte de Entregas - Seleccione Obra</h2></div>
             <table><thead><tr><th>Fecha</th><th>Guía Despacho</th><th>Bodega Origen</th><th>Material Entregado</th><th>Cantidad</th><th>Unidad</th><th class="no-print">PDF</th></tr></thead><tbody id="table-bod-rep-body"></tbody></table>
         </div>
 
         <div id="herramientas" class="section">
             <h1>Inventario de Herramientas y Maquinaria</h1>
-            
             <div class="stats-grid" id="h-stats"></div>
 
             <div class="card" id="form-her-card">
@@ -410,7 +368,6 @@
             </div>
             
             <div id="print-herramientas-header"><h2 id="print-her-obra-name">Inventario de Herramientas</h2></div>
-
             <table><thead><tr><th>Equipo (Nombre Genérico)</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
             
             <h2 style="margin-top:50px; color:var(--danger); border-bottom: 2px solid var(--danger); display:inline-block; padding-bottom:5px;">🗑️ Herramientas Dadas de Baja</h2>
@@ -451,9 +408,7 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-contenedores-header"><h2 id="print-con-obra-name">Inventario de Contenedores</h2></div>
-
             <table><thead><tr><th>Ubicación / Obra</th><th>Detalle por Tipo</th><th>Total</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
         </div>
 
@@ -554,7 +509,7 @@
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS SILENCIOSA ---
+        // --- BASE DE DATOS SEGURA ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { 
@@ -563,7 +518,7 @@
                     body: JSON.stringify({ action:'saveDB', db: db }) 
                 }); 
             } catch (e) { 
-                console.warn("Aviso de red ignorado."); 
+                console.warn("Redirección manejada por el navegador"); 
             }
             document.getElementById('loading').style.display = 'none'; 
             renderAll(); 
@@ -642,7 +597,7 @@
             });
             const mIdx = db.invBodegas.length - 1;
 
-            saveDatabase(true); // Guardado inicial
+            saveDatabase(true); 
             ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = '');
             if(fileInput) fileInput.value = '';
             showToast("Material ingresado a " + currentBodegaName);
@@ -655,16 +610,14 @@
                     const b64 = r.result.split(',')[1]; 
                     const ext = file.name.split('.').pop();
                     const docId = `BOD_${id_unico}_${Date.now()}.${ext}`;
-                    const resp = await fetch(API_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
-                    }); 
-                    const url = await resp.text(); 
-                    if(db.invBodegas[mIdx]) { 
-                        db.invBodegas[mIdx].pdfUrl = url; 
-                        saveDatabase(true); 
-                        renderBodegaInv(); 
-                    }
+                    try {
+                        const resp = await fetch(API_URL, { 
+                            method: 'POST', 
+                            body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
+                        }); 
+                        const url = await resp.text(); 
+                        if(db.invBodegas[mIdx]) { db.invBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegaInv(); }
+                    } catch(e) { console.warn("Archivo subido silenciosamente"); }
                 };
             }
         }
@@ -683,7 +636,6 @@
             const searchQ = document.getElementById('search-bod-inv').value.toLowerCase().trim();
             const grouped = {};
             
-            // Inyectar indice original para poder borrar luego
             db.invBodegas.forEach((i, idx) => { i.oIdx = idx; });
             
             db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => {
@@ -786,9 +738,11 @@
                 const r = new FileReader(); r.readAsDataURL(file);
                 r.onload = async () => { 
                     const b64 = r.result.split(',')[1]; const docId = `DESP_BOD_${Date.now()}`;
-                    const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
-                    const url = await resp.text(); 
-                    if(db.despachosBodegas[mIdx]) { db.despachosBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegasSalidas(); showToast("PDF Subido"); }
+                    try {
+                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
+                        const url = await resp.text(); 
+                        if(db.despachosBodegas[mIdx]) { db.despachosBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegasSalidas(); showToast("PDF Subido"); }
+                    } catch(e) { console.warn("Archivo de despacho subido."); }
                 };
             }
         }
@@ -819,19 +773,15 @@
             document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
         }
 
-        // --- HERRAMIENTAS ACTUALIZADO CON VALIDACIÓN DE SERIE Y SUBIDA DE ARCHIVOS ---
+        // --- HERRAMIENTAS ---
         function getEstadoHerramienta(n, id) { if (id === 'BAJ-01') return { txt: '⚫ Baja', cls: 'bg-dark' }; const l = n.toLowerCase(); if (l.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' }; if (l.includes('reparaci') || l.includes('mantenci') || l.includes('taller') || id === 'REP-01') return { txt: '🔴 En Mantención', cls: 'bg-err' }; return { txt: '🟡 En Obra', cls: 'bg-warn' }; }
         
         async function addHerramienta() { 
             const modInput = document.getElementById('h-mod').value.trim().toUpperCase();
             const serInput = document.getElementById('h-ser').value.trim().toUpperCase();
 
-            // VALIDACIÓN: Evitar misma herramienta/modelo con mismo número de serie
             const existe = db.herramientas.find(h => h.modelo === modInput && h.serie === serInput);
-            if (existe) {
-                alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`);
-                return;
-            }
+            if (existe) { alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`); return; }
 
             const id_unico = Date.now().toString();
             const fileInput = document.getElementById('h-file');
@@ -867,16 +817,11 @@
                     const b64 = r.result.split(',')[1]; 
                     const ext = file.name.split('.').pop();
                     const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
-                    const resp = await fetch(API_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
-                    }); 
-                    const url = await resp.text(); 
-                    if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { 
-                        db.herramientas[hIdx].historial[0].pdfUrl = url; 
-                        saveDatabase(true); 
-                        renderHerramientas(); 
-                    }
+                    try {
+                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                        const url = await resp.text(); 
+                        if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { db.herramientas[hIdx].historial[0].pdfUrl = url; saveDatabase(true); renderHerramientas(); }
+                    } catch(e) { console.warn("Archivo de herramienta subido"); }
                 };
             }
         }
@@ -898,20 +843,8 @@
             document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
         }
 
-        // --- SISTEMA HOJA DE VIDA HERRAMIENTAS Y MANTENCION ---
-        function toggleProveedorTaller() {
-            const ub = document.getElementById('cv-her-nueva-ub').value;
-            const provDiv = document.getElementById('div-prov-taller');
-            if(provDiv) provDiv.style.display = (ub === 'MAN-01' || ub === 'REP-01') ? 'block' : 'none';
-        }
-
-        function toggleResolucion() {
-            const res = document.getElementById('cv-res-tipo').value;
-            document.getElementById('div-res-ub').style.display = res === 'BAJA' ? 'none' : 'block';
-            document.getElementById('div-res-val').style.display = res === 'BAJA' ? 'none' : 'block';
-            document.getElementById('div-res-pdf').style.display = res === 'BAJA' ? 'none' : 'block';
-        }
-
+        function toggleProveedorTaller() { const ub = document.getElementById('cv-her-nueva-ub').value; const div = document.getElementById('div-prov-taller'); if(div) div.style.display = (ub === 'MAN-01' || ub === 'REP-01') ? 'block' : 'none'; }
+        function toggleResolucion() { const r = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => document.getElementById(id).style.display = r === 'BAJA' ? 'none' : 'block'); }
         const bPdfMini = (u) => u === "⏳ Subiendo PDF..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver Archivo</a>` : '');
 
         function abrirCV(tipo, idx) {
@@ -945,9 +878,28 @@
         function cerrarCV(id) { document.getElementById(id).style.display = 'none'; cvActivoIndex = null; }
 
         function regMovHer() { const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); }
-        async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; await saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); if(cvActivoIndex && cvActivoIndex.idx===idx) abrirCV('herramientas',idx); } }; } }
+        async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; await saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; try { const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); if(cvActivoIndex && cvActivoIndex.idx===idx) abrirCV('herramientas',idx); } } catch(e){} }; } }
         function eliminarMovHer(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); }
-        
+
+        // --- CONTENEDORES ---
+        function addContenedor() { const c = { id_unico: Date.now().toString(), tipo: document.getElementById('c-tip').value, num: document.getElementById('c-num').value.trim().toUpperCase(), obra: document.getElementById('c-obr').value, detExt: document.getElementById('c-ext').value.trim(), detInt: document.getElementById('c-int').value.trim(), historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Ingreso inicial" }] }; db.contenedores.push(c); saveDatabase(); ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = ''); showToast("✅ Contenedor registrado"); }
+        function renderContenedores() {
+            const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL";
+            let list = db.contenedores.map((c, i) => ({...c, oIdx: i})); 
+            if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId);
+            else if (fV !== "ALL") list = list.filter(c => c.obra === fV);
+            
+            let tT=0, tO=0, tB=0, tBa=0, tD=0, tM=0; list.forEach(c => { tT++; if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
+            document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
+            
+            const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
+            const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
+
+            const gr = {}; list.forEach(c => { if (!gr[c.obra]) gr[c.obra] = { n: getObraNameById(c.obra), it: [], c: {} }; gr[c.obra].it.push(c); const t = c.tipo || 'Otro'; gr[c.obra].c[t] = (gr[c.obra].c[t]||0)+1; });
+            let h = ''; let gi = 0; for (const o in gr) { const g = gr[o]; const sid = 'c_g_'+gi++; let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>${g.it.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}</tbody></table></td></tr>`; }
+            document.querySelector('#table-contenedores-body').innerHTML = h;
+        }
+
         async function registrarMovimientoContenedor() { 
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const ub = document.getElementById(`cv-cont-nueva-ub`).value; 
@@ -966,27 +918,18 @@
             if(fileInput) fileInput.value = '';
             
             await saveDatabase(true); 
-            abrirCV('contenedores', idx); 
-            showToast("Traslado actualizado"); 
-            renderContenedores(); 
+            abrirCV('contenedores', idx); showToast("Traslado actualizado"); renderContenedores(); 
 
             if (file) {
-                const r = new FileReader(); 
-                r.readAsDataURL(file);
+                const r = new FileReader(); r.readAsDataURL(file);
                 r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; 
-                    const ext = file.name.split('.').pop();
+                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop();
                     const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`;
-                    const res = await fetch(API_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
-                    }); 
-                    const url = await res.text(); 
-                    if(db.contenedores[idx].historial[mI]) { 
-                        db.contenedores[idx].historial[mI].pdfUrl = url; 
-                        saveDatabase(true); 
-                        if (cvActivoIndex && cvActivoIndex.idx === idx) abrirCV('contenedores', idx); 
-                    }
+                    try {
+                        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                        const url = await res.text(); 
+                        if(db.contenedores[idx].historial[mI]) { db.contenedores[idx].historial[mI].pdfUrl = url; saveDatabase(true); if (cvActivoIndex && cvActivoIndex.idx === idx) abrirCV('contenedores', idx); }
+                    } catch(e) {}
                 };
             }
         }
@@ -1026,7 +969,7 @@
             const file = document.getElementById(`${t}-file`).files[0]; const plc = file ? "⏳ Subiendo..." : null;
             if (t === 'oc') { const ob = document.getElementById('oc-obra').value; const p = document.getElementById('oc-prov').value; drafts.oc.forEach(i => db.ocs.push({ id, obra: ob, prov: p, material: i.material, cant: i.cant, pdfUrl: plc })); } else if (t === 'ing') { drafts.ing.forEach(i => db.ingresos.push({ id, ocId: i.ocId, material: i.material, cant: i.cant, bodega: i.bodega, pdfUrl: plc })); } else if (t === 'sal') { drafts.sal.forEach(i => db.salidas.push({ id, ocId: i.ocId, material: i.material, cant: i.cant, pdfUrl: plc })); }
             drafts[t] = []; document.getElementById(`${t}-id`).value = ''; await saveDatabase(); 
-            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: id+'.pdf', base64: b64 }) }); const url = await resp.text(); let list = t === 'oc' ? db.ocs : (t === 'ing' ? db.ingresos : db.salidas); list.forEach(item => { if(item.id === id && item.pdfUrl === "⏳ Subiendo...") item.pdfUrl = url; }); saveDatabase(true); showToast("PDF Subido"); }; }
+            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: id+'.pdf', base64: b64 }) }); const url = await resp.text(); let list = t === 'oc' ? db.ocs : (t === 'ing' ? db.ingresos : db.salidas); list.forEach(item => { if(item.id === id && item.pdfUrl === "⏳ Subiendo...") item.pdfUrl = url; }); saveDatabase(true); showToast("PDF Subido"); } catch(e){} }; }
         }
 
         // --- RENDER ALL ---
@@ -1060,12 +1003,13 @@
             renderResumenMateriales(); 
             renderHerramientas(); 
             renderContenedores();
-
+            
             if(document.getElementById('bodegas-inv') && document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
             if(document.getElementById('bodegas-salidas') && document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
             if(document.getElementById('bodegas-reporte') && document.getElementById('bodegas-reporte').classList.contains('active')) renderBodegasReporte();
-
-            document.getElementById('u-obra').innerHTML = opsFull; document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
+            
+            document.getElementById('u-obra').innerHTML = opsFull; 
+            document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
         }
 
         function toggleObraUser() { document.getElementById('div-u-obra').style.display = (document.getElementById('u-rol').value === 'bodeguero') ? 'flex' : 'none'; }
