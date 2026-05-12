@@ -30,14 +30,14 @@
         .stat-card-small h3 { font-size: 1.3rem; margin: 0 0 2px 0; color: var(--primary); }
         .stat-card-small p { font-size: 0.65rem; color: #7f8c8d; margin: 0; text-transform: uppercase; font-weight: bold; }
 
-        /* PANTALLAS DE CARGA Y LOGIN */
+        /* PANTALLAS DE CARGA Y LOGIN (ESTILO SJ SYSTEMWEB) */
         #splash-screen, #login-screen, #loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10000; }
         #splash-screen { background: white; transition: opacity 0.8s ease; }
         #login-screen { background: linear-gradient(135deg, #2c3e50 0%, #118180 100%); display: none; }
         #loading { background: rgba(44, 62, 80, 0.9); color: white; display: none; z-index: 10002; }
         
         .login-box { background: white; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 420px; text-align: center; overflow: hidden; }
-        .login-logo-header { background: black; padding: 30px; border-bottom: 3px solid var(--accent); }
+        .login-logo-header { background-color: black; padding: 30px; border-bottom: 3px solid var(--accent); }
         .login-logo-header img { width: 250px; height: auto; display: block; margin: 0 auto; }
         .login-form-content { padding: 30px 40px 40px 40px; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
@@ -268,40 +268,23 @@
             <div class="card no-print">
                 <form onsubmit="event.preventDefault(); addInvBodega();">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nombre del Material</label>
-                            <input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas">
-                        </div>
-                        <div class="form-group">
-                            <label>Unidad de Medida</label>
-                            <select id="bi-uni" required>
-                                <option value="Uni">Unidad (Uni)</option>
-                                <option value="Kg">Kilogramos (Kg)</option>
-                                <option value="Mts">Metros (Mts)</option>
-                                <option value="Roll">Rollo (Roll)</option>
-                                <option value="Lts">Litros (Lts)</option>
-                                <option value="Caj">Caja (Caj)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Cantidad a Ingresar</label>
-                            <input type="number" step="0.01" id="bi-cant" required>
-                        </div>
+                        <div class="form-group"><label>Nombre del Material</label><input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas"></div>
+                        <div class="form-group"><label>Unidad de Medida</label><select id="bi-uni" required><option value="Uni">Unidad (Uni)</option><option value="Kg">Kilogramos (Kg)</option><option value="Mts">Metros (Mts)</option><option value="Roll">Rollo (Roll)</option><option value="Lts">Litros (Lts)</option><option value="Caj">Caja (Caj)</option></select></div>
+                        <div class="form-group"><label>Cantidad a Ingresar</label><input type="number" step="0.01" id="bi-cant" required></div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Comentario / Detalle (Opcional)</label>
-                            <input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4...">
-                        </div>
+                        <div class="form-group"><label>Comentario / Detalle (Opcional)</label><input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4..."></div>
                     </div>
                     <button class="btn btn-primary">Ingresar Material a esta Bodega</button>
                 </form>
             </div>
 
             <div class="filter-container no-print">
-                <div style="display:flex; align-items:center; gap:15px; width:100%;">
+                <div style="display:flex; align-items:center; gap:15px; flex: 1; min-width: 250px;">
                     <label style="font-weight:bold;">🔍 Buscar Material:</label>
-                    <input type="text" id="search-bod-inv" placeholder="Escribe el nombre del material..." onkeyup="renderBodegaInv()" style="padding:10px; border-radius:5px; border:1px solid #ccc; flex:1;">
+                    <input type="text" id="search-bod-inv" placeholder="Escribe el nombre del material..." onkeyup="renderBodegaInv()" style="padding:10px; border-radius:5px; border:1px solid #ccc; width:100%;">
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-end;">
                     <button class="btn btn-success" onclick="exportExcelBodegaInv()">📊 Excel</button>
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
@@ -348,9 +331,9 @@
             <h1 class="no-print">Reporte de Entregas por Obra</h1>
             
             <div class="filter-container no-print">
-                <div style="display:flex; align-items:center; gap:15px;">
+                <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">Generar Reporte para la Obra:</label>
-                    <select id="filter-bod-rep-obra" onchange="renderBodegasReporte()" style="padding:10px; border-radius:5px; min-width:300px;"></select>
+                    <select id="filter-bod-rep-obra" onchange="renderBodegasReporte()" style="padding:10px; border-radius:5px; width:100%; max-width:400px;"></select>
                 </div>
                 <div style="display:flex; gap:10px;">
                     <button class="btn btn-success" onclick="exportExcelBodegasReporte()">📊 Excel</button>
@@ -400,7 +383,7 @@
             
             <div id="print-herramientas-header"><h2 id="print-her-obra-name">Inventario de Herramientas</h2></div>
 
-            <table><thead><tr><th>Equipo</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
+            <table><thead><tr><th>Equipo (Nombre Genérico)</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
             
             <h2 style="margin-top:50px; color:var(--danger); border-bottom: 2px solid var(--danger); display:inline-block; padding-bottom:5px;">🗑️ Herramientas Dadas de Baja</h2>
             <table style="opacity: 0.85; margin-top:15px;">
@@ -430,9 +413,11 @@
             </div>
 
             <div class="filter-container no-print">
-                <div style="display:flex; align-items:center; gap:15px; width:100%;">
+                <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">📍 Filtrar por Obra:</label>
-                    <select id="filter-cont-obra" onchange="renderContenedores()" style="padding:10px; border-radius:5px; flex:1;"><option value="ALL">Todas las Obras</option></select>
+                    <select id="filter-cont-obra" onchange="renderContenedores()" style="padding:10px; border-radius:5px; width:100%; max-width: 400px;"><option value="ALL">Todas las Obras</option></select>
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-end;">
                     <button class="btn btn-success" onclick="exportExcelContenedores()">📊 Excel</button>
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
@@ -452,10 +437,10 @@
     </div>
 
     <script>
-        // =========================================================================================
-        // PEGA AQUÍ TU URL DE GOOGLE (ENTRE LAS COMILLAS)
+        // ==============================================================
+        // ENLACE DE GOOGLE DE LA BASE DE DATOS ORIGINAL
         const API_URL = "https://script.google.com/macros/s/AKfycbwdgb8eOCqtkMEYXJDmG34rEoPsnkioGCMoEoVhkjG-va5EoI3qj5h1HulKebf6bUs2/exec"; 
-        // =========================================================================================
+        // ==============================================================
 
         const MASTER_ADMIN = { nombre: "Osvaldo San Juan", user: "osvaldo", pass: "lobito", rol: "admin", obraId: null };
         let currentUser = null; let cvActivoIndex = null;
@@ -468,7 +453,7 @@
         };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
-        // --- SISTEMA BASICO Y UI ---
+        // --- SISTEMA BÁSICO UI ---
         function toggleSubmenu(id) {
             const menu = document.getElementById(id); const isOpen = menu.classList.contains('open');
             document.querySelectorAll('.submenu').forEach(m => m.classList.remove('open'));
@@ -488,9 +473,8 @@
             setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); 
         }
 
-        // --- CARGA DE DATOS ---
+        // --- CARGA DE DATOS (CON EVASIÓN DE CACHÉ ?t=) ---
         async function loadDataForLogin() {
-            if(API_URL.includes("AQUI_PEGARAS")) { alert("Falta configurar URL de Google."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { 
                 document.getElementById('loading').style.display = 'flex'; 
                 const r = await fetch(API_URL + "?t=" + new Date().getTime()); 
@@ -540,7 +524,7 @@
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS (CONEXIÓN ORIGINAL Y SEGURA) ---
+        // --- BASE DE DATOS (MÉTODO SEGURO ORIGINAL) ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { 
@@ -706,6 +690,7 @@
                 const r = new FileReader(); r.readAsDataURL(file);
                 r.onload = async () => { 
                     const b64 = r.result.split(',')[1]; const docId = `DESP_BOD_${Date.now()}`;
+                    // Mismo sistema de guardado original
                     const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
                     const url = await resp.text(); 
                     if(db.despachosBodegas[mIdx]) { db.despachosBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegasSalidas(); showToast("PDF Subido"); }
@@ -816,11 +801,16 @@
                 grouped[k].items.push(h); 
             });
 
+            // Título impresión
+            const printTitle = (fV !== "ALL") ? `Inventario Herramientas: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Herramientas: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Herramientas");
+            const ph = document.getElementById('print-her-obra-name');
+            if(ph) ph.innerText = printTitle;
+
             let html = '';
             let gIdx = 0;
             for (const k in grouped) {
                 const g = grouped[k];
-                const sId = 'herr_grp_' + gIdx++;
+                const sId = 'h_g_' + gIdx++;
                 html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
                     <td><b>${g.nom}</b></td>
                     <td><b>${g.items.length}</b> unid.</td>
@@ -973,7 +963,7 @@
                                     <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
                                     <select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
                                         ${getObrasOptionsHtml(false, null)}
-                                        <option value="MAN-01">Taller / En Mantención</option>
+                                        <option value="MAN-01">🛠️ Taller / En Mantención</option>
                                     </select>
                                 </div>
                                 <div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;">
@@ -1184,7 +1174,7 @@
                 <div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tMix}</h3><p>Mixtos</p></div>
             `;
 
-            // Configurar Título de Impresión
+            // Título impresión
             const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
             const ph = document.getElementById('print-con-obra-name'); 
             if(ph) ph.innerText = printTitle;
@@ -1201,7 +1191,7 @@
             let gIdx = 0;
             for (const oId in grouped) {
                 const g = grouped[oId]; 
-                const sId = 'cont_grp_' + gIdx++;
+                const sId = 'c_g_' + gIdx++;
                 let breakdownStr = Object.entries(g.counts).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | ') || 'Sin especificar';
 
                 html += `
