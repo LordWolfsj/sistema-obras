@@ -188,6 +188,10 @@
                         <select id="cv-cont-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></select></div>
                     <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Guía Traslado:</label>
                         <input type="text" id="cv-cont-comentario" placeholder="Ej: Traslado con grúa, Guía 123" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
+                    
+                    <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Adjuntar Foto/PDF (Opcional):</label>
+                        <input type="file" id="cv-cont-file" accept=".pdf,image/*" style="width:100%; padding:7px; border-radius:5px; border:1px solid #ccc; background:white;"></div>
+                        
                     <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoContenedor()">Confirmar Traslado</button>
                 </div>
             </div>
@@ -431,6 +435,7 @@
                     <div class="form-grid">
                         <div class="form-group"><label>Detalle Exterior</label><input type="text" id="c-ext" required placeholder="Ej: Pintura azul, puerta doble"></div>
                         <div class="form-group"><label>Detalle Interior</label><input type="text" id="c-int" required placeholder="Ej: 3 repisas de acero, luz LED"></div>
+                        <div class="form-group"><label>Adjuntar Foto/PDF (Opcional)</label><input type="file" id="c-file" accept=".pdf,image/*"></div>
                     </div>
                     <button class="btn btn-primary">Registrar Contenedor</button>
                 </form>
@@ -497,7 +502,7 @@
             setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); 
         }
 
-        // --- CARGA DE DATOS EVITANDO CACHÉ ---
+        // --- CARGA DE DATOS EVITANDO CACHÉ (?t=fecha) ---
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Falta configurar URL de Google."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { 
@@ -549,12 +554,13 @@
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS ORIGINAL SEGURA ---
+        // --- BASE DE DATOS ORIGINAL (CONEXION SEGURA) ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { 
                 await fetch(API_URL, { 
                     method:'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action:'saveDB', db: db }) 
                 }); 
                 document.getElementById('loading').style.display = 'none'; 
@@ -635,7 +641,7 @@
             });
             const mIdx = db.invBodegas.length - 1;
 
-            saveDatabase(true); // Guardado inicial
+            saveDatabase(true);
             ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = '');
             if(fileInput) fileInput.value = '';
             showToast("Material ingresado a " + currentBodegaName);
@@ -650,6 +656,7 @@
                     const docId = `BOD_${id_unico}_${Date.now()}.${ext}`;
                     const resp = await fetch(API_URL, { 
                         method: 'POST', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
                     }); 
                     const url = await resp.text(); 
@@ -676,7 +683,6 @@
             const searchQ = document.getElementById('search-bod-inv').value.toLowerCase().trim();
             const grouped = {};
             
-            // Inyectar indice original para poder borrar luego
             db.invBodegas.forEach((i, idx) => { i.oIdx = idx; });
             
             db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => {
@@ -779,7 +785,7 @@
                 const r = new FileReader(); r.readAsDataURL(file);
                 r.onload = async () => { 
                     const b64 = r.result.split(',')[1]; const docId = `DESP_BOD_${Date.now()}`;
-                    const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
+                    const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
                     const url = await resp.text(); 
                     if(db.despachosBodegas[mIdx]) { db.despachosBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegasSalidas(); showToast("PDF Subido"); }
                 };
@@ -791,7 +797,7 @@
             let h = '';
             db.despachosBodegas.forEach((d, idx) => {
                 h += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${getObraNameById(d.obra)}</td><td>${d.items.length} items</td><td>
-                ${d.pdfUrl ? `<a href="${d.pdfUrl}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>` : '-'}
+                ${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>`) : '-'}
                 <button class="btn btn-danger btn-small" onclick="deleteRecord('despachosBodegas', ${idx}); renderBodegasSalidas();" style="margin-left:5px;">X</button></td></tr>`;
             });
             document.getElementById('table-bod-sal-body').innerHTML = h || '<tr><td colspan="5" style="text-align:center;">No hay despachos registrados.</td></tr>';
@@ -806,7 +812,7 @@
             let html = '';
             db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => {
                 d.items.forEach(it => {
-                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td>${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>` : '-'}</td></tr>`;
+                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td>${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>`) : '-'}</td></tr>`;
                 });
             });
             document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
@@ -852,6 +858,7 @@
                     const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
                     const resp = await fetch(API_URL, { 
                         method: 'POST', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
                     }); 
                     const url = await resp.text(); 
@@ -881,8 +888,53 @@
             document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
         }
 
-        // --- CONTENEDORES ---
-        function addContenedor() { const c = { id_unico: Date.now().toString(), tipo: document.getElementById('c-tip').value, num: document.getElementById('c-num').value.trim().toUpperCase(), obra: document.getElementById('c-obr').value, detExt: document.getElementById('c-ext').value.trim(), detInt: document.getElementById('c-int').value.trim(), historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Ingreso inicial" }] }; db.contenedores.push(c); saveDatabase(); ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = ''); showToast("✅ Contenedor registrado"); }
+        // --- CONTENEDORES CON SUBIDA DE ARCHIVO ---
+        async function addContenedor() { 
+            const id_unico = Date.now().toString();
+            const fileInput = document.getElementById('c-file');
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo..." : null;
+
+            const c = { 
+                id_unico: id_unico, 
+                tipo: document.getElementById('c-tip').value, 
+                num: document.getElementById('c-num').value.trim().toUpperCase(), 
+                obra: document.getElementById('c-obr').value, 
+                detExt: document.getElementById('c-ext').value.trim(), 
+                detInt: document.getElementById('c-int').value.trim(), 
+                historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Ingreso inicial", pdfUrl: placeholder }] 
+            }; 
+            db.contenedores.push(c); 
+            const cIdx = db.contenedores.length - 1;
+
+            saveDatabase(true); 
+            ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = ''); 
+            if(fileInput) fileInput.value = '';
+            showToast("✅ Contenedor registrado"); 
+            renderContenedores();
+
+            if (file) {
+                const r = new FileReader(); 
+                r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; 
+                    const ext = file.name.split('.').pop();
+                    const docId = `CONT_${id_unico}_${Date.now()}.${ext}`;
+                    const resp = await fetch(API_URL, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
+                    }); 
+                    const url = await resp.text(); 
+                    if(db.contenedores[cIdx] && db.contenedores[cIdx].historial[0]) { 
+                        db.contenedores[cIdx].historial[0].pdfUrl = url; 
+                        saveDatabase(true); 
+                        renderContenedores(); 
+                    }
+                };
+            }
+        }
+
         function renderContenedores() {
             const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL";
             let list = db.contenedores.map((c, i) => ({...c, oIdx: i})); 
@@ -896,14 +948,14 @@
             const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
 
             const gr = {}; list.forEach(c => { if (!gr[c.obra]) gr[c.obra] = { n: getObraNameById(c.obra), it: [], c: {} }; gr[c.obra].it.push(c); const t = c.tipo || 'Otro'; gr[c.obra].c[t] = (gr[c.obra].c[t]||0)+1; });
-            let h = ''; let gi = 0; for (const o in gr) { const g = gr[o]; const sid = 'c_g_'+gi++; let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>${g.it.map(u => `<tr><td><b>${u.tipo}</b> - ${u.num}</td><td>${u.detExt}</td><td>${u.detInt}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}</tbody></table></td></tr>`; }
+            let h = ''; let gi = 0; for (const o in gr) { const g = gr[o]; const sid = 'c_g_'+gi++; let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>${g.it.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white; border:none;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}</tbody></table></td></tr>`; }
             document.querySelector('#table-contenedores-body').innerHTML = h;
         }
 
         // --- HOJA DE VIDA ---
         function toggleProv() { const ub = document.getElementById('cv-her-nueva-ub').value; const div = document.getElementById('div-prov-taller'); if(div) div.style.display = (ub === 'MAN-01' || ub === 'REP-01') ? 'block' : 'none'; }
         function toggleRes() { const r = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => document.getElementById(id).style.display = r === 'BAJA' ? 'none' : 'block'); }
-        const bPdfM = (u) => u === "⏳ Subiendo PDF..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem;">📄 Ver</a>` : '');
+        const bPdfM = (u) => u === "⏳ Subiendo..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem;">📄 Ver Archivo</a>` : '');
 
         function abrirCV(tipo, idx) {
             cvActivoIndex = { tipo, idx };
@@ -927,7 +979,7 @@
             } else {
                 const c = db.contenedores[idx]; document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.num}`;
                 document.getElementById('cv-cont-datos').innerHTML = `<div class="cv-item"><b>Ubicación</b> ${getObraNameById(c.obra)}</div><div class="cv-item"><b>Detalle</b> ${c.detExt} | ${c.detInt}</div>`;
-                document.getElementById('cv-cont-historial-body').innerHTML = c.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovCon(${i})">X</button>`:'-'}</td></tr>`).join('');
+                document.getElementById('cv-cont-historial-body').innerHTML = c.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl?bPdfM(m.pdfUrl):''}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovCon(${i})">X</button>`:'-'}</td></tr>`).join('');
                 document.getElementById('cv-cont-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
                 document.getElementById('cv-cont-nueva-ub').innerHTML = getObrasOptionsHtml(false, null);
                 document.getElementById('modal-cv-cont').style.display = 'block';
@@ -936,13 +988,55 @@
         function cerrarCV(id) { document.getElementById(id).style.display = 'none'; cvActivoIndex = null; }
 
         function regMovHer() { const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); }
-        async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo PDF..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; await saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); if(cvActivoIndex && cvActivoIndex.idx===idx) abrirCV('herramientas',idx); } }; } }
+        async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; await saveDatabase(true); abrirCV('herramientas', idx); renderHerramientas(); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; const res=await fetch(API_URL,{method:'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); if(cvActivoIndex && cvActivoIndex.idx===idx) abrirCV('herramientas',idx); } }; } }
         function eliminarMovHer(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); }
         
-        function registrarMovimientoContenedor() { const idx = cvActivoIndex.idx; const ub = document.getElementById(`cv-cont-nueva-ub`).value; const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; db.contenedores[idx].obra = ub; db.contenedores[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c }); saveDatabase(true); abrirCV('contenedores', idx); renderContenedores(); }
+        async function registrarMovimientoContenedor() { 
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
+            const ub = document.getElementById(`cv-cont-nueva-ub`).value; 
+            const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; 
+            const f = new Date().toISOString().split('T')[0];
+            
+            const fileInput = document.getElementById('cv-cont-file');
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo..." : null;
+
+            db.contenedores[idx].obra = ub; 
+            db.contenedores[idx].historial.push({ fecha: f, ubicacion: ub, detalle: c, pdfUrl: placeholder }); 
+            const mI = db.contenedores[idx].historial.length - 1;
+
+            document.getElementById(`cv-cont-comentario`).value = ''; 
+            if(fileInput) fileInput.value = '';
+            
+            await saveDatabase(true); 
+            abrirCV('contenedores', idx); 
+            showToast("Traslado actualizado"); 
+            renderContenedores(); 
+
+            if (file) {
+                const r = new FileReader(); 
+                r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; 
+                    const ext = file.name.split('.').pop();
+                    const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`;
+                    const res = await fetch(API_URL, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
+                    }); 
+                    const url = await res.text(); 
+                    if(db.contenedores[idx].historial[mI]) { 
+                        db.contenedores[idx].historial[mI].pdfUrl = url; 
+                        saveDatabase(true); 
+                        if (cvActivoIndex && cvActivoIndex.idx === idx) abrirCV('contenedores', idx); 
+                    }
+                };
+            }
+        }
         function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
-        // --- MATERIALES ---
+        // --- MATERIALES GLOBALES ---
         function calculateStats(ocId, mat) { const oc = db.ocs.find(o => o.id === ocId && o.material === mat); const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0); const d = db.salidas.filter(s => s.ocId === ocId && s.material === mat).reduce((s, i) => s + i.cant, 0); return { comp: oc ? oc.cant : 0, rec: r, desp: d, stock: r - d }; }
         function exportExcelMateriales() { const fV = document.getElementById('filter-obra').value; let list = db.ocs.filter(o => currentUser.rol === 'bodeguero' ? o.obra === currentUser.obraId : (fV === "ALL" || o.obra === fV)); let csv = "\uFEFFOC;Obra;Material;Bodegas Físicas;Comprado;Recibido;Diferencia Faltante;Stock Real;Estado\n"; list.forEach(oc => { const s = calculateStats(oc.id, oc.material); const dif = s.comp - s.rec; const ings = db.ingresos.filter(i => i.ocId === oc.id && i.material === oc.material); const b = [...new Set(ings.map(i => i.bodega))].join(' - ') || '-'; csv += `${oc.id};${getObraNameById(oc.obra)};${oc.material};${b};${s.comp};${s.rec};${dif};${s.stock};${dif<=0?'Completo':'Pendiente'}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Materiales.csv`); link.click(); }
         
@@ -955,55 +1049,33 @@
                 gr[id].items.forEach(it => { const s = calculateStats(id, it.material); if (s.rec < s.comp) aR = false; if (s.desp < s.comp) aE = false; });
                 let cls = aE ? "row-entregado" : (aR ? "row-recibido" : "row-pendiente");
                 h += `<tr class="${cls}" onclick="toggleOCDetails('${sId}')" style="cursor:pointer;"><td><b>${id}</b></td><td>${gr[id].obra}</td><td><span class="badge ${aE?'bg-info':(aR?'bg-ok':'bg-warn')}">${aE?'Entregado':(aR?'Completo':'Pendiente')}</span></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr>
-                <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa; width:100%;"><thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Compra</th><th>Recibe</th><th>Faltante</th><th>Stock</th></tr></thead><tbody>
-                ${gr[id].items.map(it => { const s = calculateStats(id, it.material); const dif = s.comp - s.rec; const b = [...new Set(db.ingresos.filter(i => i.ocId === id && i.material === it.material).map(i => i.bodega))].join(', ') || '-'; return `<tr><td>${it.material}</td><td><b>${b}</b></td><td>${s.comp}</td><td>${s.rec}</td><td style="color:${dif>0?'#e74c3c':'#27ae60'}; font-weight:bold;">${dif}</td><td><b>${s.stock}</b></td></tr>` }).join('')}</tbody></table></td></tr>`;
-            } 
-            document.getElementById('resumen-body').innerHTML = h;
-            const vIds = list.map(o => o.id); document.getElementById('print-details-body').innerHTML = db.ingresos.filter(i => vIds.includes(i.ocId)).map(i => `<tr><td>${getObraNameByOcId(i.ocId)}</td><td>${i.ocId}</td><td>${i.id}</td><td>${(db.ocs.find(o=>o.id===i.ocId)||{}).prov||'-'}</td><td>${i.material}</td><td>${i.cant}</td></tr>`).join('');
+                <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa; width:100%;"><thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Compra</th><th>Recibe</th><th>Faltante</th><th>Stock</th></tr></thead><tbody>${gr[id].items.map(it => { const s = calculateStats(id, it.material); const dif = s.comp - s.rec; const b = [...new Set(db.ingresos.filter(i => i.ocId === id && i.material === it.material).map(i => i.bodega))].join(', '); return `<tr><td>${it.material}</td><td><b>${b}</b></td><td>${s.comp}</td><td>${s.rec}</td><td style="color:${dif>0?'red':'green'}"><b>${dif}</b></td><td><b>${s.stock}</b></td></tr>`}).join('')}</tbody></table></td></tr>`;
+            } document.getElementById('resumen-body').innerHTML = h;
         }
 
         function updateIngMaterialSelect() { const o = document.getElementById('ing-oc-select').value; document.getElementById('ing-mat-select').innerHTML = o ? db.ocs.filter(x => x.id === o).map(x => `<option value="${x.material}">${x.material}</option>`).join('') : ''; }
         function updateSalMaterialSelect() { const o = document.getElementById('sal-oc-select').value; document.getElementById('sal-mat-select').innerHTML = o ? db.ocs.filter(x => x.id === o).map(x => { const s = calculateStats(x.id, x.material); return `<option value="${x.material}">${x.material} (Stock: ${s.stock})</option>`; }).join('') : ''; }
-        
-        function addToDraft(t) {
-            if (t === 'oc') { const m = document.getElementById('oc-mat').value; const c = parseFloat(document.getElementById('oc-cant').value); if (m && c) { drafts.oc.push({ material: m, cant: c }); document.getElementById('oc-mat').value=''; document.getElementById('oc-cant').value=''; } } 
-            else if (t === 'ing') { const o = document.getElementById('ing-oc-select').value; const m = document.getElementById('ing-mat-select').value; const c = parseFloat(document.getElementById('ing-cant').value); const b = document.getElementById('ing-bodega').value.trim(); if (o && m && c && b) { drafts.ing.push({ ocId: o, material: m, cant: c, bodega: b }); document.getElementById('ing-cant').value=''; } } 
-            else if (t === 'sal') { const o = document.getElementById('sal-oc-select').value; const m = document.getElementById('sal-mat-select').value; const c = parseFloat(document.getElementById('sal-cant').value); if (o && m && c) { const s = calculateStats(o, m); if (c <= s.stock) { drafts.sal.push({ ocId: o, material: m, cant: c }); document.getElementById('sal-cant').value=''; } else alert("Sin stock"); } } 
-            renderDrafts();
-        }
+        function addToDraft(t) { if (t === 'oc') { const m = document.getElementById('oc-mat').value; const c = parseFloat(document.getElementById('oc-cant').value); if (m && c) { drafts.oc.push({ material: m, cant: c }); document.getElementById('oc-mat').value=''; document.getElementById('oc-cant').value=''; } } else if (t === 'ing') { const o = document.getElementById('ing-oc-select').value; const m = document.getElementById('ing-mat-select').value; const c = parseFloat(document.getElementById('ing-cant').value); const b = document.getElementById('ing-bodega').value.trim(); if (o && m && c && b) { drafts.ing.push({ ocId: o, material: m, cant: c, bodega: b }); document.getElementById('ing-cant').value=''; } } else if (t === 'sal') { const o = document.getElementById('sal-oc-select').value; const m = document.getElementById('sal-mat-select').value; const c = parseFloat(document.getElementById('sal-cant').value); if (o && m && c) { const s = calculateStats(o, m); if (c <= s.stock) { drafts.sal.push({ ocId: o, material: m, cant: c }); document.getElementById('sal-cant').value=''; } else alert("Sin stock"); } } renderDrafts(); }
         function removeFromDraft(t, i) { drafts[t].splice(i, 1); renderDrafts(); }
-        function renderDrafts() {
-            document.getElementById('oc-draft').innerHTML = drafts.oc.map((it, i) => `<tr><td>${it.material}</td><td>${it.cant}</td><td><button onclick="removeFromDraft('oc', ${i})">X</button></td></tr>`).join('');
-            document.getElementById('ing-draft').innerHTML = drafts.ing.map((it, i) => `<tr><td>${it.ocId}</td><td>${it.material}</td><td>${it.bodega}</td><td>${it.cant}</td><td><button onclick="removeFromDraft('ing', ${i})">X</button></td></tr>`).join('');
-            document.getElementById('sal-draft').innerHTML = drafts.sal.map((it, i) => `<tr><td>${it.ocId}</td><td>${it.material}</td><td>${it.cant}</td><td><button onclick="removeFromDraft('sal', ${i})">X</button></td></tr>`).join('');
-        }
+        function renderDrafts() { document.getElementById('oc-draft').innerHTML = drafts.oc.map((it, i) => `<tr><td>${it.material}</td><td>${it.cant}</td><td><button class="btn btn-danger btn-small" onclick="removeFromDraft('oc', ${i})">X</button></td></tr>`).join(''); document.getElementById('ing-draft').innerHTML = drafts.ing.map((it, i) => `<tr><td>${it.ocId}</td><td>${it.material}</td><td>${it.bodega}</td><td>${it.cant}</td><td><button class="btn btn-danger btn-small" onclick="removeFromDraft('ing', ${i})">X</button></td></tr>`).join(''); document.getElementById('sal-draft').innerHTML = drafts.sal.map((it, i) => `<tr><td>${it.ocId}</td><td>${it.material}</td><td>${it.cant}</td><td><button class="btn btn-danger btn-small" onclick="removeFromDraft('sal', ${i})">X</button></td></tr>`).join(''); }
 
         async function saveFinal(t) {
             const id = document.getElementById(`${t}-id`).value.toUpperCase(); if (!id || drafts[t].length === 0) return alert("Falta ID o items");
             const file = document.getElementById(`${t}-file`).files[0]; const plc = file ? "⏳ Subiendo..." : null;
-            if (t === 'oc') { const ob = document.getElementById('oc-obra').value; const p = document.getElementById('oc-prov').value; drafts.oc.forEach(i => db.ocs.push({ id, obra: ob, prov: p, material: i.material, cant: i.cant, pdfUrl: plc })); } 
-            else if (t === 'ing') { drafts.ing.forEach(i => db.ingresos.push({ id, ocId: i.ocId, material: i.material, cant: i.cant, bodega: i.bodega, pdfUrl: plc })); } 
-            else if (t === 'sal') { drafts.sal.forEach(i => db.salidas.push({ id, ocId: i.ocId, material: i.material, cant: i.cant, pdfUrl: plc })); }
+            if (t === 'oc') { const ob = document.getElementById('oc-obra').value; const p = document.getElementById('oc-prov').value; drafts.oc.forEach(i => db.ocs.push({ id, obra: ob, prov: p, material: i.material, cant: i.cant, pdfUrl: plc })); } else if (t === 'ing') { drafts.ing.forEach(i => db.ingresos.push({ id, ocId: i.ocId, material: i.material, cant: i.cant, bodega: i.bodega, pdfUrl: plc })); } else if (t === 'sal') { drafts.sal.forEach(i => db.salidas.push({ id, ocId: i.ocId, material: i.material, cant: i.cant, pdfUrl: plc })); }
             drafts[t] = []; document.getElementById(`${t}-id`).value = ''; await saveDatabase(); 
-            if (file) {
-                const r = new FileReader(); r.readAsDataURL(file);
-                r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: id+'.pdf', base64: b64 }) }); 
-                    const url = await resp.text(); let list = t === 'oc' ? db.ocs : (t === 'ing' ? db.ingresos : db.salidas); 
-                    list.forEach(item => { if(item.id === id && item.pdfUrl === "⏳ Subiendo...") item.pdfUrl = url; }); saveDatabase(true); showToast("PDF Subido"); 
-                };
-            }
+            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'uploadPDF', filename: id+'.pdf', base64: b64 }) }); const url = await resp.text(); let list = t === 'oc' ? db.ocs : (t === 'ing' ? db.ingresos : db.salidas); list.forEach(item => { if(item.id === id && item.pdfUrl === "⏳ Subiendo...") item.pdfUrl = url; }); saveDatabase(true); showToast("PDF Subido"); }; }
         }
 
-        // --- RENDERIZADO GLOBAL ---
+        // --- RENDER ALL ---
         function renderAll() {
             const isB = currentUser.rol === 'bodeguero'; const fOId = isB ? currentUser.obraId : null;
-            const opsFull = getObrasOptionsHtml(false, null); const opsFil = getObrasOptionsHtml(true, fOId); const opsUsr = getObrasOptionsHtml(false, fOId); 
+            const opsFull = getObrasOptionsHtml(false, null); const filterOps = getObrasOptionsHtml(true, fOId); const userOps = getObrasOptionsHtml(false, fOId); 
 
-            document.getElementById('oc-obra').innerHTML = opsUsr; document.getElementById('h-obr').innerHTML = opsUsr; document.getElementById('c-obr').innerHTML = opsUsr;
-            document.getElementById('filter-obra').innerHTML = opsFil; document.getElementById('filter-obra').disabled = isB;
-            document.getElementById('filter-her-obra').innerHTML = opsFil; document.getElementById('filter-her-obra').disabled = isB;
-            if(document.getElementById('filter-cont-obra')) { document.getElementById('filter-cont-obra').innerHTML = opsFil; document.getElementById('filter-cont-obra').disabled = isB; }
+            document.getElementById('oc-obra').innerHTML = userOps; document.getElementById('h-obr').innerHTML = userOps; document.getElementById('c-obr').innerHTML = userOps;
+            document.getElementById('filter-obra').innerHTML = filterOps; document.getElementById('filter-obra').disabled = isB;
+            document.getElementById('filter-her-obra').innerHTML = filterOps; document.getElementById('filter-her-obra').disabled = isB;
+            if(document.getElementById('filter-cont-obra')) { document.getElementById('filter-cont-obra').innerHTML = filterOps; document.getElementById('filter-cont-obra').disabled = isB; }
             
             const vOc = db.ocs.map((o,i)=>({...o, idx:i})).filter(o => isB ? o.obra === currentUser.obraId : true);
             const vIng = db.ingresos.map((o,i)=>({...o, idx:i})).filter(o => isB ? getObraNameByOcId(o.ocId) === getObraNameById(currentUser.obraId) : true);
@@ -1014,32 +1086,21 @@
 
             document.querySelector('#table-obras tbody').innerHTML = getSortedObras().map((o,i) => `<tr><td>${o.id}</td><td><b>${o.nombre}</b></td><td>${o.ub}</td><td>${o.nombre.toLowerCase().includes('central')?'-':`<button class="btn btn-danger btn-small" onclick="deleteRecord('obras', ${db.obras.indexOf(o)})">X</button>`}</td></tr>`).join('');
 
-            const bPdf = (u) => u === "⏳ Subiendo..." ? `<b>${u}</b>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold;">📄 PDF</a>` : '-');
+            const bPdf = (u) => u === "⏳ Subiendo..." ? `<b>${u}</b>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold;">📄 Ver PDF</a>` : '-');
             const dTh = isB ? '' : '<th>Eliminar</th>'; const dTd = (t, i) => isB ? '' : `<td><button class="btn btn-danger btn-small" onclick="deleteRecord('${t}', ${i}); event.stopPropagation();">X</button></td>`;
 
-            const rendAcc = (data, t, pre, cols, rowFn) => {
-                const gr = {}; data.forEach(o => { const k = o.ocId || o.id; if(!gr[k]) gr[k] = { o: getObraNameByOcId(k), p: o.prov, it: [] }; gr[k].it.push(o); });
-                let h = ''; let gi = 0; for(const id in gr){
-                    const sId = pre + '_grp_' + gi++;
-                    h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')"><td><b>${id}</b></td><td>${gr[id].o}</td><td>${gr[id].it.length} registros</td><td class="no-print"><button class="btn btn-primary btn-small">Ver ⬇️</button></td></tr>
-                    <tr id="${sId}" style="display:none;"><td colspan="4"><table style="width:100%;"><thead><tr>${cols}${dTh}</tr></thead><tbody>${gr[id].it.map(rowFn).join('')}</tbody></table></td></tr>`;
-                } return h;
-            };
+            const rendAcc = (data, t, pre, cols, rowFn) => { const gr = {}; data.forEach(o => { const k = o.ocId || o.id; if(!gr[k]) gr[k] = { o: getObraNameByOcId(k), p: o.prov, it: [] }; gr[k].it.push(o); }); let h = ''; let gi = 0; for(const id in gr){ const sId = pre + '_grp_' + gi++; h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')"><td><b>${id}</b></td><td>${gr[id].o}</td><td>${gr[id].it.length} registros</td><td class="no-print"><button class="btn btn-primary btn-small">Ver ⬇️</button></td></tr><tr id="${sId}" style="display:none;"><td colspan="4"><table style="width:100%;"><thead><tr>${cols}${dTh}</tr></thead><tbody>${gr[id].it.map(rowFn).join('')}</tbody></table></td></tr>`; } return h; };
 
             document.querySelector('#table-oc tbody').innerHTML = rendAcc(vOc, 'ocs', 'ocd', '<th>Mat</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.material}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('ocs', i.idx)}</tr>`);
             document.querySelector('#table-ingresos tbody').innerHTML = rendAcc(vIng, 'ingresos', 'ind', '<th>Guía</th><th>Mat</th><th>Bod</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.bodega}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('ingresos', i.idx)}</tr>`);
-            document.querySelector('#table-salidas tbody').innerHTML = rendAcc(vSal, 'salidas', 'sad', '<th>Despacho</th><th>Mat</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('salidas', i.idx)}</tr>`);
+            document.querySelector('#table-salidas tbody').innerHTML = rendAcc(vSal, 'salidas', 'sad', '<th>Vale</th><th>Mat</th><th>Cant</th><th>PDF</th>', i => `<tr><td>${i.id}</td><td>${i.material}</td><td>${i.cant}</td><td>${bPdf(i.pdfUrl)}</td>${dTd('salidas', i.idx)}</tr>`);
 
-            renderResumenMateriales(); 
-            renderHerramientas(); 
-            renderContenedores();
+            renderResumenMateriales(); renderHerramientas(); renderContenedores();
+            if(document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
+            if(document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
+            if(document.getElementById('bodegas-reporte').classList.contains('active')) renderBodegasReporte();
 
-            if(document.getElementById('bodegas-inv') && document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
-            if(document.getElementById('bodegas-salidas') && document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
-            if(document.getElementById('bodegas-reporte') && document.getElementById('bodegas-reporte').classList.contains('active')) renderBodegasReporte();
-            
-            document.getElementById('u-obra').innerHTML = opsFull; 
-            document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
+            document.getElementById('u-obra').innerHTML = opsFull; document.querySelector('#table-usuarios tbody').innerHTML = db.usuarios.map((u, i) => `<tr><td>${u.nombre}</td><td>${u.user}</td><td>${u.rol}</td><td>${u.obraId?getObraNameById(u.obraId):'-'}</td><td><button class="btn btn-danger btn-small" onclick="deleteRecord('usuarios', ${i})">X</button></td></tr>`).join('');
         }
 
         function toggleObraUser() { document.getElementById('div-u-obra').style.display = (document.getElementById('u-rol').value === 'bodeguero') ? 'flex' : 'none'; }
