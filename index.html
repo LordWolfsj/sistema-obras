@@ -355,13 +355,42 @@
             <div class="card no-print">
                 <form onsubmit="event.preventDefault(); addInvBodega();">
                     <div class="form-grid">
-                        <div class="form-group"><label>Nombre del Material</label><input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas"></div>
-                        <div class="form-group"><label>Unidad de Medida</label><select id="bi-uni" required><option value="Uni">Unidad (Uni)</option><option value="Kg">Kilogramos (Kg)</option><option value="Mts">Metros (Mts)</option><option value="Roll">Rollo (Roll)</option><option value="Lts">Litros (Lts)</option><option value="Caj">Caja (Caj)</option></select></div>
-                        <div class="form-group"><label>Cantidad a Ingresar</label><input type="number" step="0.01" id="bi-cant" required></div>
-                        <div class="form-group"><label>Adjuntar Archivo/Foto (Opcional)</label><input type="file" id="bi-file" accept=".pdf,image/*"></div>
+                        <div class="form-group">
+                            <label>Nombre del Material / Ítem</label>
+                            <input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas / Foco Led">
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="bi-cat" required>
+                                <option value="Material">📦 Material (Consumible)</option>
+                                <option value="Faena">🚧 Faena (Instalación)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Unidad de Medida</label>
+                            <select id="bi-uni" required>
+                                <option value="Uni">Unidad (Uni)</option>
+                                <option value="Kg">Kilogramos (Kg)</option>
+                                <option value="Mts">Metros (Mts)</option>
+                                <option value="Roll">Rollo (Roll)</option>
+                                <option value="Lts">Litros (Lts)</option>
+                                <option value="Caj">Caja (Caj)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad a Ingresar</label>
+                            <input type="number" step="0.01" id="bi-cant" required>
+                        </div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group"><label>Comentario / Detalle (Opcional)</label><input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4..."></div>
+                        <div class="form-group">
+                            <label>Comentario / Detalle (Opcional)</label>
+                            <input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4...">
+                        </div>
+                        <div class="form-group">
+                            <label>Adjuntar Archivo/Foto (Opcional)</label>
+                            <input type="file" id="bi-file" accept=".pdf,image/*">
+                        </div>
                     </div>
                     <button class="btn btn-primary">Ingresar Material a esta Bodega</button>
                 </form>
@@ -369,8 +398,8 @@
 
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
-                    <label style="font-weight:bold;">🔍 Buscar Material:</label>
-                    <input type="text" id="search-bod-inv" placeholder="Escribe el nombre del material..." onkeyup="renderBodegaInv()" style="padding:10px; border-radius:5px; border:1px solid #ccc; flex:1;">
+                    <label style="font-weight:bold;">🔍 Buscar Ítem:</label>
+                    <input type="text" id="search-bod-inv" placeholder="Escribe el nombre del material o faena..." onkeyup="renderBodegaInv()" style="padding:10px; border-radius:5px; border:1px solid #ccc; flex:1;">
                 </div>
                 <div style="display:flex; gap:10px; align-items:flex-end;">
                     <button class="btn btn-success" onclick="exportExcelBodegaInv()">📊 Excel</button>
@@ -381,7 +410,7 @@
             <div id="print-bodegas-inv-header"><h2 id="print-bi-name">Inventario Bodega</h2></div>
 
             <table>
-                <thead><tr><th>Material</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead>
+                <thead><tr><th>Ítem / Nombre</th><th>Categoría</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead>
                 <tbody id="table-bod-inv-body"></tbody>
             </table>
         </div>
@@ -407,7 +436,7 @@
                     <button class="btn btn-primary" onclick="addToDraftBod()" style="background:#f1c40f; color:#333;">+ Añadir a la Lista</button>
                 </div>
                 
-                <table class="draft-table"><thead><tr><th>Origen</th><th>Material</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="bod-draft"></tbody></table>
+                <table class="draft-table"><thead><tr><th>Origen</th><th>Ítem</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="bod-draft"></tbody></table>
                 <button class="btn btn-success" style="width:100%; margin-top:15px;" onclick="saveFinalBod()">Confirmar Despacho a Obra</button>
             </div>
             
@@ -430,11 +459,12 @@
             </div>
 
             <div id="print-bodegas-report"><h2 id="print-bod-title">Reporte de Entregas - Seleccione Obra</h2></div>
-            <table><thead><tr><th>Fecha</th><th>Guía Despacho</th><th>Bodega Origen</th><th>Material Entregado</th><th>Cantidad</th><th>Unidad</th><th class="no-print">PDF</th></tr></thead><tbody id="table-bod-rep-body"></tbody></table>
+            <table><thead><tr><th>Fecha</th><th>Guía Despacho</th><th>Bodega Origen</th><th>Ítem Entregado</th><th>Cantidad</th><th>Unidad</th><th class="no-print">PDF</th></tr></thead><tbody id="table-bod-rep-body"></tbody></table>
         </div>
 
         <div id="herramientas" class="section">
             <h1>Inventario de Herramientas y Maquinaria</h1>
+            
             <div class="stats-grid" id="h-stats"></div>
 
             <div class="card" id="form-her-card">
@@ -470,6 +500,7 @@
             </div>
             
             <div id="print-herramientas-header"><h2 id="print-her-obra-name">Inventario de Herramientas</h2></div>
+
             <table><thead><tr><th>Equipo (Nombre Genérico)</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
             
             <h2 style="margin-top:50px; color:var(--danger); border-bottom: 2px solid var(--danger); display:inline-block; padding-bottom:5px;">🗑️ Herramientas Dadas de Baja</h2>
@@ -510,7 +541,9 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
+
             <div id="print-contenedores-header"><h2 id="print-con-obra-name">Inventario de Contenedores</h2></div>
+
             <table><thead><tr><th>Ubicación / Obra</th><th>Detalle por Tipo</th><th>Total</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
         </div>
 
@@ -610,7 +643,6 @@
                 
                 ['form-oc-card', 'form-ing-card', 'form-sal-card', 'form-her-card', 'form-cont-card'].forEach(id => document.getElementById(id).style.display = isB ? 'none' : 'block');
                 
-                // Forzar ir a "Inicio" al logear
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.getElementById('inicio').classList.add('active');
                 
@@ -726,7 +758,7 @@
             }
         }
 
-        // *** EXPORTAR CALENDARIO A EXCEL EN FORMATO GRILLA (VISUAL) ***
+        // *** EXCEL VISUAL (CALENDARIO) ***
         function exportExcelCalendario() {
             const mNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const title = `Calendario de Tareas - ${mNames[calMonth]} ${calYear}`;
@@ -735,10 +767,8 @@
             html += `<head><meta charset="utf-8"></head><body>`;
             html += `<table border="1" style="font-family: sans-serif; border-collapse: collapse; text-align: left;">`;
             
-            // Título
             html += `<tr><th colspan="7" style="background:#2c3e50; color:white; font-size:16pt; padding:10px; text-align:center;">${title}</th></tr>`;
             
-            // Días de la semana
             html += `<tr>`;
             ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].forEach(d => {
                 html += `<th style="background:#34495e; color:white; padding:5px; text-align:center; width: 150px;">${d}</th>`;
@@ -752,13 +782,11 @@
             html += `<tr>`;
             let currentCol = 1;
             
-            // Espacios en blanco iniciales
             for (let i = 1; i < startDay; i++) {
                 html += `<td style="background:#f9f9f9;"></td>`;
                 currentCol++;
             }
             
-            // Llenar los días
             for (let i = 1; i <= daysInMonth; i++) {
                 const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                 const dayTasks = db.tareas.filter(t => t.fecha === dateStr);
@@ -773,14 +801,13 @@
                 
                 if (currentCol === 7) {
                     html += `</tr>`;
-                    if (i < daysInMonth) html += `<tr>`; // Abrir nueva fila si quedan días
+                    if (i < daysInMonth) html += `<tr>`; 
                     currentCol = 1;
                 } else {
                     currentCol++;
                 }
             }
             
-            // Rellenar la última semana con espacios vacíos si no terminó en Domingo
             if (currentCol > 1) {
                 for (let i = currentCol; i <= 7; i++) {
                     html += `<td style="background:#f9f9f9;"></td>`;
@@ -799,7 +826,6 @@
 
         // --- DASHBOARD DE INICIO ---
         function renderInicio() {
-            // 1. Tareas Pendientes
             const pending = db.tareas.filter(t => !t.completada).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
             let tHtml = '';
             if(pending.length === 0) {
@@ -819,7 +845,6 @@
             }
             document.getElementById('inicio-tareas-lista').innerHTML = tHtml;
 
-            // 2. Resumen de Herramientas
             let actH = db.herramientas.filter(h => h.obra !== 'BAJ-01');
             let tDisp = 0, tObr = 0, tRep = 0;
             actH.forEach(h => { 
@@ -835,7 +860,6 @@
                 <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>
             `;
 
-            // 3. Resumen de Contenedores
             let tO=0, tB=0, tBa=0, tD=0, tM=0; 
             db.contenedores.forEach(c => { 
                 if(c.tipo==='Oficina') tO++; 
@@ -876,7 +900,7 @@
         function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
 
         // ==========================================
-        // MÓDULO BODEGAS INTERNAS
+        // MÓDULO BODEGAS INTERNAS (NUEVO CAMPO: CATEGORÍA)
         // ==========================================
 
         function openBodegaView(nombreBodega, btn) {
@@ -888,6 +912,7 @@
 
         async function addInvBodega() {
             const mat = document.getElementById('bi-mat').value.trim().toUpperCase();
+            const cat = document.getElementById('bi-cat').value; // NUEVA LINEA
             const uni = document.getElementById('bi-uni').value;
             const cant = parseFloat(document.getElementById('bi-cant').value);
             const com = document.getElementById('bi-com').value.trim();
@@ -899,7 +924,7 @@
             let placeholder = file ? "⏳ Subiendo..." : null;
 
             db.invBodegas.push({ 
-                id_unico: id_unico, bodega: currentBodegaName, material: mat, 
+                id_unico: id_unico, bodega: currentBodegaName, material: mat, categoria: cat, 
                 unidad: uni, cantidad: cant, comentario: com, fecha: fec, pdfUrl: placeholder 
             });
             const mIdx = db.invBodegas.length - 1;
@@ -907,7 +932,7 @@
             saveDatabase(true); 
             ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = '');
             if(fileInput) fileInput.value = '';
-            showToast("Material ingresado a " + currentBodegaName);
+            showToast("Ítem ingresado a " + currentBodegaName);
             renderBodegaInv();
 
             if (file) {
@@ -924,12 +949,12 @@
             }
         }
 
-        function getStockBodega(bodega, material, unidad) {
+        function getStockBodega(bodega, material, unidad, categoria) {
             let ing = 0;
-            db.invBodegas.filter(i => i.bodega === bodega && i.material === material && i.unidad === unidad).forEach(i => ing += i.cantidad);
+            db.invBodegas.filter(i => i.bodega === bodega && i.material === material && i.unidad === unidad && (i.categoria || 'Material') === categoria).forEach(i => ing += i.cantidad);
             let sal = 0;
             db.despachosBodegas.forEach(d => {
-                d.items.forEach(it => { if(it.bodega === bodega && it.material === material && it.unidad === unidad) sal += it.cant; });
+                d.items.forEach(it => { if(it.bodega === bodega && it.material === material && it.unidad === unidad && (it.categoria || 'Material') === categoria) sal += it.cant; });
             });
             return { ing, sal, stock: ing - sal };
         }
@@ -940,8 +965,9 @@
             
             db.invBodegas.forEach((i, idx) => { i.oIdx = idx; });
             db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => {
-                const k = `${i.material}_${i.unidad}`;
-                if(!grouped[k]) grouped[k] = { material: i.material, unidad: i.unidad, items: [] };
+                const cat = i.categoria || 'Material';
+                const k = `${i.material}_${i.unidad}_${cat}`;
+                if(!grouped[k]) grouped[k] = { material: i.material, unidad: i.unidad, categoria: cat, items: [] };
                 grouped[k].items.push(i);
             });
 
@@ -952,23 +978,26 @@
 
             let html = ''; let gIdx = 0;
             list.forEach(item => {
-                const s = getStockBodega(currentBodegaName, item.material, item.unidad);
+                const s = getStockBodega(currentBodegaName, item.material, item.unidad, item.categoria);
                 const sId = 'bi_grp_' + gIdx++;
+                let badgeCls = item.categoria === 'Faena' ? 'bg-warn' : 'bg-info';
                 
                 html += `
                 <tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
-                    <td><b>${item.material}</b></td><td>${item.unidad}</td><td>${s.ing}</td><td>${s.sal}</td>
+                    <td><b>${item.material}</b></td>
+                    <td><span class="badge ${badgeCls}">${item.categoria}</span></td>
+                    <td>${item.unidad}</td><td>${s.ing}</td><td>${s.sal}</td>
                     <td><b style="color:${s.stock > 0 ? 'green' : 'red'}">${s.stock}</b></td>
                     <td class="no-print"><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td>
                 </tr>
-                <tr id="${sId}" style="display:none;"><td colspan="6"><table style="background:white; border:1px solid #ddd; width:100%;">
+                <tr id="${sId}" style="display:none;"><td colspan="7"><table style="background:white; border:1px solid #ddd; width:100%;">
                     <thead style="background:#34495e; color:white;"><tr><th>Fecha</th><th>Cantidad Ingresada</th><th>Comentario</th><th>Archivo</th><th class="no-print">Acción</th></tr></thead>
                     <tbody>${item.items.map(u => `<tr><td>${u.fecha}</td><td>${u.cantidad} ${u.unidad}</td><td>${u.comentario || '-'}</td>
                     <td>${u.pdfUrl ? (u.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${u.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">📄 Ver Archivo</a>`) : '-'}</td>
                     <td class="no-print">${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('invBodegas', ${u.oIdx}); renderBodegaInv(); event.stopPropagation();">X</button>` : '-'}</td></tr>`).join('')}
                     </tbody></table></td></tr>`;
             });
-            document.getElementById('table-bod-inv-body').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No hay materiales registrados en esta bodega.</td></tr>';
+            document.getElementById('table-bod-inv-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay ítems registrados en esta bodega.</td></tr>';
         }
 
         function updateBodSalMatSelect() {
@@ -977,12 +1006,16 @@
             if(!bod) { sel.innerHTML = ''; return; }
             
             const uniqueMats = {};
-            db.invBodegas.filter(i => i.bodega === bod).forEach(i => { uniqueMats[`${i.material}_${i.unidad}`] = i; });
+            db.invBodegas.filter(i => i.bodega === bod).forEach(i => { 
+                const cat = i.categoria || 'Material';
+                uniqueMats[`${i.material}_${i.unidad}_${cat}`] = i; 
+            });
 
             let opts = '';
             Object.values(uniqueMats).forEach(item => {
-                const s = getStockBodega(bod, item.material, item.unidad);
-                if (s.stock > 0) opts += `<option value="${item.material}|${item.unidad}">${item.material} - Disp: ${s.stock} ${item.unidad}</option>`;
+                const cat = item.categoria || 'Material';
+                const s = getStockBodega(bod, item.material, item.unidad, cat);
+                if (s.stock > 0) opts += `<option value="${item.material}|${item.unidad}|${cat}">[${cat}] ${item.material} - Disp: ${s.stock} ${item.unidad}</option>`;
             });
             sel.innerHTML = opts || '<option value="">Sin stock disponible en esta bodega</option>';
         }
@@ -993,15 +1026,15 @@
             const cant = parseFloat(document.getElementById('bs-cant').value);
             
             if(!bod || !matSelect || !cant) return alert("Complete todos los campos del material.");
-            const [material, unidad] = matSelect.split('|');
-            const s = getStockBodega(bod, material, unidad);
+            const [material, unidad, categoria] = matSelect.split('|');
+            const s = getStockBodega(bod, material, unidad, categoria);
             if(cant > s.stock) return alert(`No hay stock suficiente. Máximo: ${s.stock}`);
             
-            drafts.bod.push({ bodega: bod, material, unidad, cant });
+            drafts.bod.push({ bodega: bod, material, unidad, categoria, cant });
             document.getElementById('bs-cant').value = ''; renderDraftsBod();
         }
 
-        function renderDraftsBod() { document.getElementById('bod-draft').innerHTML = drafts.bod.map((it, i) => `<tr><td>${it.bodega}</td><td>${it.material}</td><td>${it.cant} ${it.unidad}</td><td><button class="btn btn-danger btn-small" onclick="removeFromDraftBod(${i})">X</button></td></tr>`).join(''); }
+        function renderDraftsBod() { document.getElementById('bod-draft').innerHTML = drafts.bod.map((it, i) => `<tr><td>${it.bodega}</td><td><span class="badge ${it.categoria === 'Faena' ? 'bg-warn' : 'bg-info'}">${it.categoria}</span> ${it.material}</td><td>${it.cant} ${it.unidad}</td><td><button class="btn btn-danger btn-small" onclick="removeFromDraftBod(${i})">X</button></td></tr>`).join(''); }
         function removeFromDraftBod(i) { drafts.bod.splice(i, 1); renderDraftsBod(); }
 
         async function saveFinalBod() {
@@ -1048,7 +1081,7 @@
             let html = '';
             db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => {
                 d.items.forEach(it => {
-                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td>${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>`) : '-'}</td></tr>`;
+                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td><span class="badge ${it.categoria==='Faena'?'bg-warn':'bg-info'}">${it.categoria||'Material'}</span> ${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>`) : '-'}</td></tr>`;
                 });
             });
             document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
@@ -1113,9 +1146,8 @@
             document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
         }
 
-        // --- SISTEMA HOJA DE VIDA HERRAMIENTAS Y MANTENCION ---
         function toggleProveedorTaller() { const ub = document.getElementById('cv-her-nueva-ub').value; const div = document.getElementById('div-prov-taller'); if(div) div.style.display = (ub === 'MAN-01') ? 'block' : 'none'; }
-        function toggleResolucion() { const res = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => document.getElementById(id).style.display = res === 'BAJA' ? 'none' : 'block'); }
+        function toggleResolucion() { const r = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => document.getElementById(id).style.display = r === 'BAJA' ? 'none' : 'block'); }
         const bPdfMini = (u) => u === "⏳ Subiendo..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver Archivo</a>` : '');
 
         function abrirCV(tipo, idx) {
@@ -1133,7 +1165,7 @@
                         bx.innerHTML = `<h4 style="margin-bottom:10px;">Resolución</h4><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Acción</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada</option><option value="BAJA">🗑️ Baja</option></select></div><div id="div-res-ub"><label>A Obra</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label>Detalle Técnico</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label>Costo ($)</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label>PDF Respaldo</label><input type="file" id="cv-her-file" style="width:100%; padding:8px;" accept=".pdf,image/*"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procRes()">Guardar</button>`;
                         setTimeout(toggleResolucion, 50);
                     } else {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px;">Nuevo Movimiento</h4><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1;"><label>Destino</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}<option value="MAN-01">Taller / Mantención</option></select></div><div id="div-prov-taller" style="display:none;"><label>Taller</label><input type="text" id="cv-her-prov" style="width:100%; padding:8px;"></div><div style="flex:1;"><label>Comentario</label><input type="text" id="cv-her-com" style="width:100%; padding:8px;"></div><button class="btn btn-primary" onclick="regMovHer()">Registrar</button></div>`;
+                        bx.innerHTML = `<h4 style="margin-bottom:10px;">Nuevo Movimiento</h4><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1;"><label>Destino</label><select id="cv-her-nueva-ub" onchange="toggleProv()" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}<option value="MAN-01">Taller / Mantención</option></select></div><div id="div-prov-taller" style="display:none;"><label>Taller</label><input type="text" id="cv-her-prov" style="width:100%; padding:8px;"></div><div style="flex:1;"><label>Comentario</label><input type="text" id="cv-her-com" style="width:100%; padding:8px;"></div><button class="btn btn-primary" onclick="regMovHer()">Registrar</button></div>`;
                     }
                 }
                 document.getElementById('modal-cv-her').style.display = 'block';
@@ -1148,34 +1180,15 @@
         }
         function cerrarCV(id) { document.getElementById(id).style.display = 'none'; cvActivoIndex = null; }
 
-        function regMovHer() { 
-            const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); 
-            saveDatabase(true); 
-            cerrarCV('modal-cv-her'); 
-            renderHerramientas(); 
-            showToast("Movimiento registrado"); 
-        }
-        
-        async function procRes() { 
-            const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; 
-            
-            saveDatabase(true); 
-            cerrarCV('modal-cv-her'); 
-            renderHerramientas(); 
-            showToast("Resolución guardada");
-
-            if(file){ 
-                const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; try { const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); } } catch(e){} }; 
-            } 
-        }
+        function regMovHer() { const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); saveDatabase(true); cerrarCV('modal-cv-her'); renderHerramientas(); showToast("Movimiento registrado"); }
+        async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; saveDatabase(true); cerrarCV('modal-cv-her'); renderHerramientas(); showToast("Resolución guardada"); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; try { const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); } } catch(e){} }; } }
         function eliminarMovHer(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); }
-        
+
         async function registrarMovimientoContenedor() { 
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const ub = document.getElementById(`cv-cont-nueva-ub`).value; 
             const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; 
             const f = new Date().toISOString().split('T')[0];
-            
             const fileInput = document.getElementById('cv-cont-file');
             const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
             let placeholder = file ? "⏳ Subiendo..." : null;
@@ -1187,10 +1200,7 @@
             document.getElementById(`cv-cont-comentario`).value = ''; 
             if(fileInput) fileInput.value = '';
             
-            saveDatabase(true); 
-            cerrarCV('modal-cv-cont'); 
-            showToast("Traslado actualizado"); 
-            renderContenedores(); 
+            saveDatabase(true); cerrarCV('modal-cv-cont'); showToast("Traslado actualizado"); renderContenedores(); 
 
             if (file) {
                 const r = new FileReader(); r.readAsDataURL(file);
@@ -1207,30 +1217,11 @@
         }
         function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
-        // --- CONTENEDORES ---
-        function addContenedor() { const c = { id_unico: Date.now().toString(), tipo: document.getElementById('c-tip').value, num: document.getElementById('c-num').value.trim().toUpperCase(), obra: document.getElementById('c-obr').value, detExt: document.getElementById('c-ext').value.trim(), detInt: document.getElementById('c-int').value.trim(), historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Ingreso inicial" }] }; db.contenedores.push(c); saveDatabase(); ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = ''); showToast("✅ Contenedor registrado"); }
-        function renderContenedores() {
-            const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL";
-            let list = db.contenedores.map((c, i) => ({...c, oIdx: i})); 
-            if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId);
-            else if (fV !== "ALL") list = list.filter(c => c.obra === fV);
-            
-            let tT=0, tO=0, tB=0, tBa=0, tD=0, tM=0; list.forEach(c => { tT++; if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
-            document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
-            
-            const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
-            const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
-
-            const gr = {}; list.forEach(c => { if (!gr[c.obra]) gr[c.obra] = { n: getObraNameById(c.obra), it: [], c: {} }; gr[c.obra].it.push(c); const t = c.tipo || 'Otro'; gr[c.obra].c[t] = (gr[c.obra].c[t]||0)+1; });
-            let h = ''; let gi = 0; for (const o in gr) { const g = gr[o]; const sid = 'c_g_'+gi++; let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>${g.it.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white; border:none;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}</tbody></table></td></tr>`; }
-            document.querySelector('#table-contenedores-body').innerHTML = h;
-        }
-
         // --- EXPORTACIONES ---
         function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
         function exportExcelContenedores() { const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL"; let list = db.contenedores; if (fV !== "ALL") list = list.filter(c => c.obra === fV); else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId); let csv = "\uFEFFUbicación/Obra;Tipo;N° Contenedor;Detalle Exterior;Detalle Interior\n"; list.forEach(c => { csv += `${getObraNameById(c.obra)};${c.tipo};${c.num};${c.detExt};${c.detInt}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Contenedores.csv`); link.click(); }
-        function exportExcelBodegaInv() { const sQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const gr = {}; db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => { const k = `${i.material}_${i.unidad}`; if(!gr[k]) gr[k] = { m: i.material, u: i.unidad, c: [] }; if(i.comentario) gr[k].c.push(`${i.fecha}: ${i.comentario}`); }); let ls = Object.values(gr); if(sQ) ls = ls.filter(x => x.m.toLowerCase().includes(sQ)); let csv = `\uFEFFInventario Bodega: ${currentBodegaName}\nMaterial;Unidad;T. Ingresado;T. Despachado;Stock Actual;Comentarios\n`; ls.forEach(x => { const s = getStockBodega(currentBodegaName, x.m, x.u); const cm = x.c.length > 0 ? x.c.join(' | ') : '-'; csv += `${x.m};${x.u};${s.ing};${s.sal};${s.stock};${cm}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_${currentBodegaName}.csv`); link.click(); }
-        function exportExcelBodegasReporte() { const selObra = document.getElementById('filter-bod-rep-obra'); const obraId = selObra.value; if(!obraId) return; let csv = `\uFEFFReporte de Entregas Internas - Obra: ${getObraNameById(obraId)}\nFecha;Guía Despacho;Bodega Origen;Material Entregado;Cantidad;Unidad\n`; db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { csv += `${d.fecha};${d.guia};${it.bodega};${it.material};${it.cant};${it.unidad}\n`; }); }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Entregas_${getObraNameById(obraId)}.csv`); link.click(); }
+        function exportExcelBodegaInv() { const sQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const gr = {}; db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => { const cat = i.categoria || 'Material'; const k = `${i.material}_${i.unidad}_${cat}`; if(!gr[k]) gr[k] = { m: i.material, u: i.unidad, cat: cat, c: [] }; if(i.comentario) gr[k].c.push(`${i.fecha}: ${i.comentario}`); }); let ls = Object.values(gr); if(sQ) ls = ls.filter(x => x.m.toLowerCase().includes(sQ)); let csv = `\uFEFFInventario Bodega: ${currentBodegaName}\nÍtem/Material;Categoría;Unidad;T. Ingresado;T. Despachado;Stock Actual;Comentarios\n`; ls.forEach(x => { const s = getStockBodega(currentBodegaName, x.m, x.u, x.cat); const cm = x.c.length > 0 ? x.c.join(' | ') : '-'; csv += `${x.m};${x.cat};${x.u};${s.ing};${s.sal};${s.stock};${cm}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_${currentBodegaName}.csv`); link.click(); }
+        function exportExcelBodegasReporte() { const selObra = document.getElementById('filter-bod-rep-obra'); const obraId = selObra.value; if(!obraId) return; let csv = `\uFEFFReporte de Entregas Internas - Obra: ${getObraNameById(obraId)}\nFecha;Guía Despacho;Bodega Origen;Categoría;Ítem Entregado;Cantidad;Unidad\n`; db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { const cat = it.categoria || 'Material'; csv += `${d.fecha};${d.guia};${it.bodega};${cat};${it.material};${it.cant};${it.unidad}\n`; }); }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Entregas_${getObraNameById(obraId)}.csv`); link.click(); }
 
         // --- MATERIALES GLOBALES ---
         function calculateStats(ocId, mat) { const oc = db.ocs.find(o => o.id === ocId && o.material === mat); const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0); const d = db.salidas.filter(s => s.ocId === ocId && s.material === mat).reduce((s, i) => s + i.cant, 0); return { comp: oc ? oc.cant : 0, rec: r, desp: d, stock: r - d }; }
