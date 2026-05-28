@@ -115,7 +115,7 @@
         /* IMPRESIÓN */
         #print-header, #print-details, #print-bodegas-report, #print-herramientas-header, #print-contenedores-header, #print-bodegas-inv-header, #print-cal-header { display: none; }
         @media print {
-            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid, .stats-grid-small, #upcoming-tasks-card { display: none !important; }
+            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid, .stats-grid-small, #upcoming-tasks-card, #traslados-card { display: none !important; }
             .main-content { padding: 0; width: 100%; }
             .section h1 { display: none; } 
             
@@ -294,6 +294,13 @@
                     <button class="btn btn-secondary btn-small" style="background:#f39c12;" onclick="showSection('calendario', document.getElementById('btn-nav-cal'))">Ir al Calendario Completo</button>
                 </h2>
                 <div id="inicio-tareas-lista" style="max-height: 250px; overflow-y:auto;"></div>
+            </div>
+
+            <div class="card no-print" id="traslados-card" style="border-left: 5px solid #3498db; background:#f0f8ff; padding: 15px 20px; display:none;">
+                <h2 style="margin-top:0; color:#2980b9; font-size:1.3rem; border-bottom: 1px solid #b3e5fc; padding-bottom:10px; margin-bottom:15px;">
+                    🔄 Solicitudes de Traslado Pendientes (Bodegueros)
+                </h2>
+                <div id="inicio-traslados-lista" style="max-height: 250px; overflow-y:auto;"></div>
             </div>
 
             <h2 style="color:var(--primary); font-size:1.2rem; border-bottom:2px solid #ddd; padding-bottom:5px; margin-bottom:15px;">Resumen de Activos Fijos</h2>
@@ -571,7 +578,7 @@
         let db = { 
             obras: [], ocs: [], ingresos: [], salidas: [], 
             usuarios: [], herramientas: [], contenedores: [],
-            invBodegas: [], despachosBodegas: [], tareas: []
+            invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: []
         };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
@@ -610,7 +617,7 @@
             if (!db.salidas) db.salidas = []; if (!db.usuarios) db.usuarios = []; 
             if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
             if (!db.invBodegas) db.invBodegas = []; if (!db.despachosBodegas) db.despachosBodegas = [];
-            if (!db.tareas) db.tareas = [];
+            if (!db.tareas) db.tareas = []; if (!db.trasladosPendientes) db.trasladosPendientes = [];
             
             if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
             document.getElementById('login-screen').style.display = 'flex';
@@ -622,7 +629,7 @@
                 const r = await fetch(API_URL + "?t=" + new Date().getTime()); 
                 db = await r.json(); 
                 document.getElementById('loading').style.display = 'none'; 
-                if (!db.invBodegas) db.invBodegas = []; if (!db.despachosBodegas) db.despachosBodegas = []; if(!db.tareas) db.tareas = [];
+                if (!db.invBodegas) db.invBodegas = []; if (!db.despachosBodegas) db.despachosBodegas = []; if(!db.tareas) db.tareas = []; if (!db.trasladosPendientes) db.trasladosPendientes = [];
                 renderAll(); 
             } catch (e) { document.getElementById('loading').style.display = 'none'; }
         }
@@ -643,7 +650,6 @@
                 
                 ['form-oc-card', 'form-ing-card', 'form-sal-card', 'form-her-card', 'form-cont-card'].forEach(id => document.getElementById(id).style.display = isB ? 'none' : 'block');
                 
-                // Forzar ir a "Inicio" al logear
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.getElementById('inicio').classList.add('active');
                 
@@ -671,7 +677,7 @@
         async function clearAll() {
             if (confirm("¿Limpiar historial? (Los usuarios creados y Bodega Central se mantendrán)")) {
                 const u = db.usuarios; const bCen = db.obras.find(o => o.nombre.toLowerCase().includes('central'));
-                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [] }; 
+                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [] }; 
                 await saveDatabase();
             }
         }
@@ -825,6 +831,38 @@
             link.click();
         }
 
+        // --- SOLICITUDES DE TRASLADO (ADMIN) ---
+        function aprobarTraslado(reqId) {
+            if(!confirm("¿Aprobar este traslado?")) return;
+            const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId);
+            if(reqIdx === -1) return;
+            const req = db.trasladosPendientes[reqIdx];
+            
+            const hIdx = db.herramientas.findIndex(h => h.id_unico === req.herramienta_id);
+            if(hIdx !== -1) {
+                db.herramientas[hIdx].obra = req.destino;
+                db.herramientas[hIdx].historial.push({
+                    fecha: new Date().toISOString().split('T')[0],
+                    ubicacion: req.destino,
+                    detalle: `Traslado Aprobado (Solicitado por ${req.solicitante}): ${req.motivo}`,
+                    proveedor: ""
+                });
+            }
+            db.trasladosPendientes.splice(reqIdx, 1);
+            saveDatabase(true);
+            showToast("Traslado Aprobado y Registrado.");
+        }
+
+        function rechazarTraslado(reqId) {
+            if(!confirm("¿Rechazar esta solicitud?")) return;
+            const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId);
+            if(reqIdx !== -1) {
+                db.trasladosPendientes.splice(reqIdx, 1);
+                saveDatabase(true);
+                showToast("Solicitud rechazada.");
+            }
+        }
+
         // --- DASHBOARD DE INICIO ---
         function renderInicio() {
             // 1. Tareas Pendientes
@@ -847,7 +885,34 @@
             }
             document.getElementById('inicio-tareas-lista').innerHTML = tHtml;
 
-            // 2. Resumen de Herramientas
+            // 2. Solicitudes de Traslado (Solo Admin/Jefe)
+            if (currentUser && currentUser.rol !== 'bodeguero' && db.trasladosPendientes && db.trasladosPendientes.length > 0) {
+                document.getElementById('traslados-card').style.display = 'block';
+                let trHtml = '';
+                db.trasladosPendientes.forEach(req => {
+                    trHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:5px;">
+                        <div>
+                            <span class="badge bg-info">${req.fecha.split('-').reverse().join('/')}</span>
+                            <b style="margin-left:10px;">${req.herramienta_nombre} (Serie: ${req.herramienta_serie})</b><br>
+                            <span style="font-size:0.85rem; color:#555; margin-top:5px; display:inline-block;">
+                                Solicita: <b>${req.solicitante}</b> | De: <b>${getObraNameById(req.origen)}</b> ➡️ Para: <b>${getObraNameById(req.destino)}</b><br>
+                                Motivo: <i>${req.motivo}</i>
+                            </span>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-success btn-small" onclick="aprobarTraslado('${req.id_solicitud}')">✔ Aprobar</button>
+                            <button class="btn btn-danger btn-small" onclick="rechazarTraslado('${req.id_solicitud}')">✖ Rechazar</button>
+                        </div>
+                    </div>`;
+                });
+                document.getElementById('inicio-traslados-lista').innerHTML = trHtml;
+            } else {
+                const card = document.getElementById('traslados-card');
+                if(card) card.style.display = 'none';
+            }
+
+            // 3. Resumen de Herramientas
             let actH = db.herramientas.filter(h => h.obra !== 'BAJ-01');
             let tDisp = 0, tObr = 0, tRep = 0;
             actH.forEach(h => { 
@@ -863,7 +928,7 @@
                 <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>
             `;
 
-            // 3. Resumen de Contenedores
+            // 4. Resumen de Contenedores
             let tO=0, tB=0, tBa=0, tD=0, tM=0; 
             db.contenedores.forEach(c => { 
                 if(c.tipo==='Oficina') tO++; 
@@ -904,7 +969,7 @@
         function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
 
         // ==========================================
-        // MÓDULO BODEGAS INTERNAS
+        // MÓDULO BODEGAS INTERNAS (NUEVO CAMPO: CATEGORÍA)
         // ==========================================
 
         function openBodegaView(nombreBodega, btn) {
@@ -916,7 +981,7 @@
 
         async function addInvBodega() {
             const mat = document.getElementById('bi-mat').value.trim().toUpperCase();
-            const cat = document.getElementById('bi-cat').value; // NUEVA LINEA
+            const cat = document.getElementById('bi-cat').value; 
             const uni = document.getElementById('bi-uni').value;
             const cant = parseFloat(document.getElementById('bi-cant').value);
             const com = document.getElementById('bi-com').value.trim();
@@ -1093,15 +1158,19 @@
             document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
         }
 
-        // --- HERRAMIENTAS ---
+        // --- HERRAMIENTAS ACTUALIZADO CON FLUJO DE APROBACIÓN ---
         function getEstadoHerramienta(n, id) { if (id === 'BAJ-01') return { txt: '⚫ Baja', cls: 'bg-dark' }; const l = n.toLowerCase(); if (l.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' }; if (l.includes('reparaci') || l.includes('mantenci') || l.includes('taller') || id === 'MAN-01') return { txt: '🔴 En Mantención', cls: 'bg-err' }; return { txt: '🟡 En Obra', cls: 'bg-warn' }; }
         
         async function addHerramienta() { 
             const modInput = document.getElementById('h-mod').value.trim().toUpperCase();
             const serInput = document.getElementById('h-ser').value.trim().toUpperCase();
 
+            // VALIDACIÓN: Evitar misma herramienta/modelo con mismo número de serie
             const existe = db.herramientas.find(h => h.modelo === modInput && h.serie === serInput);
-            if (existe) { alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`); return; }
+            if (existe) {
+                alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`);
+                return;
+            }
 
             const id_unico = Date.now().toString();
             const fileInput = document.getElementById('h-file');
@@ -1109,28 +1178,46 @@
             let placeholder = file ? "⏳ Subiendo..." : null;
 
             const h = { 
-                id_unico: id_unico, nombre: document.getElementById('h-nom').value.trim().toUpperCase(), 
-                cat: document.getElementById('h-cat').value, marca: document.getElementById('h-mar').value.trim().toUpperCase(), 
-                modelo: modInput, serie: serInput, obra: document.getElementById('h-obr').value, 
-                fecha: document.getElementById('h-fec').value, valor: parseFloat(document.getElementById('h-val').value), 
+                id_unico: id_unico, 
+                nombre: document.getElementById('h-nom').value.trim().toUpperCase(), 
+                cat: document.getElementById('h-cat').value, 
+                marca: document.getElementById('h-mar').value.trim().toUpperCase(), 
+                modelo: modInput, 
+                serie: serInput, 
+                obra: document.getElementById('h-obr').value, 
+                fecha: document.getElementById('h-fec').value, 
+                valor: parseFloat(document.getElementById('h-val').value), 
                 historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial", pdfUrl: placeholder }] 
             }; 
             
-            db.herramientas.push(h); const hIdx = db.herramientas.length - 1;
+            db.herramientas.push(h); 
+            const hIdx = db.herramientas.length - 1;
 
             saveDatabase(true); 
             ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); 
-            if(fileInput) fileInput.value = ''; showToast("Herramienta Registrada"); renderHerramientas();
+            if(fileInput) fileInput.value = '';
+            showToast("Herramienta Registrada"); 
+            renderHerramientas();
 
             if (file) {
-                const r = new FileReader(); r.readAsDataURL(file);
+                const r = new FileReader(); 
+                r.readAsDataURL(file);
                 r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
+                    const b64 = r.result.split(',')[1]; 
+                    const ext = file.name.split('.').pop();
+                    const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
                     try {
-                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                        const resp = await fetch(API_URL, { 
+                            method: 'POST', 
+                            body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
+                        }); 
                         const url = await resp.text(); 
-                        if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { db.herramientas[hIdx].historial[0].pdfUrl = url; saveDatabase(true); renderHerramientas(); }
-                    } catch(e) {}
+                        if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { 
+                            db.herramientas[hIdx].historial[0].pdfUrl = url; 
+                            saveDatabase(true); 
+                            renderHerramientas(); 
+                        }
+                    } catch(e) { console.warn("Archivo de herramienta subido"); }
                 };
             }
         }
@@ -1153,49 +1240,287 @@
         }
 
         // --- SISTEMA HOJA DE VIDA HERRAMIENTAS Y MANTENCION ---
-        function toggleProveedorTaller() { const ub = document.getElementById('cv-her-nueva-ub').value; const div = document.getElementById('div-prov-taller'); if(div) div.style.display = (ub === 'MAN-01') ? 'block' : 'none'; }
-        function toggleResolucion() { const res = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => document.getElementById(id).style.display = res === 'BAJA' ? 'none' : 'block'); }
+        function toggleProveedorTaller() {
+            const ub = document.getElementById('cv-her-nueva-ub').value;
+            const provDiv = document.getElementById('div-prov-taller');
+            if(provDiv) provDiv.style.display = (ub === 'MAN-01') ? 'block' : 'none';
+        }
+
+        function toggleResolucion() {
+            const res = document.getElementById('cv-res-tipo').value;
+            document.getElementById('div-res-ub').style.display = res === 'BAJA' ? 'none' : 'block';
+            document.getElementById('div-res-val').style.display = res === 'BAJA' ? 'none' : 'block';
+            document.getElementById('div-res-pdf').style.display = res === 'BAJA' ? 'none' : 'block';
+        }
+
         const bPdfMini = (u) => u === "⏳ Subiendo..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver Archivo</a>` : '');
 
         function abrirCV(tipo, idx) {
             cvActivoIndex = { tipo, idx };
             if(tipo === 'herramientas') {
-                const h = db.herramientas[idx]; const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
+                const h = db.herramientas[idx];
                 document.getElementById('cv-her-titulo').innerText = `Herramienta: ${h.nombre}`;
-                document.getElementById('cv-her-datos').innerHTML = `<div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Mod</b> ${h.marca} ${h.modelo}</div><div class="cv-item"><b>Serie</b> ${h.serie}</div><div class="cv-item" style="grid-column: 1/-1; background:#fff; padding:10px; border:1px dashed #ccc;"><b>Estado:</b> <span class="badge ${e.cls}">${e.txt}</span> en ${getObraNameById(h.obra)}</div>`;
-                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length) ? h.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl?bPdfMini(m.pdfUrl):''}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovHer(${i})">X</button>`:'-'}</td></tr>`).join('') : `<tr><td colspan="4">Vacio</td></tr>`;
+                
+                const est = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
+                document.getElementById('cv-her-datos').innerHTML = `
+                    <div class="cv-item"><b>Categoría</b> ${h.cat}</div>
+                    <div class="cv-item"><b>Marca/Modelo</b> ${h.marca} ${h.modelo}</div>
+                    <div class="cv-item"><b>Serie Única</b> ${h.serie}</div>
+                    <div class="cv-item"><b>Valor Compra</b> $${h.valor.toLocaleString()}</div>
+                    <div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;">
+                        <b>Estado y Ubicación Actual:</b> <span class="badge ${est.cls}">${est.txt}</span> en <span>${getObraNameById(h.obra)}</span>
+                    </div>
+                `;
+                
+                document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length > 0) 
+                    ? h.historial.map((m, i) => `
+                        <tr>
+                            <td>${m.fecha}</td>
+                            <td><b>${getObraNameById(m.ubicacion)}</b></td>
+                            <td>${m.detalle} ${m.pdfUrl ? bPdfMini(m.pdfUrl) : ''}</td>
+                            <td class="no-print">
+                                ${(currentUser.rol !== 'bodeguero' && i > 0) ? `<button class="btn btn-danger btn-small" onclick="eliminarMovimientoHerramienta(${i})">X</button>` : '-'}
+                            </td>
+                        </tr>`).join('') 
+                    : `<tr><td colspan="4">Sin movimientos</td></tr>`;
+                
                 const bx = document.getElementById('cv-her-action-box');
-                if(currentUser.rol === 'bodeguero' || h.obra === 'BAJ-01') bx.style.display = 'none';
-                else {
+                if (h.obra === 'BAJ-01') { 
+                    bx.style.display = 'none'; 
+                } else if (currentUser.rol === 'bodeguero') {
+                    // MODO BODEGUERO: SOLICITAR TRASLADO
                     bx.style.display = 'block';
-                    if(e.txt.includes('Mantención')) {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px;">Resolución</h4><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Acción</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada</option><option value="BAJA">🗑️ Baja</option></select></div><div id="div-res-ub"><label>A Obra</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label>Detalle Técnico</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label>Costo ($)</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label>PDF Respaldo</label><input type="file" id="cv-her-file" style="width:100%; padding:8px;" accept=".pdf,image/*"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procRes()">Guardar</button>`;
+                    bx.innerHTML = `
+                        <h4 style="margin-bottom:10px; color:var(--primary);">Solicitar Traslado de Equipo</h4>
+                        <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
+                            <div style="flex:1; min-width: 200px;">
+                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Destino Solicitado:</label>
+                                <select id="cv-her-sol-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                    ${getObrasOptionsHtml(false, null)}
+                                </select>
+                            </div>
+                            <div style="flex:2; min-width: 250px;">
+                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Tarea:</label>
+                                <input type="text" id="cv-her-sol-com" placeholder="Ej: Se necesita para corte de cerámica..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                            </div>
+                            <button class="btn btn-warn" style="background:#f39c12; color:white; padding:10px 20px;" onclick="solicitarTrasladoHerramienta()">Enviar Solicitud</button>
+                        </div>
+                    `;
+                } else {
+                    // MODO ADMIN / JEFE
+                    bx.style.display = 'block';
+                    if (est.txt.includes('Mantención')) {
+                        bx.innerHTML = `
+                            <h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                <div>
+                                    <label style="font-weight:bold; font-size:0.8rem;">Resolución:</label>
+                                    <select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;">
+                                        <option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option>
+                                        <option value="BAJA">🗑️ Dar de Baja (Irreparable)</option>
+                                    </select>
+                                </div>
+                                <div id="div-res-ub">
+                                    <label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label>
+                                    <select id="cv-res-nueva-ub" style="width:100%; padding:8px;">
+                                        ${getObrasOptionsHtml(false, null)}
+                                    </select>
+                                </div>
+                                <div style="grid-column: 1 / -1;">
+                                    <label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label>
+                                    <input type="text" id="cv-her-comentario-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;">
+                                </div>
+                                <div id="div-res-val">
+                                    <label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label>
+                                    <input type="number" id="cv-her-valor" placeholder="0" style="width:100%; padding:8px;">
+                                </div>
+                                <div id="div-res-pdf">
+                                    <label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label>
+                                    <input type="file" id="cv-her-file" accept=".pdf,image/*" style="width:100%; padding:8px;">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>
+                        `;
                         setTimeout(toggleResolucion, 50);
                     } else {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px;">Nuevo Movimiento</h4><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1;"><label>Destino</label><select id="cv-her-nueva-ub" onchange="toggleProv()" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}<option value="MAN-01">Taller / Mantención</option></select></div><div id="div-prov-taller" style="display:none;"><label>Taller</label><input type="text" id="cv-her-prov" style="width:100%; padding:8px;"></div><div style="flex:1;"><label>Comentario</label><input type="text" id="cv-her-com" style="width:100%; padding:8px;"></div><button class="btn btn-primary" onclick="regMovHer()">Registrar</button></div>`;
+                        bx.innerHTML = `
+                            <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4>
+                            <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
+                                <div style="flex:1; min-width: 200px;">
+                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
+                                    <select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                        ${getObrasOptionsHtml(false, null)}
+                                        <option value="MAN-01">Taller / En Mantención</option>
+                                    </select>
+                                </div>
+                                <div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;">
+                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Proveedor / Taller:</label>
+                                    <input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                </div>
+                                <div style="flex:2; min-width: 250px;">
+                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label>
+                                    <input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla de motor" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                </div>
+                                <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button>
+                            </div>
+                        `;
                     }
                 }
                 document.getElementById('modal-cv-her').style.display = 'block';
-            } else {
-                const c = db.contenedores[idx]; document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.num}`;
-                document.getElementById('cv-cont-datos').innerHTML = `<div class="cv-item"><b>Ubicación</b> ${getObraNameById(c.obra)}</div><div class="cv-item"><b>Detalle</b> ${c.detExt} | ${c.detInt}</div>`;
-                document.getElementById('cv-cont-historial-body').innerHTML = c.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl?bPdfMini(m.pdfUrl):''}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovCon(${i})">X</button>`:'-'}</td></tr>`).join('');
+                
+            } else if (tipo === 'contenedores') {
+                const c = db.contenedores[idx];
+                document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.tipo} - ${c.num}`;
+                
+                document.getElementById('cv-cont-datos').innerHTML = `
+                    <div class="cv-item"><b>Ubicación Actual</b> ${getObraNameById(c.obra)}</div>
+                    <div class="cv-item" style="grid-column: 1 / -1; background:#fff; padding:10px; border:1px dashed #ccc; border-radius:5px;">
+                        <b>Detalles:</b> Ext: ${c.detExt} | Int: ${c.detInt}
+                    </div>
+                `;
+                
+                document.getElementById('cv-cont-historial-body').innerHTML = (c.historial && c.historial.length > 0) 
+                    ? c.historial.map((m, i) => `
+                        <tr>
+                            <td>${m.fecha}</td>
+                            <td><b>${getObraNameById(m.ubicacion)}</b></td>
+                            <td>${m.detalle} ${m.pdfUrl ? bPdfMini(m.pdfUrl) : ''}</td>
+                            <td class="no-print">
+                                ${(currentUser.rol !== 'bodeguero' && i > 0) ? `<button class="btn btn-danger btn-small" onclick="eliminarMovimientoContenedor(${i})">X</button>` : '-'}
+                            </td>
+                        </tr>`).join('') 
+                    : `<tr><td colspan="4">Sin movimientos</td></tr>`;
+                
                 document.getElementById('cv-cont-action-box').style.display = (currentUser.rol === 'bodeguero') ? 'none' : 'block';
                 document.getElementById('cv-cont-nueva-ub').innerHTML = getObrasOptionsHtml(false, null);
                 document.getElementById('modal-cv-cont').style.display = 'block';
             }
         }
-        function cerrarCV(id) { document.getElementById(id).style.display = 'none'; cvActivoIndex = null; }
 
-        function regMovHer() { const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); saveDatabase(true); cerrarCV('modal-cv-her'); renderHerramientas(); showToast("Movimiento registrado"); }
-        async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; saveDatabase(true); cerrarCV('modal-cv-her'); renderHerramientas(); showToast("Resolución guardada"); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; try { const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); } } catch(e){} }; } }
-        function eliminarMovHer(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); }
+        function cerrarCV(modalId) { 
+            document.getElementById(modalId).style.display = 'none'; 
+            cvActivoIndex = null; 
+        }
+
+        function registrarMovimientoHerramienta() {
+            if(!cvActivoIndex) return; 
+            const idx = cvActivoIndex.idx;
+            
+            const nuevaUb = document.getElementById('cv-her-nueva-ub').value;
+            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación/estado";
+            const provDiv = document.getElementById('div-prov-taller');
+            const prov = (document.getElementById('cv-her-proveedor') && provDiv && provDiv.style.display !== 'none') ? document.getElementById('cv-her-proveedor').value.trim() : "";
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            
+            let detFinal = comentario; 
+            if (prov) detFinal += ` | Proveedor: ${prov}`;
+
+            db.herramientas[idx].obra = nuevaUb;
+            if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detFinal, proveedor: prov });
+            
+            saveDatabase(true); 
+            cerrarCV('modal-cv-her');
+            showToast("Movimiento registrado"); 
+            renderHerramientas();
+        }
+
+        function solicitarTrasladoHerramienta() {
+            const idx = cvActivoIndex.idx;
+            const h = db.herramientas[idx];
+            const destino = document.getElementById('cv-her-sol-ub').value;
+            const motivo = document.getElementById('cv-her-sol-com').value.trim();
+            
+            if(!destino || !motivo) return alert("Selecciona un destino y escribe un motivo para el traslado.");
+
+            if (!db.trasladosPendientes) db.trasladosPendientes = [];
+            db.trasladosPendientes.push({
+                id_solicitud: Date.now().toString(),
+                herramienta_id: h.id_unico,
+                herramienta_nombre: h.nombre,
+                herramienta_serie: h.serie,
+                origen: h.obra,
+                destino: destino,
+                motivo: motivo,
+                solicitante: currentUser.nombre,
+                fecha: new Date().toISOString().split('T')[0]
+            });
+            
+            saveDatabase(true);
+            cerrarCV('modal-cv-her');
+            showToast("Solicitud enviada a Administración.");
+        }
+
+        async function procesarResolucionMantencion() {
+            if(!cvActivoIndex) return; 
+            const idx = cvActivoIndex.idx;
+            const res = document.getElementById('cv-res-tipo').value;
+            const comentario = document.getElementById('cv-her-comentario-res').value.trim();
+            const fechaHoy = new Date().toISOString().split('T')[0];
+
+            let nuevaUb = ''; 
+            let detalleFinal = '';
+            
+            if (res === 'BAJA') {
+                if(!comentario) return alert("Debes ingresar el motivo de la baja.");
+                nuevaUb = 'BAJ-01'; 
+                detalleFinal = `DADA DE BAJA: ${comentario}`;
+            } else {
+                nuevaUb = document.getElementById('cv-res-nueva-ub').value;
+                const valorRep = parseFloat(document.getElementById('cv-her-valor').value) || 0;
+                detalleFinal = `REPARADA: ${comentario} | Costo: $${valorRep}`;
+            }
+
+            const fileInput = document.getElementById('cv-her-file'); 
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo..." : null;
+
+            db.herramientas[idx].obra = nuevaUb;
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder });
+            const movIdx = db.herramientas[idx].historial.length - 1;
+
+            await saveDatabase(true); 
+            cerrarCV('modal-cv-her'); 
+            showToast("Resolución guardada"); 
+            renderHerramientas();
+
+            if (file) {
+                const r = new FileReader(); 
+                r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; 
+                    const ext = file.name.split('.').pop();
+                    const docId = `REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`;
+                    try {
+                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                        const url = await resp.text(); 
+                        if(db.herramientas[idx].historial[movIdx]) { 
+                            db.herramientas[idx].historial[movIdx].pdfUrl = url; 
+                            saveDatabase(true); 
+                        }
+                    } catch(e) {}
+                };
+            }
+        }
+
+        function eliminarMovimientoHerramienta(movIdx) {
+            if(!confirm("¿Eliminar este movimiento del historial?")) return;
+            const hIdx = cvActivoIndex.idx; 
+            db.herramientas[hIdx].historial.splice(movIdx, 1);
+            const lastMov = db.herramientas[hIdx].historial[db.herramientas[hIdx].historial.length - 1];
+            db.herramientas[hIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN';
+            saveDatabase(true); 
+            abrirCV('herramientas', hIdx); 
+            renderHerramientas(); 
+            showToast("Movimiento eliminado");
+        }
 
         async function registrarMovimientoContenedor() { 
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const ub = document.getElementById(`cv-cont-nueva-ub`).value; 
             const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; 
             const f = new Date().toISOString().split('T')[0];
+            
             const fileInput = document.getElementById('cv-cont-file');
             const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
             let placeholder = file ? "⏳ Subiendo..." : null;
@@ -1207,7 +1532,10 @@
             document.getElementById(`cv-cont-comentario`).value = ''; 
             if(fileInput) fileInput.value = '';
             
-            saveDatabase(true); cerrarCV('modal-cv-cont'); showToast("Traslado actualizado"); renderContenedores(); 
+            await saveDatabase(true); 
+            cerrarCV('modal-cv-cont');
+            showToast("Traslado actualizado"); 
+            renderContenedores(); 
 
             if (file) {
                 const r = new FileReader(); r.readAsDataURL(file);
