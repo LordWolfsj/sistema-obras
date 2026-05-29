@@ -132,7 +132,8 @@
             th { background-color: #e9ecef !important; color: #000 !important; font-weight: bold; border: 1px solid #ccc;}
             td { border: 1px solid #ccc; }
             .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
-            tr[id^="res_grp_"], tr[id^="h_g_"], tr[id^="c_g_"], tr[id^="ind_grp_"], tr[id^="sad_grp_"], tr[id^="bi_grp_"] { display: table-row !important; }
+            tr[id^="res_grp_"], tr[id^="h_g_"], tr[id^="c_g_"], tr[id^="bi_grp_"] { display: table-row !important; }
+            tr[id^="ind_grp_"], tr[id^="sad_grp_"] { display: table-row !important; }
 
             /* Estilos de Impresión Calendario */
             .calendar-grid { border: 1px solid #000; }
@@ -325,9 +326,7 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ Imprimir</button>
                 </div>
             </div>
-            
             <div id="print-cal-header"><h2 id="print-cal-title">Calendario</h2></div>
-
             <div class="calendar-grid">
                 <div class="calendar-day-header">Lunes</div>
                 <div class="calendar-day-header">Martes</div>
@@ -359,7 +358,6 @@
 
         <div id="bodegas-inv" class="section">
             <h1 id="bodega-view-title">Inventario</h1>
-            
             <div class="card no-print">
                 <form onsubmit="event.preventDefault(); addInvBodega();">
                     <div class="form-grid">
@@ -403,7 +401,6 @@
                     <button class="btn btn-primary">Ingresar Material a esta Bodega</button>
                 </form>
             </div>
-
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">🔍 Buscar Ítem:</label>
@@ -414,13 +411,8 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-bodegas-inv-header"><h2 id="print-bi-name">Inventario Bodega</h2></div>
-
-            <table>
-                <thead><tr><th>Ítem / Nombre</th><th>Categoría</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead>
-                <tbody id="table-bod-inv-body"></tbody>
-            </table>
+            <table><thead><tr><th>Ítem / Nombre</th><th>Categoría</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead><tbody id="table-bod-inv-body"></tbody></table>
         </div>
 
         <div id="bodegas-salidas" class="section">
@@ -431,7 +423,6 @@
                     <div class="form-group"><label>N° Guía de Despacho</label><input type="text" id="bs-guia" required></div>
                     <div class="form-group"><label>Adjuntar PDF Respaldo</label><input type="file" id="bs-file" accept=".pdf"></div>
                 </div>
-                
                 <div class="form-grid" style="background:#f1f2f6; padding:15px; border-radius:5px; border-left: 4px solid #f1c40f;">
                     <div class="form-group"><label>Extraer desde Bodega:</label>
                         <select id="bs-origen" onchange="updateBodSalMatSelect()">
@@ -443,18 +434,15 @@
                     <div class="form-group"><label>Cantidad a Despachar</label><input type="number" step="0.01" id="bs-cant"></div>
                     <button class="btn btn-primary" onclick="addToDraftBod()" style="background:#f1c40f; color:#333;">+ Añadir a la Lista</button>
                 </div>
-                
                 <table class="draft-table"><thead><tr><th>Origen</th><th>Ítem</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="bod-draft"></tbody></table>
                 <button class="btn btn-success" style="width:100%; margin-top:15px;" onclick="saveFinalBod()">Confirmar Despacho a Obra</button>
             </div>
-            
             <h2 style="margin-top:30px; margin-bottom:15px; color:var(--primary);">Historial de Despachos</h2>
             <table><thead><tr><th>Fecha</th><th>Guía</th><th>Obra Destino</th><th>Total Items</th><th>Acción</th></tr></thead><tbody id="table-bod-sal-body"></tbody></table>
         </div>
 
         <div id="bodegas-reporte" class="section">
             <h1 class="no-print">Reporte de Entregas por Obra</h1>
-            
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">Generar Reporte para la Obra:</label>
@@ -465,16 +453,13 @@
                     <button class="btn btn-secondary" style="background:#34495e; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-bodegas-report"><h2 id="print-bod-title">Reporte de Entregas - Seleccione Obra</h2></div>
             <table><thead><tr><th>Fecha</th><th>Guía Despacho</th><th>Bodega Origen</th><th>Ítem Entregado</th><th>Cantidad</th><th>Unidad</th><th class="no-print">PDF</th></tr></thead><tbody id="table-bod-rep-body"></tbody></table>
         </div>
 
         <div id="herramientas" class="section">
             <h1>Inventario de Herramientas y Maquinaria</h1>
-            
             <div class="stats-grid" id="h-stats"></div>
-
             <div class="card" id="form-her-card">
                 <form onsubmit="event.preventDefault(); addHerramienta();">
                     <div class="form-grid">
@@ -491,7 +476,6 @@
                     <button class="btn btn-primary">Registrar Herramienta a la Nube</button>
                 </form>
             </div>
-            
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex: 1; min-width: 250px;">
                     <label style="font-weight:bold;">📍 Filtrar Ubicación:</label>
@@ -506,11 +490,8 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-            
             <div id="print-herramientas-header"><h2 id="print-her-obra-name">Inventario de Herramientas</h2></div>
-
             <table><thead><tr><th>Equipo (Nombre Genérico)</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
-            
             <h2 style="margin-top:50px; color:var(--danger); border-bottom: 2px solid var(--danger); display:inline-block; padding-bottom:5px;">🗑️ Herramientas Dadas de Baja</h2>
             <table style="opacity: 0.85; margin-top:15px;">
                 <thead style="background:#e74c3c; color:white;"><tr><th>Equipo</th><th>Marca / Modelo</th><th>Serie</th><th>Fecha y Motivo de Baja</th><th class="no-print">Acción</th></tr></thead>
@@ -521,7 +502,6 @@
         <div id="contenedores" class="section">
             <h1>Inventario de Contenedores</h1>
             <div class="stats-grid-small" id="c-stats"></div>
-            
             <div class="card" id="form-cont-card">
                 <form onsubmit="event.preventDefault(); addContenedor();">
                     <div class="form-grid">
@@ -538,7 +518,6 @@
                     <button class="btn btn-primary">Registrar Contenedor</button>
                 </form>
             </div>
-
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">📍 Filtrar por Obra:</label>
@@ -549,9 +528,7 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-contenedores-header"><h2 id="print-con-obra-name">Inventario de Contenedores</h2></div>
-
             <table><thead><tr><th>Ubicación / Obra</th><th>Detalle por Tipo</th><th>Total</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
         </div>
 
@@ -570,20 +547,19 @@
         // =========================================================================================
 
         const MASTER_ADMIN = { nombre: "Osvaldo San Juan", user: "osvaldo", pass: "lobito", rol: "admin", obraId: null };
-        let currentUser = null; let cvActivoIndex = null;
-        let currentBodegaName = "";
-        
-        let calMonth = new Date().getMonth();
-        let calYear = new Date().getFullYear();
+        let currentUser = null; let cvActivoIndex = null; let currentBodegaName = "";
+        let calMonth = new Date().getMonth(); let calYear = new Date().getFullYear();
 
-        let db = { 
-            obras: [], ocs: [], ingresos: [], salidas: [], 
-            usuarios: [], herramientas: [], contenedores: [],
-            invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: []
-        };
+        let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [] };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
-        // --- SISTEMA BASICO Y UI ---
+        function sanitizeDB() {
+            if (!db) db = {};
+            const arrs = ['obras', 'ocs', 'ingresos', 'salidas', 'usuarios', 'herramientas', 'contenedores', 'invBodegas', 'despachosBodegas', 'tareas', 'trasladosPendientes'];
+            arrs.forEach(a => { if (!db[a]) db[a] = []; db[a] = db[a].filter(x => x !== null && x !== undefined); });
+            if (!db.obras.some(o => o.id === 'B-CEN')) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
+        }
+
         function toggleSubmenu(id) {
             const menu = document.getElementById(id); const isOpen = menu.classList.contains('open');
             document.querySelectorAll('.submenu').forEach(m => m.classList.remove('open'));
@@ -603,7 +579,6 @@
             setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); 
         }
 
-        // --- CARGA DE DATOS ---
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Falta configurar URL de Google."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { 
@@ -612,16 +587,7 @@
                 db = await r.json(); 
                 document.getElementById('loading').style.display = 'none'; 
             } catch (e) { document.getElementById('loading').style.display = 'none'; }
-            
-            if (!db) db = {};
-            if (!db.obras) db.obras = []; if (!db.ocs) db.ocs = []; if (!db.ingresos) db.ingresos = []; 
-            if (!db.salidas) db.salidas = []; if (!db.usuarios) db.usuarios = []; 
-            if (!db.herramientas) db.herramientas = []; if (!db.contenedores) db.contenedores = [];
-            if (!db.invBodegas) db.invBodegas = []; if (!db.despachosBodegas) db.despachosBodegas = [];
-            if (!db.tareas) db.tareas = []; if (!db.trasladosPendientes) db.trasladosPendientes = [];
-            
-            if (!db.obras.some(o => o.nombre.toLowerCase().includes('central'))) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
-            document.getElementById('login-screen').style.display = 'flex';
+            sanitizeDB(); document.getElementById('login-screen').style.display = 'flex';
         }
 
         async function loadDataAndRender() {
@@ -630,12 +596,10 @@
                 const r = await fetch(API_URL + "?t=" + new Date().getTime()); 
                 db = await r.json(); 
                 document.getElementById('loading').style.display = 'none'; 
-                if (!db.invBodegas) db.invBodegas = []; if (!db.despachosBodegas) db.despachosBodegas = []; if(!db.tareas) db.tareas = []; if (!db.trasladosPendientes) db.trasladosPendientes = [];
-                renderAll(); 
+                sanitizeDB(); renderAll(); 
             } catch (e) { document.getElementById('loading').style.display = 'none'; }
         }
 
-        // --- LOGIN Y SEGURIDAD ---
         function procesarLogin() {
             const uI = document.getElementById('login-user').value.toLowerCase().trim(); const pI = document.getElementById('login-pass').value;
             let f = db.usuarios.find(u => u.user.toLowerCase() === uI && u.pass === pI);
@@ -644,33 +608,22 @@
             if (f) {
                 currentUser = f; const isB = currentUser.rol === 'bodeguero';
                 document.getElementById('ui-username').innerText = currentUser.nombre; document.getElementById('ui-rol').innerText = currentUser.rol.toUpperCase();
-                
                 document.getElementById('btn-borrar-bd').style.display = (currentUser.rol==='admin') ? 'block' : 'none';
                 document.getElementById('cat-creacion').style.display = isB ? 'none' : 'flex';
                 document.getElementById('cat-bodegas').style.display = isB ? 'none' : 'flex'; 
-                
                 ['form-oc-card', 'form-ing-card', 'form-sal-card', 'form-her-card', 'form-cont-card'].forEach(id => document.getElementById(id).style.display = isB ? 'none' : 'block');
-                
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.getElementById('inicio').classList.add('active');
-                
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('app-main').style.display = 'block';
                 renderAll();
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS SEGURA ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
-            try { 
-                await fetch(API_URL, { 
-                    method:'POST', 
-                    body: JSON.stringify({ action:'saveDB', db: db }) 
-                }); 
-            } catch (e) { console.error(e); } 
-            document.getElementById('loading').style.display = 'none'; 
-            renderAll(); 
+            try { await fetch(API_URL, { method:'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action:'saveDB', db: db }) }); } catch (e) {} 
+            document.getElementById('loading').style.display = 'none'; renderAll(); 
         }
         
         async function clearAll() {
@@ -684,16 +637,9 @@
         function showSection(id, btn) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-            
-            if(id === 'bodegas-salidas') renderBodegasSalidas();
-            if(id === 'bodegas-reporte') renderBodegasReporte();
-            if(id === 'calendario') renderCalendario();
+            if(id === 'bodegas-salidas') renderBodegasSalidas(); if(id === 'bodegas-reporte') renderBodegasReporte(); if(id === 'calendario') renderCalendario();
         }
-        
-        function deleteRecord(t, i) { 
-            if (t === 'obras' && db.obras[i].nombre.toLowerCase().includes('central')) return alert("⚠️ No puedes eliminar la Bodega Central.");
-            if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } 
-        }
+        function deleteRecord(t, i) { if (t === 'obras' && db.obras[i].nombre.toLowerCase().includes('central')) return alert("⚠️ No puedes eliminar la Bodega Central."); if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } }
         function toggleOCDetails(id) { const el = document.getElementById(id); if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; }
 
         // --- SISTEMA CALENDARIO Y TAREAS ---
@@ -725,483 +671,151 @@
             
             const grid = document.querySelector('.calendar-grid');
             const headers = Array.from(grid.querySelectorAll('.calendar-day-header'));
-            grid.innerHTML = '';
-            headers.forEach(h => grid.appendChild(h));
-            grid.insertAdjacentHTML('beforeend', html);
+            grid.innerHTML = ''; headers.forEach(h => grid.appendChild(h)); grid.insertAdjacentHTML('beforeend', html);
         }
 
-        function changeMonth(dir) {
-            calMonth += dir;
-            if(calMonth > 11) { calMonth = 0; calYear++; }
-            if(calMonth < 0) { calMonth = 11; calYear--; }
-            renderCalendario();
-        }
-
-        function abrirModalTarea() {
-            document.getElementById('t-fecha').value = '';
-            document.getElementById('t-desc').value = '';
-            document.getElementById('modal-tarea').style.display = 'block';
-        }
-
-        function guardarTarea() {
-            const f = document.getElementById('t-fecha').value;
-            const d = document.getElementById('t-desc').value.trim();
-            db.tareas.push({ id: Date.now().toString(), fecha: f, desc: d, completada: false });
-            saveDatabase(true);
-            document.getElementById('modal-tarea').style.display = 'none';
-        }
-
-        function toggleTarea(id) {
-            const t = db.tareas.find(x => x.id === id);
-            if(t) { t.completada = !t.completada; saveDatabase(true); }
-        }
-
-        function eliminarTarea(id, ev) {
-            ev.stopPropagation(); 
-            if(confirm("¿Eliminar tarea?")) {
-                db.tareas = db.tareas.filter(x => x.id !== id);
-                saveDatabase(true);
-            }
-        }
+        function changeMonth(dir) { calMonth += dir; if(calMonth > 11) { calMonth = 0; calYear++; } if(calMonth < 0) { calMonth = 11; calYear--; } renderCalendario(); }
+        function abrirModalTarea() { document.getElementById('t-fecha').value = ''; document.getElementById('t-desc').value = ''; document.getElementById('modal-tarea').style.display = 'block'; }
+        function guardarTarea() { const f = document.getElementById('t-fecha').value; const d = document.getElementById('t-desc').value.trim(); db.tareas.push({ id: Date.now().toString(), fecha: f, desc: d, completada: false }); saveDatabase(true); document.getElementById('modal-tarea').style.display = 'none'; }
+        function toggleTarea(id) { const t = db.tareas.find(x => x.id === id); if(t) { t.completada = !t.completada; saveDatabase(true); } }
+        function eliminarTarea(id, ev) { ev.stopPropagation();  if(confirm("¿Eliminar tarea?")) { db.tareas = db.tareas.filter(x => x.id !== id); saveDatabase(true); } }
 
         function exportExcelCalendario() {
             const mNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const title = `Calendario de Tareas - ${mNames[calMonth]} ${calYear}`;
-            
-            let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">`;
-            html += `<head><meta charset="utf-8"></head><body>`;
+            let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>`;
             html += `<table border="1" style="font-family: sans-serif; border-collapse: collapse; text-align: left;">`;
-            html += `<tr><th colspan="7" style="background:#2c3e50; color:white; font-size:16pt; padding:10px; text-align:center;">${title}</th></tr>`;
-            html += `<tr>`;
-            ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].forEach(d => {
-                html += `<th style="background:#34495e; color:white; padding:5px; text-align:center; width: 150px;">${d}</th>`;
-            });
-            html += `</tr>`;
-
-            const firstDay = new Date(calYear, calMonth, 1).getDay();
-            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-            let startDay = firstDay === 0 ? 7 : firstDay; 
-            
-            html += `<tr>`;
-            let currentCol = 1;
-            
-            for (let i = 1; i < startDay; i++) {
-                html += `<td style="background:#f9f9f9;"></td>`;
-                currentCol++;
-            }
-            
+            html += `<tr><th colspan="7" style="background:#2c3e50; color:white; font-size:16pt; padding:10px; text-align:center;">${title}</th></tr><tr>`;
+            ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].forEach(d => { html += `<th style="background:#34495e; color:white; padding:5px; text-align:center; width: 150px;">${d}</th>`; });
+            html += `</tr><tr>`;
+            const firstDay = new Date(calYear, calMonth, 1).getDay(); const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+            let startDay = firstDay === 0 ? 7 : firstDay; let currentCol = 1;
+            for (let i = 1; i < startDay; i++) { html += `<td style="background:#f9f9f9;"></td>`; currentCol++; }
             for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                const dayTasks = db.tareas.filter(t => t.fecha === dateStr);
-                
+                const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const dayTasks = db.tareas.filter(t => t.fecha === dateStr);
                 let cellContent = `<div style="text-align:right; font-weight:bold; color:#7f8c8d; margin-bottom:5px;">${i}</div>`;
-                dayTasks.forEach(t => {
-                    let decor = t.completada ? "text-decoration:line-through; color:#95a5a6;" : "color:#118180; font-weight:bold;";
-                    cellContent += `<div style="${decor}">• ${t.desc}</div>`;
-                });
-
+                dayTasks.forEach(t => { let decor = t.completada ? "text-decoration:line-through; color:#95a5a6;" : "color:#118180; font-weight:bold;"; cellContent += `<div style="${decor}">• ${t.desc}</div>`; });
                 html += `<td style="vertical-align:top; padding:10px; height:100px;">${cellContent}</td>`;
-                
-                if (currentCol === 7) {
-                    html += `</tr>`;
-                    if (i < daysInMonth) html += `<tr>`; 
-                    currentCol = 1;
-                } else {
-                    currentCol++;
-                }
+                if (currentCol === 7) { html += `</tr>`; if (i < daysInMonth) html += `<tr>`; currentCol = 1; } else { currentCol++; }
             }
-            
-            if (currentCol > 1) {
-                for (let i = currentCol; i <= 7; i++) {
-                    html += `<td style="background:#f9f9f9;"></td>`;
-                }
-                html += `</tr>`;
-            }
+            if (currentCol > 1) { for (let i = currentCol; i <= 7; i++) { html += `<td style="background:#f9f9f9;"></td>`; } html += `</tr>`; }
             html += `</table></body></html>`;
-
-            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-            const link = document.createElement("a"); 
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", `Calendario_${mNames[calMonth]}_${calYear}.xls`); 
-            link.click();
-        }
-
-        // --- SOLICITUDES DE TRASLADO (ADMIN) ---
-        function aprobarTraslado(reqId) {
-            if(!confirm("¿Aprobar este traslado?")) return;
-            const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId);
-            if(reqIdx === -1) return;
-            const req = db.trasladosPendientes[reqIdx];
-            
-            const hIdx = db.herramientas.findIndex(h => h.id_unico === req.herramienta_id);
-            if(hIdx !== -1) {
-                db.herramientas[hIdx].obra = req.destino;
-                db.herramientas[hIdx].historial.push({
-                    fecha: new Date().toISOString().split('T')[0],
-                    ubicacion: req.destino,
-                    detalle: `Traslado Aprobado (Solicitado por ${req.solicitante}): ${req.motivo}`,
-                    proveedor: ""
-                });
-            }
-            db.trasladosPendientes.splice(reqIdx, 1);
-            saveDatabase(true);
-            showToast("Traslado Aprobado y Registrado.");
-        }
-
-        function rechazarTraslado(reqId) {
-            if(!confirm("¿Rechazar esta solicitud?")) return;
-            const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId);
-            if(reqIdx !== -1) {
-                db.trasladosPendientes.splice(reqIdx, 1);
-                saveDatabase(true);
-                showToast("Solicitud rechazada.");
-            }
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Calendario_${mNames[calMonth]}_${calYear}.xls`); link.click();
         }
 
         // --- DASHBOARD DE INICIO ---
         function renderInicio() {
             const pending = db.tareas.filter(t => !t.completada).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
             let tHtml = '';
-            if(pending.length === 0) {
-                tHtml = `<p style="color:#7f8c8d; font-size:0.9rem; text-align:center; padding:10px; margin:0;">No hay tareas pendientes. ¡Excelente trabajo!</p>`;
-            } else {
-                pending.forEach(t => {
-                    const isOverdue = t.fecha < new Date().toISOString().split('T')[0];
-                    tHtml += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;">
-                        <div>
-                            <span class="badge ${isOverdue ? 'bg-err' : 'bg-info'}">${t.fecha.split('-').reverse().join('/')}</span>
-                            <span style="margin-left:10px; font-weight:bold; color:var(--primary);">${t.desc}</span>
-                        </div>
-                        <button class="btn btn-success btn-small" onclick="toggleTarea('${t.id}')">✔ Completar</button>
-                    </div>`;
-                });
-            }
+            if(pending.length === 0) { tHtml = `<p style="color:#7f8c8d; font-size:0.9rem; text-align:center; padding:10px; margin:0;">No hay tareas pendientes. ¡Excelente trabajo!</p>`; } 
+            else { pending.forEach(t => { const isOverdue = t.fecha < new Date().toISOString().split('T')[0]; tHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;"><div><span class="badge ${isOverdue ? 'bg-err' : 'bg-info'}">${t.fecha.split('-').reverse().join('/')}</span><span style="margin-left:10px; font-weight:bold; color:var(--primary);">${t.desc}</span></div><button class="btn btn-success btn-small" onclick="toggleTarea('${t.id}')">✔ Completar</button></div>`; }); }
             document.getElementById('inicio-tareas-lista').innerHTML = tHtml;
 
             if (currentUser && currentUser.rol !== 'bodeguero' && db.trasladosPendientes && db.trasladosPendientes.length > 0) {
-                document.getElementById('traslados-card').style.display = 'block';
-                let trHtml = '';
-                db.trasladosPendientes.forEach(req => {
-                    trHtml += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:5px;">
-                        <div>
-                            <span class="badge bg-info">${req.fecha.split('-').reverse().join('/')}</span>
-                            <b style="margin-left:10px;">${req.herramienta_nombre} (Serie: ${req.herramienta_serie})</b><br>
-                            <span style="font-size:0.85rem; color:#555; margin-top:5px; display:inline-block;">
-                                Solicita: <b>${req.solicitante}</b> | De: <b>${getObraNameById(req.origen)}</b> ➡️ Para: <b>${getObraNameById(req.destino)}</b><br>
-                                Motivo: <i>${req.motivo}</i>
-                            </span>
-                        </div>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn btn-success btn-small" onclick="aprobarTraslado('${req.id_solicitud}')">✔ Aprobar</button>
-                            <button class="btn btn-danger btn-small" onclick="rechazarTraslado('${req.id_solicitud}')">✖ Rechazar</button>
-                        </div>
-                    </div>`;
-                });
+                document.getElementById('traslados-card').style.display = 'block'; let trHtml = '';
+                db.trasladosPendientes.forEach(req => { trHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:5px;"><div><span class="badge bg-info">${req.fecha.split('-').reverse().join('/')}</span><b style="margin-left:10px;">${req.herramienta_nombre} (Serie: ${req.herramienta_serie})</b><br><span style="font-size:0.85rem; color:#555; margin-top:5px; display:inline-block;">Solicita: <b>${req.solicitante}</b> | De: <b>${getObraNameById(req.origen)}</b> ➡️ Para: <b>${getObraNameById(req.destino)}</b><br>Motivo: <i>${req.motivo}</i></span></div><div style="display:flex; gap:10px;"><button class="btn btn-success btn-small" onclick="aprobarTraslado('${req.id_solicitud}')">✔ Aprobar</button><button class="btn btn-danger btn-small" onclick="rechazarTraslado('${req.id_solicitud}')">✖ Rechazar</button></div></div>`; });
                 document.getElementById('inicio-traslados-lista').innerHTML = trHtml;
-            } else {
-                const card = document.getElementById('traslados-card');
-                if(card) card.style.display = 'none';
-            }
+            } else { const card = document.getElementById('traslados-card'); if(card) card.style.display = 'none'; }
 
-            let actH = db.herramientas.filter(h => h.obra !== 'BAJ-01');
-            let tDisp = 0, tObr = 0, tRep = 0;
-            actH.forEach(h => { 
-                const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra); 
-                if(e.txt.includes('Disponible')) tDisp++; 
-                else if(e.txt.includes('Mantención')) tRep++; 
-                else tObr++; 
-            });
-            document.getElementById('inicio-herr-stats').innerHTML = `
-                <div class="stat-card" style="border-left-color: #3498db;"><h3>${actH.length}</h3><p>Total Herramientas</p></div>
-                <div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>En Central</p></div>
-                <div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>En Obra</p></div>
-                <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>
-            `;
+            let actH = db.herramientas.filter(h => h.obra !== 'BAJ-01'); let tDisp = 0, tObr = 0, tRep = 0;
+            actH.forEach(h => { const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra); if(e.txt.includes('Disponible')) tDisp++; else if(e.txt.includes('Mantención')) tRep++; else tObr++; });
+            document.getElementById('inicio-herr-stats').innerHTML = `<div class="stat-card" style="border-left-color: #3498db;"><h3>${actH.length}</h3><p>Total Herramientas</p></div><div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>En Central</p></div><div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>`;
 
             let tO=0, tB=0, tBa=0, tD=0, tM=0; 
-            db.contenedores.forEach(c => { 
-                if(c.tipo==='Oficina') tO++; 
-                else if(c.tipo==='Bodega') tB++; 
-                else if(c.tipo==='Baños') tBa++; 
-                else if(c.tipo==='Duchas') tD++; 
-                else tM++; 
-            });
-            document.getElementById('inicio-cont-stats').innerHTML = `
-                <div class="stat-card-small" style="border-left-color: #3498db;"><h3>${db.contenedores.length}</h3><p>Total Contenedores</p></div>
-                <div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div>
-                <div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tB}</h3><p>Bodegas</p></div>
-                <div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBa}</h3><p>Baños</p></div>
-                <div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tD}</h3><p>Duchas</p></div>
-                <div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>
-            `;
+            db.contenedores.forEach(c => { if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
+            document.getElementById('inicio-cont-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${db.contenedores.length}</h3><p>Total Contenedores</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
         }
 
         // --- ORDENAMIENTO Y BÚSQUEDA OBRAS ---
-        function getSortedObras() {
-            return [...db.obras].sort((a, b) => {
-                let aCen = a.nombre.toLowerCase().includes('central'); let bCen = b.nombre.toLowerCase().includes('central');
-                if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0;
-            });
-        }
-        function getObrasOptionsHtml(includeAll = false, filteredId = null) {
-            let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : '';
-            const sortedObras = getSortedObras();
-            if (filteredId) { let fObra = sortedObras.find(o => o.id === filteredId); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } 
-            else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); }
-            return html;
-        }
-        function getObraNameById(id) {
-            if (id === 'MAN-01') return 'Taller / En Mantención';
-            if (id === 'BAJ-01') return 'Dada de Baja';
-            const o = db.obras.find(x => x.id === id); return o ? o.nombre : id;
-        }
+        function getSortedObras() { return [...db.obras].sort((a, b) => { let aCen = a.nombre.toLowerCase().includes('central'); let bCen = b.nombre.toLowerCase().includes('central'); if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0; }); }
+        function getObrasOptionsHtml(includeAll = false, filteredId = null) { let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : ''; const sortedObras = getSortedObras(); if (filteredId) { let fObra = sortedObras.find(o => o.id === filteredId); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); } return html; }
+        function getObraNameById(id) { if (id === 'MAN-01') return 'Taller / En Mantención'; if (id === 'BAJ-01') return 'Dada de Baja'; const o = db.obras.find(x => x.id === id); return o ? o.nombre : id; }
         function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
 
-        // ==========================================
-        // MÓDULO BODEGAS INTERNAS
-        // ==========================================
-
-        function openBodegaView(nombreBodega, btn) {
-            currentBodegaName = nombreBodega;
-            document.getElementById('bodega-view-title').innerText = `Inventario: ${nombreBodega}`;
-            showSection('bodegas-inv', btn);
-            renderBodegaInv();
-        }
-
+        // --- BODEGAS INTERNAS ---
+        function openBodegaView(nombreBodega, btn) { currentBodegaName = nombreBodega; document.getElementById('bodega-view-title').innerText = `Inventario: ${nombreBodega}`; showSection('bodegas-inv', btn); renderBodegaInv(); }
         async function addInvBodega() {
-            const mat = document.getElementById('bi-mat').value.trim().toUpperCase();
-            const cat = document.getElementById('bi-cat').value; 
-            const uni = document.getElementById('bi-uni').value;
-            const cant = parseFloat(document.getElementById('bi-cant').value);
-            const com = document.getElementById('bi-com').value.trim();
-            const fec = new Date().toISOString().split('T')[0];
-            const id_unico = Date.now().toString();
-
-            const fileInput = document.getElementById('bi-file');
-            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
-            let placeholder = file ? "⏳ Subiendo..." : null;
-
-            db.invBodegas.push({ 
-                id_unico: id_unico, bodega: currentBodegaName, material: mat, categoria: cat, 
-                unidad: uni, cantidad: cant, comentario: com, fecha: fec, pdfUrl: placeholder 
-            });
-            const mIdx = db.invBodegas.length - 1;
-
-            saveDatabase(true); 
-            ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = '');
-            if(fileInput) fileInput.value = '';
-            showToast("Ítem ingresado a " + currentBodegaName);
-            renderBodegaInv();
-
-            if (file) {
-                const r = new FileReader(); r.readAsDataURL(file);
-                r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop();
-                    const docId = `BOD_${id_unico}_${Date.now()}.${ext}`;
-                    try {
-                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
-                        const url = await resp.text(); 
-                        if(db.invBodegas[mIdx]) { db.invBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegaInv(); }
-                    } catch(e) {}
-                };
-            }
+            const mat = document.getElementById('bi-mat').value.trim().toUpperCase(); const cat = document.getElementById('bi-cat').value; const uni = document.getElementById('bi-uni').value; const cant = parseFloat(document.getElementById('bi-cant').value); const com = document.getElementById('bi-com').value.trim(); const fec = new Date().toISOString().split('T')[0]; const id_unico = Date.now().toString();
+            const fileInput = document.getElementById('bi-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
+            db.invBodegas.push({ id_unico: id_unico, bodega: currentBodegaName, material: mat, categoria: cat, unidad: uni, cantidad: cant, comentario: com, fecha: fec, pdfUrl: placeholder }); const mIdx = db.invBodegas.length - 1;
+            saveDatabase(true); ['bi-mat','bi-cant','bi-com'].forEach(id => document.getElementById(id).value = ''); if(fileInput) fileInput.value = ''; showToast("Ítem ingresado a " + currentBodegaName); renderBodegaInv();
+            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `BOD_${id_unico}_${Date.now()}.${ext}`; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); if(db.invBodegas[mIdx]) { db.invBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegaInv(); } } catch(e) {} }; }
         }
 
         function getStockBodega(bodega, material, unidad, categoria) {
-            let ing = 0;
-            db.invBodegas.filter(i => i.bodega === bodega && i.material === material && i.unidad === unidad && (i.categoria || 'Material') === categoria).forEach(i => ing += i.cantidad);
-            let sal = 0;
-            db.despachosBodegas.forEach(d => {
-                d.items.forEach(it => { if(it.bodega === bodega && it.material === material && it.unidad === unidad && (it.categoria || 'Material') === categoria) sal += it.cant; });
-            });
-            return { ing, sal, stock: ing - sal };
+            let ing = 0; db.invBodegas.filter(i => i.bodega === bodega && i.material === material && i.unidad === unidad && (i.categoria || 'Material') === categoria).forEach(i => ing += i.cantidad);
+            let sal = 0; db.despachosBodegas.forEach(d => { d.items.forEach(it => { if(it.bodega === bodega && it.material === material && it.unidad === unidad && (it.categoria || 'Material') === categoria) sal += it.cant; }); }); return { ing, sal, stock: ing - sal };
         }
 
         function renderBodegaInv() {
-            const searchQ = document.getElementById('search-bod-inv').value.toLowerCase().trim();
-            const grouped = {};
-            
+            const searchQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const grouped = {};
             let filteredList = db.invBodegas.map((i, idx) => ({...i, oIdx: idx}));
-            
-            filteredList.filter(i => i.bodega === currentBodegaName).forEach(i => {
-                const cat = i.categoria || 'Material';
-                const k = `${i.material}_${i.unidad}_${cat}`;
-                if(!grouped[k]) grouped[k] = { material: i.material, unidad: i.unidad, categoria: cat, items: [] };
-                grouped[k].items.push(i);
-            });
-
-            let list = Object.values(grouped);
-            if (searchQ) list = list.filter(item => item.material.toLowerCase().includes(searchQ));
-
+            filteredList.filter(i => i.bodega === currentBodegaName).forEach(i => { const cat = i.categoria || 'Material'; const k = `${i.material}_${i.unidad}_${cat}`; if(!grouped[k]) grouped[k] = { material: i.material, unidad: i.unidad, categoria: cat, items: [] }; grouped[k].items.push(i); });
+            let list = Object.values(grouped); if (searchQ) list = list.filter(item => item.material.toLowerCase().includes(searchQ));
             document.getElementById('print-bi-name').innerText = `Inventario Bodega: ${currentBodegaName}`;
-
             let html = ''; let gIdx = 0;
             list.forEach(item => {
-                const s = getStockBodega(currentBodegaName, item.material, item.unidad, item.categoria);
-                const sId = 'bi_grp_' + gIdx++;
-                let badgeCls = item.categoria === 'Faena' ? 'bg-warn' : 'bg-info';
-                
-                html += `
-                <tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')">
-                    <td><b>${item.material}</b></td>
-                    <td><span class="badge ${badgeCls}">${item.categoria}</span></td>
-                    <td>${item.unidad}</td><td>${s.ing}</td><td>${s.sal}</td>
-                    <td><b style="color:${s.stock > 0 ? 'green' : 'red'}">${s.stock}</b></td>
-                    <td class="no-print"><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td>
-                </tr>
-                <tr id="${sId}" style="display:none;"><td colspan="7"><table style="background:white; border:1px solid #ddd; width:100%;">
-                    <thead style="background:#34495e; color:white;"><tr><th>Fecha</th><th>Cantidad Ingresada</th><th>Comentario</th><th>Archivo</th><th class="no-print">Acción</th></tr></thead>
-                    <tbody>${item.items.map(u => `<tr><td>${u.fecha}</td><td>${u.cantidad} ${u.unidad}</td><td>${u.comentario || '-'}</td>
-                    <td>${u.pdfUrl ? (u.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${u.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">📄 Ver Archivo</a>`) : '-'}</td>
-                    <td class="no-print">${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('invBodegas', ${u.oIdx}); renderBodegaInv(); event.stopPropagation();">X</button>` : '-'}</td></tr>`).join('')}
-                    </tbody></table></td></tr>`;
+                const s = getStockBodega(currentBodegaName, item.material, item.unidad, item.categoria); const sId = 'bi_grp_' + gIdx++; let badgeCls = item.categoria === 'Faena' ? 'bg-warn' : 'bg-info';
+                html += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sId}')"><td><b>${item.material}</b></td><td><span class="badge ${badgeCls}">${item.categoria}</span></td><td>${item.unidad}</td><td>${s.ing}</td><td>${s.sal}</td><td><b style="color:${s.stock > 0 ? 'green' : 'red'}">${s.stock}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalle ⬇️</button></td></tr>
+                <tr id="${sId}" style="display:none;"><td colspan="7"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Fecha</th><th>Cantidad Ingresada</th><th>Comentario</th><th>Archivo</th><th class="no-print">Acción</th></tr></thead>
+                <tbody>${item.items.map(u => `<tr><td>${u.fecha}</td><td>${u.cantidad} ${u.unidad}</td><td>${u.comentario || '-'}</td><td>${u.pdfUrl ? (u.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${u.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">📄 Ver Archivo</a>`) : '-'}</td><td class="no-print">${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" onclick="deleteRecord('invBodegas', ${u.oIdx}); renderBodegaInv(); event.stopPropagation();">X</button>` : '-'}</td></tr>`).join('')}</tbody></table></td></tr>`;
             });
             document.getElementById('table-bod-inv-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay ítems registrados en esta bodega.</td></tr>';
         }
 
-        function updateBodSalMatSelect() {
-            const bod = document.getElementById('bs-origen').value;
-            const sel = document.getElementById('bs-mat');
-            if(!bod) { sel.innerHTML = ''; return; }
-            
-            const uniqueMats = {};
-            db.invBodegas.filter(i => i.bodega === bod).forEach(i => { 
-                const cat = i.categoria || 'Material';
-                uniqueMats[`${i.material}_${i.unidad}_${cat}`] = i; 
-            });
-
-            let opts = '';
-            Object.values(uniqueMats).forEach(item => {
-                const cat = item.categoria || 'Material';
-                const s = getStockBodega(bod, item.material, item.unidad, cat);
-                if (s.stock > 0) opts += `<option value="${item.material}|${item.unidad}|${cat}">[${cat}] ${item.material} - Disp: ${s.stock} ${item.unidad}</option>`;
-            });
-            sel.innerHTML = opts || '<option value="">Sin stock disponible en esta bodega</option>';
-        }
-
-        function addToDraftBod() {
-            const bod = document.getElementById('bs-origen').value;
-            const matSelect = document.getElementById('bs-mat').value;
-            const cant = parseFloat(document.getElementById('bs-cant').value);
-            
-            if(!bod || !matSelect || !cant) return alert("Complete todos los campos del material.");
-            const [material, unidad, categoria] = matSelect.split('|');
-            const s = getStockBodega(bod, material, unidad, categoria);
-            if(cant > s.stock) return alert(`No hay stock suficiente. Máximo: ${s.stock}`);
-            
-            drafts.bod.push({ bodega: bod, material, unidad, categoria, cant });
-            document.getElementById('bs-cant').value = ''; renderDraftsBod();
-        }
-
+        function updateBodSalMatSelect() { const bod = document.getElementById('bs-origen').value; const sel = document.getElementById('bs-mat'); if(!bod) { sel.innerHTML = ''; return; } const uniqueMats = {}; db.invBodegas.filter(i => i.bodega === bod).forEach(i => { const cat = i.categoria || 'Material'; uniqueMats[`${i.material}_${i.unidad}_${cat}`] = i; }); let opts = ''; Object.values(uniqueMats).forEach(item => { const cat = item.categoria || 'Material'; const s = getStockBodega(bod, item.material, item.unidad, cat); if (s.stock > 0) opts += `<option value="${item.material}|${item.unidad}|${cat}">[${cat}] ${item.material} - Disp: ${s.stock} ${item.unidad}</option>`; }); sel.innerHTML = opts || '<option value="">Sin stock disponible en esta bodega</option>'; }
+        function addToDraftBod() { const bod = document.getElementById('bs-origen').value; const matSelect = document.getElementById('bs-mat').value; const cant = parseFloat(document.getElementById('bs-cant').value); if(!bod || !matSelect || !cant) return alert("Complete todos los campos del material."); const [material, unidad, categoria] = matSelect.split('|'); const s = getStockBodega(bod, material, unidad, categoria); if(cant > s.stock) return alert(`No hay stock suficiente. Máximo: ${s.stock}`); drafts.bod.push({ bodega: bod, material, unidad, categoria, cant }); document.getElementById('bs-cant').value = ''; renderDraftsBod(); }
         function renderDraftsBod() { document.getElementById('bod-draft').innerHTML = drafts.bod.map((it, i) => `<tr><td>${it.bodega}</td><td><span class="badge ${it.categoria === 'Faena' ? 'bg-warn' : 'bg-info'}">${it.categoria}</span> ${it.material}</td><td>${it.cant} ${it.unidad}</td><td><button class="btn btn-danger btn-small" onclick="removeFromDraftBod(${i})">X</button></td></tr>`).join(''); }
         function removeFromDraftBod(i) { drafts.bod.splice(i, 1); renderDraftsBod(); }
 
         async function saveFinalBod() {
-            const id = document.getElementById('bs-guia').value.trim(); const obraDest = document.getElementById('bs-obra').value;
-            if (!id || drafts.bod.length === 0 || !obraDest) return alert("Falta Guía, Obra o items");
-            
+            const id = document.getElementById('bs-guia').value.trim(); const obraDest = document.getElementById('bs-obra').value; if (!id || drafts.bod.length === 0 || !obraDest) return alert("Falta Guía, Obra o items");
             const file = document.getElementById('bs-file').files[0]; const plc = file ? "⏳ Subiendo..." : null;
-            
-            db.despachosBodegas.push({ id_despacho: Date.now().toString(), guia: id, obra: obraDest, fecha: new Date().toISOString().split('T')[0], pdfUrl: plc, items: [...drafts.bod] });
-            const mIdx = db.despachosBodegas.length - 1;
-            drafts.bod = []; document.getElementById('bs-guia').value = ''; 
-            await saveDatabase(true); renderBodegasSalidas(); showToast("Despacho confirmado.");
-            
-            if (file) {
-                const r = new FileReader(); r.readAsDataURL(file);
-                r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const docId = `DESP_BOD_${Date.now()}`;
-                    try {
-                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); 
-                        const url = await resp.text(); 
-                        if(db.despachosBodegas[mIdx]) { db.despachosBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegasSalidas(); showToast("PDF Subido"); }
-                    } catch(e) {}
-                };
-            }
+            db.despachosBodegas.push({ id_despacho: Date.now().toString(), guia: id, obra: obraDest, fecha: new Date().toISOString().split('T')[0], pdfUrl: plc, items: [...drafts.bod] }); const mIdx = db.despachosBodegas.length - 1; drafts.bod = []; document.getElementById('bs-guia').value = ''; await saveDatabase(true); renderBodegasSalidas(); showToast("Despacho confirmado.");
+            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const docId = `DESP_BOD_${Date.now()}`; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId+'.pdf', base64: b64 }) }); const url = await resp.text(); if(db.despachosBodegas[mIdx]) { db.despachosBodegas[mIdx].pdfUrl = url; saveDatabase(true); renderBodegasSalidas(); showToast("PDF Subido"); } } catch(e) {} }; }
         }
 
         function renderBodegasSalidas() {
-            document.getElementById('bs-obra').innerHTML = getObrasOptionsHtml(false, null);
-            let h = '';
-            db.despachosBodegas.forEach((d, idx) => {
-                h += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${getObraNameById(d.obra)}</td><td>${d.items.length} items</td><td>
-                ${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>`) : '-'}
-                <button class="btn btn-danger btn-small" onclick="deleteRecord('despachosBodegas', ${idx}); renderBodegasSalidas();" style="margin-left:5px;">X</button></td></tr>`;
-            });
-            document.getElementById('table-bod-sal-body').innerHTML = h || '<tr><td colspan="5" style="text-align:center;">No hay despachos registrados.</td></tr>';
+            document.getElementById('bs-obra').innerHTML = getObrasOptionsHtml(false, null); let h = '';
+            db.despachosBodegas.forEach((d, idx) => { h += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${getObraNameById(d.obra)}</td><td>${d.items.length} items</td><td>${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>`) : '-'} <button class="btn btn-danger btn-small" onclick="deleteRecord('despachosBodegas', ${idx}); renderBodegasSalidas();" style="margin-left:5px;">X</button></td></tr>`; }); document.getElementById('table-bod-sal-body').innerHTML = h || '<tr><td colspan="5" style="text-align:center;">No hay despachos registrados.</td></tr>';
         }
 
         function renderBodegasReporte() {
-            const selObra = document.getElementById('filter-bod-rep-obra');
-            if (selObra.options.length === 0) selObra.innerHTML = getObrasOptionsHtml(false, null);
-            const obraId = selObra.value; if(!obraId) return;
-
-            document.getElementById('print-bod-title').innerText = `Reporte de Entregas Internas - Obra: ${getObraNameById(obraId)}`;
-            let html = '';
-            db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => {
-                d.items.forEach(it => {
-                    html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td><span class="badge ${it.categoria==='Faena'?'bg-warn':'bg-info'}">${it.categoria||'Material'}</span> ${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>`) : '-'}</td></tr>`;
-                });
-            });
-            document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
+            const selObra = document.getElementById('filter-bod-rep-obra'); if (selObra.options.length === 0) selObra.innerHTML = getObrasOptionsHtml(false, null); const obraId = selObra.value; if(!obraId) return;
+            document.getElementById('print-bod-title').innerText = `Reporte de Entregas Internas - Obra: ${getObraNameById(obraId)}`; let html = '';
+            db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { html += `<tr><td>${d.fecha}</td><td><b>${d.guia}</b></td><td>${it.bodega}</td><td><span class="badge ${it.categoria==='Faena'?'bg-warn':'bg-info'}">${it.categoria||'Material'}</span> ${it.material}</td><td><b>${it.cant}</b></td><td>${it.unidad}</td><td class="no-print">${d.pdfUrl ? (d.pdfUrl === '⏳ Subiendo...' ? '⏳ Subiendo...' : `<a href="${d.pdfUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">PDF</a>`) : '-'}</td></tr>`; }); }); document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
         }
 
         // --- HERRAMIENTAS ---
         function getEstadoHerramienta(n, id) { if (id === 'BAJ-01') return { txt: '⚫ Baja', cls: 'bg-dark' }; const l = n.toLowerCase(); if (l.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' }; if (l.includes('reparaci') || l.includes('mantenci') || l.includes('taller') || id === 'MAN-01') return { txt: '🔴 En Mantención', cls: 'bg-err' }; return { txt: '🟡 En Obra', cls: 'bg-warn' }; }
         
         async function addHerramienta() { 
-            const modInput = document.getElementById('h-mod').value.trim().toUpperCase();
-            const serInput = document.getElementById('h-ser').value.trim().toUpperCase();
-            const existe = db.herramientas.find(h => h.modelo === modInput && h.serie === serInput);
-            if (existe) { alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`); return; }
-
-            const id_unico = Date.now().toString();
-            const fileInput = document.getElementById('h-file');
-            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
-            let placeholder = file ? "⏳ Subiendo..." : null;
-
-            const h = { 
-                id_unico: id_unico, nombre: document.getElementById('h-nom').value.trim().toUpperCase(), 
-                cat: document.getElementById('h-cat').value, marca: document.getElementById('h-mar').value.trim().toUpperCase(), 
-                modelo: modInput, serie: serInput, obra: document.getElementById('h-obr').value, 
-                fecha: document.getElementById('h-fec').value, valor: parseFloat(document.getElementById('h-val').value), 
-                historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial", pdfUrl: placeholder }] 
-            }; 
-            db.herramientas.push(h); const hIdx = db.herramientas.length - 1;
-
-            saveDatabase(true); ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); 
-            if(fileInput) fileInput.value = ''; showToast("Herramienta Registrada"); renderHerramientas();
-
-            if (file) {
-                const r = new FileReader(); r.readAsDataURL(file);
-                r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
-                    try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { db.herramientas[hIdx].historial[0].pdfUrl = url; saveDatabase(true); renderHerramientas(); } } catch(e) {}
-                };
-            }
+            const modInput = document.getElementById('h-mod').value.trim().toUpperCase(); const serInput = document.getElementById('h-ser').value.trim().toUpperCase();
+            const existe = db.herramientas.find(h => h.modelo === modInput && h.serie === serInput); if (existe) { alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`); return; }
+            const id_unico = Date.now().toString(); const fileInput = document.getElementById('h-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
+            const h = { id_unico: id_unico, nombre: document.getElementById('h-nom').value.trim().toUpperCase(), cat: document.getElementById('h-cat').value, marca: document.getElementById('h-mar').value.trim().toUpperCase(), modelo: modInput, serie: serInput, obra: document.getElementById('h-obr').value, fecha: document.getElementById('h-fec').value, valor: parseFloat(document.getElementById('h-val').value), historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial", pdfUrl: placeholder }] }; 
+            db.herramientas.push(h); const hIdx = db.herramientas.length - 1; saveDatabase(true); 
+            ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); if(fileInput) fileInput.value = ''; showToast("Herramienta Registrada"); renderHerramientas();
+            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `HERR_${id_unico}_${Date.now()}.${ext}`; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { db.herramientas[hIdx].historial[0].pdfUrl = url; saveDatabase(true); renderHerramientas(); } } catch(e) {} }; }
         }
 
         function renderHerramientas() {
             const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim();
             let all = db.herramientas.map((h, i) => ({...h, oIdx: i})); let act = all.filter(h => h.obra !== 'BAJ-01'); let baj = all.filter(h => h.obra === 'BAJ-01');
-            if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId);
+            if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); else if (fV !== "ALL") act = act.filter(h => h.obra === fV); 
             if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ));
             let tTot = act.length; let tDisp = 0; let tObr = 0; let tRep = 0; act.forEach(h => { const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra); if(e.txt.includes('Disponible')) tDisp++; else if(e.txt.includes('Mantención')) tRep++; else tObr++; });
             document.getElementById('h-stats').innerHTML = `<div class="stat-card" style="border-left-color:#3498db;"><h3>${tTot}</h3><p>Activos</p></div><div class="stat-card" style="border-left-color:#27ae60;"><h3>${tDisp}</h3><p>Central</p></div><div class="stat-card" style="border-left-color:#f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color:#e74c3c;"><h3>${tRep}</h3><p>Mantención</p></div>`;
-            
             const printTitle = (fV !== "ALL") ? `Inventario Herramientas: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Herramientas: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Herramientas");
             const ph = document.getElementById('print-her-obra-name'); if(ph) ph.innerText = printTitle;
-
-            const gr = {}; act.forEach(h => { if (!gr[h.nombre]) gr[h.nombre] = []; gr[h.nombre].push(h); });
-            let h = ''; let gi = 0; for (const k in gr) { const sid = 'h_g_'+gi++; h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${k}</b></td><td><b>${gr[k].length}</b> unid.</td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Marca / Mod</th><th>Serie</th><th>Ubicación</th><th>Estado</th><th>Prov.</th><th class="no-print">Acción</th></tr></thead><tbody>${gr[k].map(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${p}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.oIdx}); event.stopPropagation();">Hoja Vida</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`; }).join('')}</tbody></table></td></tr>`; }
+            const gr = {}; act.forEach(h => { if (!gr[h.nombre]) gr[h.nombre] = []; gr[h.nombre].push(h); }); let h = ''; let gi = 0; for (const k in gr) { const sid = 'h_g_'+gi++; h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${k}</b></td><td><b>${gr[k].length}</b> unid.</td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Marca / Mod</th><th>Serie</th><th>Ubicación</th><th>Estado</th><th>Prov.</th><th class="no-print">Acción</th></tr></thead><tbody>${gr[k].map(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${p}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.oIdx}); event.stopPropagation();">Hoja Vida</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`; }).join('')}</tbody></table></td></tr>`; }
             document.querySelector('#table-herramientas-body').innerHTML = h;
             document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
         }
 
+        // --- HOJA DE VIDA Y TRASLADOS ---
         function toggleProveedorTaller() { const ub = document.getElementById('cv-her-nueva-ub').value; const div = document.getElementById('div-prov-taller'); if(div) div.style.display = (ub === 'MAN-01') ? 'block' : 'none'; }
-        function toggleResolucion() { const res = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => document.getElementById(id).style.display = res === 'BAJA' ? 'none' : 'block'); }
+        function toggleResolucion() { const r = document.getElementById('cv-res-tipo'); if(r) { const v = r.value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = v === 'BAJA' ? 'none' : 'block'; }); } }
         const bPdfMini = (u) => u === "⏳ Subiendo..." ? `<span style="color:#e67e22; font-size:0.8rem;">${u}</span>` : (u ? `<a href="${u}" target="_blank" style="color:var(--accent); font-weight:bold; font-size:0.8rem; margin-left:10px;">📄 Ver Archivo</a>` : '');
 
         function abrirCV(tipo, idx) {
@@ -1212,7 +826,7 @@
                 document.getElementById('cv-her-datos').innerHTML = `<div class="cv-item"><b>Categoría</b> ${h.cat}</div><div class="cv-item"><b>Marca/Mod</b> ${h.marca} ${h.modelo}</div><div class="cv-item"><b>Serie</b> ${h.serie}</div><div class="cv-item" style="grid-column: 1/-1; background:#fff; padding:10px; border:1px dashed #ccc;"><b>Estado:</b> <span class="badge ${e.cls}">${e.txt}</span> en ${getObraNameById(h.obra)}</div>`;
                 document.getElementById('cv-her-historial-body').innerHTML = (h.historial && h.historial.length) ? h.historial.map((m,i)=>`<tr><td>${m.fecha}</td><td><b>${getObraNameById(m.ubicacion)}</b></td><td>${m.detalle} ${m.pdfUrl?bPdfMini(m.pdfUrl):''}</td><td class="no-print">${(currentUser.rol!=='bodeguero'&&i>0)?`<button class="btn btn-danger btn-small" onclick="eliminarMovHer(${i})">X</button>`:'-'}</td></tr>`).join('') : `<tr><td colspan="4">Vacio</td></tr>`;
                 const bx = document.getElementById('cv-her-action-box');
-                if (h.obra === 'BAJ-01') { bx.style.display = 'none'; } else if (currentUser.rol === 'bodeguero') { bx.style.display = 'block'; bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Solicitar Traslado de Equipo</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Destino Solicitado:</label><select id="cv-her-sol-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}</select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Tarea:</label><input type="text" id="cv-her-sol-com" placeholder="Ej: Se necesita para corte de cerámica..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-warn" style="background:#f39c12; color:white; padding:10px 20px;" onclick="solicitarTrasladoHerramienta()">Enviar Solicitud</button></div>`; } else { bx.style.display = 'block'; if (e.txt.includes('Mantención')) { bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false, null)}</select></div><div style="grid-column: 1 / -1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-comentario-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-valor" placeholder="0" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf,image/*" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`; setTimeout(toggleResolucion, 50); } else { bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01">Taller / En Mantención</option></select></div><div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Proveedor / Taller:</label><input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla de motor" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button></div>`; } }
+                if (h.obra === 'BAJ-01') { bx.style.display = 'none'; } else if (currentUser.rol === 'bodeguero') { bx.style.display = 'block'; bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Solicitar Traslado de Equipo</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Destino Solicitado:</label><select id="cv-her-sol-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}</select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Tarea:</label><input type="text" id="cv-her-sol-com" placeholder="Ej: Se necesita para corte de cerámica..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-warn" style="background:#f39c12; color:white; padding:10px 20px;" onclick="solicitarTrasladoHerramienta()">Enviar Solicitud</button></div>`; } else { bx.style.display = 'block'; if (e.txt.includes('Mantención')) { bx.innerHTML = `<h4 style="margin-bottom:10px;">Resolución</h4><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><label>Acción</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada</option><option value="BAJA">🗑️ Baja</option></select></div><div id="div-res-ub"><label>A Obra</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label>Detalle Técnico</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label>Costo ($)</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label>PDF Respaldo</label><input type="file" id="cv-her-file" style="width:100%; padding:8px;" accept=".pdf,image/*"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procRes()">Guardar</button>`; setTimeout(toggleResolucion, 50); } else { bx.innerHTML = `<h4 style="margin-bottom:10px;">Nuevo Movimiento</h4><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1;"><label>Destino</label><select id="cv-her-nueva-ub" onchange="toggleProv()" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}<option value="MAN-01">Taller / Mantención</option></select></div><div id="div-prov-taller" style="display:none;"><label>Taller</label><input type="text" id="cv-her-prov" style="width:100%; padding:8px;"></div><div style="flex:1;"><label>Comentario</label><input type="text" id="cv-her-com" style="width:100%; padding:8px;"></div><button class="btn btn-primary" onclick="regMovHer()">Registrar</button></div>`; } }
                 document.getElementById('modal-cv-her').style.display = 'block';
             } else {
                 const c = db.contenedores[idx]; document.getElementById('cv-cont-titulo').innerText = `Contenedor: ${c.num}`;
@@ -1227,9 +841,29 @@
 
         function regMovHer() { const idx = cvActivoIndex.idx; const ub = document.getElementById('cv-her-nueva-ub').value; const c = document.getElementById('cv-her-com').value.trim() || "Traslado"; const pD = document.getElementById('div-prov-taller'); const p = (document.getElementById('cv-her-prov') && pD && pD.style.display !== 'none') ? document.getElementById('cv-her-prov').value.trim() : ""; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: ub, detalle: c + (p?` | Taller: ${p}`:''), proveedor: p }); saveDatabase(true); cerrarCV('modal-cv-her'); renderHerramientas(); showToast("Movimiento registrado"); }
         function solicitarTrasladoHerramienta() { const idx = cvActivoIndex.idx; const h = db.herramientas[idx]; const destino = document.getElementById('cv-her-sol-ub').value; const motivo = document.getElementById('cv-her-sol-com').value.trim(); if(!destino || !motivo) return alert("Selecciona un destino y escribe un motivo."); if (!db.trasladosPendientes) db.trasladosPendientes = []; db.trasladosPendientes.push({ id_solicitud: Date.now().toString(), herramienta_id: h.id_unico, herramienta_nombre: h.nombre, herramienta_serie: h.serie, origen: h.obra, destino: destino, motivo: motivo, solicitante: currentUser.nombre, fecha: new Date().toISOString().split('T')[0] }); saveDatabase(true); cerrarCV('modal-cv-her'); showToast("Solicitud enviada a Administración."); }
+        function aprobarTraslado(reqId) { if(!confirm("¿Aprobar este traslado?")) return; const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId); if(reqIdx === -1) return; const req = db.trasladosPendientes[reqIdx]; const hIdx = db.herramientas.findIndex(h => h.id_unico === req.herramienta_id); if(hIdx !== -1) { db.herramientas[hIdx].obra = req.destino; db.herramientas[hIdx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: req.destino, detalle: `Traslado Aprobado (Solicitado por ${req.solicitante}): ${req.motivo}`, proveedor: "" }); } db.trasladosPendientes.splice(reqIdx, 1); saveDatabase(true); showToast("Traslado Aprobado y Registrado."); }
+        function rechazarTraslado(reqId) { if(!confirm("¿Rechazar esta solicitud?")) return; const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId); if(reqIdx !== -1) { db.trasladosPendientes.splice(reqIdx, 1); saveDatabase(true); showToast("Solicitud rechazada."); } }
         async function procRes() { const idx = cvActivoIndex.idx; const r = document.getElementById('cv-res-tipo').value; const c = document.getElementById('cv-her-com-res').value.trim(); const f = new Date().toISOString().split('T')[0]; let ub = '', det = ''; if(r==='BAJA') { ub='BAJ-01'; det=`BAJA: ${c}`; } else { ub=document.getElementById('cv-res-nueva-ub').value; det=`REPARADA: ${c} | Costo: $${document.getElementById('cv-her-val').value||0}`; } const file = document.getElementById('cv-her-file')?document.getElementById('cv-her-file').files[0]:null; let plc = file ? "⏳ Subiendo..." : null; db.herramientas[idx].obra = ub; db.herramientas[idx].historial.push({ fecha:f, ubicacion:ub, detalle:det, pdfUrl:plc }); const mI = db.herramientas[idx].historial.length-1; saveDatabase(true); cerrarCV('modal-cv-her'); renderHerramientas(); showToast("Resolución guardada"); if(file){ const rd=new FileReader(); rd.readAsDataURL(file); rd.onload=async()=>{ const b64=rd.result.split(',')[1]; const ext=file.name.split('.').pop(); const dId=`REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; try { const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'uploadPDF',filename:dId,base64:b64})}); const url=await res.text(); if(db.herramientas[idx].historial[mI]){ db.herramientas[idx].historial[mI].pdfUrl=url; saveDatabase(true); } } catch(e){} }; } }
         function eliminarMovHer(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); }
         
+        // --- CONTENEDORES ---
+        function addContenedor() { const c = { id_unico: Date.now().toString(), tipo: document.getElementById('c-tip').value, num: document.getElementById('c-num').value.trim().toUpperCase(), obra: document.getElementById('c-obr').value, detExt: document.getElementById('c-ext').value.trim(), detInt: document.getElementById('c-int').value.trim(), historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Ingreso inicial" }] }; db.contenedores.push(c); saveDatabase(); ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = ''); showToast("✅ Contenedor registrado"); }
+        function renderContenedores() {
+            const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL";
+            let list = db.contenedores.map((c, i) => ({...c, oIdx: i})); 
+            if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId); else if (fV !== "ALL") list = list.filter(c => c.obra === fV);
+            
+            let tT=0, tO=0, tB=0, tBa=0, tD=0, tM=0; list.forEach(c => { tT++; if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
+            document.getElementById('c-stats').innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
+            
+            const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
+            const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
+
+            const gr = {}; list.forEach(c => { if (!gr[c.obra]) gr[c.obra] = { n: getObraNameById(c.obra), it: [], c: {} }; gr[c.obra].it.push(c); const t = c.tipo || 'Otro'; gr[c.obra].c[t] = (gr[c.obra].c[t]||0)+1; });
+            let h = ''; let gi = 0; for (const o in gr) { const g = gr[o]; const sid = 'c_g_'+gi++; let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>${g.it.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white; border:none;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser.rol!=='bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}</tbody></table></td></tr>`; }
+            document.querySelector('#table-contenedores-body').innerHTML = h;
+        }
+
         async function registrarMovimientoContenedor() { 
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const ub = document.getElementById(`cv-cont-nueva-ub`).value; const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; const f = new Date().toISOString().split('T')[0];
@@ -1241,16 +875,28 @@
         }
         function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
-        // --- EXPORTACIONES ---
+        // --- EXPORTACIONES EXCEL ---
         function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
         function exportExcelContenedores() { const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL"; let list = db.contenedores; if (fV !== "ALL") list = list.filter(c => c.obra === fV); else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId); let csv = "\uFEFFUbicación/Obra;Tipo;N° Contenedor;Detalle Exterior;Detalle Interior\n"; list.forEach(c => { csv += `${getObraNameById(c.obra)};${c.tipo};${c.num};${c.detExt};${c.detInt}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Contenedores.csv`); link.click(); }
         function exportExcelBodegaInv() { const sQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const gr = {}; db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => { const cat = i.categoria || 'Material'; const k = `${i.material}_${i.unidad}_${cat}`; if(!gr[k]) gr[k] = { m: i.material, u: i.unidad, cat: cat, c: [] }; if(i.comentario) gr[k].c.push(`${i.fecha}: ${i.comentario}`); }); let ls = Object.values(gr); if(sQ) ls = ls.filter(x => x.m.toLowerCase().includes(sQ)); let csv = `\uFEFFInventario Bodega: ${currentBodegaName}\nÍtem/Material;Categoría;Unidad;T. Ingresado;T. Despachado;Stock Actual;Comentarios\n`; ls.forEach(x => { const s = getStockBodega(currentBodegaName, x.m, x.u, x.cat); const cm = x.c.length > 0 ? x.c.join(' | ') : '-'; csv += `${x.m};${x.cat};${x.u};${s.ing};${s.sal};${s.stock};${cm}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_${currentBodegaName}.csv`); link.click(); }
         function exportExcelBodegasReporte() { const selObra = document.getElementById('filter-bod-rep-obra'); const obraId = selObra.value; if(!obraId) return; let csv = `\uFEFFReporte de Entregas Internas - Obra: ${getObraNameById(obraId)}\nFecha;Guía Despacho;Bodega Origen;Categoría;Ítem Entregado;Cantidad;Unidad\n`; db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { const cat = it.categoria || 'Material'; csv += `${d.fecha};${d.guia};${it.bodega};${cat};${it.material};${it.cant};${it.unidad}\n`; }); }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Entregas_${getObraNameById(obraId)}.csv`); link.click(); }
-
-        // --- MATERIALES GLOBALES ---
-        function calculateStats(ocId, mat) { const oc = db.ocs.find(o => o.id === ocId && o.material === mat); const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0); const d = db.salidas.filter(s => s.ocId === ocId && s.material === mat).reduce((s, i) => s + i.cant, 0); return { comp: oc ? oc.cant : 0, rec: r, desp: d, stock: r - d }; }
         function exportExcelMateriales() { const fV = document.getElementById('filter-obra').value; let list = db.ocs.filter(o => currentUser.rol === 'bodeguero' ? o.obra === currentUser.obraId : (fV === "ALL" || o.obra === fV)); let csv = "\uFEFFOC;Obra;Material;Bodegas Físicas;Comprado;Recibido;Diferencia Faltante;Despachado;Stock Real;Estado\n"; list.forEach(oc => { const s = calculateStats(oc.id, oc.material); const dif = s.comp - s.rec; const ings = db.ingresos.filter(i => i.ocId === oc.id && i.material === oc.material); const b = [...new Set(ings.map(i => i.bodega))].join(' - ') || '-'; csv += `${oc.id};${getObraNameById(oc.obra)};${oc.material};${b};${s.comp};${s.rec};${dif};${s.desp};${s.stock};${dif<=0?'Completo':'Pendiente'}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Materiales.csv`); link.click(); }
-        function renderResumenMateriales() { const fV = document.getElementById('filter-obra').value; let list = db.ocs.filter(o => { if (currentUser.rol === 'bodeguero') return o.obra === currentUser.obraId; return (fV === "ALL" || o.obra === fV); }); document.getElementById('print-obra-name').innerText = (fV !== "ALL") ? `Obra: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Obra: ${getObraNameById(currentUser.obraId)}` : "Todas las Obras"); const gr = {}; list.forEach(o => { if(!gr[o.id]) gr[o.id] = { obra: getObraNameById(o.obra), items: [] }; gr[o.id].items.push(o); }); let h = ''; let gIdx = 0; for (const id in gr) { const sId = 'res_grp_' + gIdx++; let aR = true; let aE = true; gr[id].items.forEach(it => { const s = calculateStats(id, it.material); if (s.rec < s.comp) aR = false; if (s.desp < s.comp) aE = false; }); let cls = aE ? "row-entregado" : (aR ? "row-recibido" : "row-pendiente"); h += `<tr class="${cls}" onclick="toggleOCDetails('${sId}')" style="cursor:pointer;"><td><b>${id}</b></td><td>${gr[id].obra}</td><td><span class="badge ${aE?'bg-info':(aR?'bg-ok':'bg-warn')}">${aE?'Entregado':(aR?'Completo':'Pendiente')}</span></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa; width:100%;"><thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Compra</th><th>Recibe</th><th>Faltante</th><th>Despacha</th><th>Stock</th></tr></thead><tbody>${gr[id].items.map(it => { const s = calculateStats(id, it.material); const dif = s.comp - s.rec; const b = [...new Set(db.ingresos.filter(i => i.ocId === id && i.material === it.material).map(i => i.bodega))].join(', '); return `<tr><td>${it.material}</td><td><b>${b}</b></td><td>${s.comp}</td><td>${s.rec}</td><td style="color:${dif>0?'red':'green'}"><b>${dif}</b></td><td>${s.desp}</td><td><b>${s.stock}</b></td></tr>`}).join('')}</tbody></table></td></tr>`; } document.getElementById('resumen-body').innerHTML = h; }
+
+        // --- COMPRAS GLOBALES ---
+        function calculateStats(ocId, mat) { const oc = db.ocs.find(o => o.id === ocId && o.material === mat); const r = db.ingresos.filter(i => i.ocId === ocId && i.material === mat).reduce((s, i) => s + i.cant, 0); const d = db.salidas.filter(s => s.ocId === ocId && s.material === mat).reduce((s, i) => s + i.cant, 0); return { comp: oc ? oc.cant : 0, rec: r, desp: d, stock: r - d }; }
+        function renderResumenMateriales() {
+            const fV = document.getElementById('filter-obra').value; let list = db.ocs.filter(o => { if (currentUser.rol === 'bodeguero') return o.obra === currentUser.obraId; return (fV === "ALL" || o.obra === fV); });
+            document.getElementById('print-obra-name').innerText = (fV !== "ALL") ? `Obra: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Obra: ${getObraNameById(currentUser.obraId)}` : "Todas las Obras");
+            const gr = {}; list.forEach(o => { if(!gr[o.id]) gr[o.id] = { obra: getObraNameById(o.obra), items: [] }; gr[o.id].items.push(o); });
+            let h = ''; let gIdx = 0; for (const id in gr) {
+                const sId = 'res_grp_' + gIdx++; let aR = true; let aE = true;
+                gr[id].items.forEach(it => { const s = calculateStats(id, it.material); if (s.rec < s.comp) aR = false; if (s.desp < s.comp) aE = false; });
+                let cls = aE ? "row-entregado" : (aR ? "row-recibido" : "row-pendiente");
+                h += `<tr class="${cls}" onclick="toggleOCDetails('${sId}')" style="cursor:pointer;"><td><b>${id}</b></td><td>${gr[id].obra}</td><td><span class="badge ${aE?'bg-info':(aR?'bg-ok':'bg-warn')}">${aE?'Entregado':(aR?'Completo':'Pendiente')}</span></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr>
+                <tr id="${sId}" style="display:none;"><td colspan="4"><table style="background:#fafafa; width:100%;"><thead style="background:#bdc3c7; color:#2c3e50;"><tr><th>Material</th><th>Bodegas</th><th>Compra</th><th>Recibe</th><th>Faltante</th><th>Despacha</th><th>Stock</th></tr></thead><tbody>${gr[id].items.map(it => { const s = calculateStats(id, it.material); const dif = s.comp - s.rec; const b = [...new Set(db.ingresos.filter(i => i.ocId === id && i.material === it.material).map(i => i.bodega))].join(', '); return `<tr><td>${it.material}</td><td><b>${b}</b></td><td>${s.comp}</td><td>${s.rec}</td><td style="color:${dif>0?'red':'green'}"><b>${dif}</b></td><td>${s.desp}</td><td><b>${s.stock}</b></td></tr>`}).join('')}</tbody></table></td></tr>`;
+            } document.getElementById('resumen-body').innerHTML = h;
+        }
+
         function updateIngMaterialSelect() { const o = document.getElementById('ing-oc-select').value; document.getElementById('ing-mat-select').innerHTML = o ? db.ocs.filter(x => x.id === o).map(x => `<option value="${x.material}">${x.material}</option>`).join('') : ''; }
         function updateSalMaterialSelect() { const o = document.getElementById('sal-oc-select').value; document.getElementById('sal-mat-select').innerHTML = o ? db.ocs.filter(x => x.id === o).map(x => { const s = calculateStats(x.id, x.material); return `<option value="${x.material}">${x.material} (Stock: ${s.stock})</option>`; }).join('') : ''; }
         function addToDraft(t) { if (t === 'oc') { const m = document.getElementById('oc-mat').value; const c = parseFloat(document.getElementById('oc-cant').value); if (m && c) { drafts.oc.push({ material: m, cant: c }); document.getElementById('oc-mat').value=''; document.getElementById('oc-cant').value=''; } } else if (t === 'ing') { const o = document.getElementById('ing-oc-select').value; const m = document.getElementById('ing-mat-select').value; const c = parseFloat(document.getElementById('ing-cant').value); const b = document.getElementById('ing-bodega').value.trim(); if (o && m && c && b) { drafts.ing.push({ ocId: o, material: m, cant: c, bodega: b }); document.getElementById('ing-cant').value=''; } } else if (t === 'sal') { const o = document.getElementById('sal-oc-select').value; const m = document.getElementById('sal-mat-select').value; const c = parseFloat(document.getElementById('sal-cant').value); if (o && m && c) { const s = calculateStats(o, m); if (c <= s.stock) { drafts.sal.push({ ocId: o, material: m, cant: c }); document.getElementById('sal-cant').value=''; } else alert("Sin stock"); } } renderDrafts(); }
@@ -1265,7 +911,7 @@
             if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: id+'.pdf', base64: b64 }) }); const url = await resp.text(); let list = t === 'oc' ? db.ocs : (t === 'ing' ? db.ingresos : db.salidas); list.forEach(item => { if(item.id === id && item.pdfUrl === "⏳ Subiendo...") item.pdfUrl = url; }); saveDatabase(true); showToast("PDF Subido"); } catch(e){} }; }
         }
 
-        // --- RENDER ALL ---
+        // --- RENDERIZADO COMPLETO ---
         function renderAll() {
             const isB = currentUser.rol === 'bodeguero'; const fOId = isB ? currentUser.obraId : null;
             const opsFull = getObrasOptionsHtml(false, null); const filterOps = getObrasOptionsHtml(true, fOId); const userOps = getObrasOptionsHtml(false, fOId); 
