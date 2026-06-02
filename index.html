@@ -116,7 +116,7 @@
         /* IMPRESIÓN */
         #print-header, #print-details, #print-bodegas-report, #print-herramientas-header, #print-contenedores-header, #print-bodegas-inv-header, #print-cal-header { display: none; }
         @media print {
-            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid, .stats-grid-small, #upcoming-tasks-card, #traslados-card { display: none !important; }
+            .sidebar, .btn, .card, .no-print, .filter-container, .stats-grid, .stats-grid-small, #upcoming-tasks-card, #traslados-card, #mant-card { display: none !important; }
             .main-content { padding: 0; width: 100%; }
             .section h1 { display: none; } 
             
@@ -145,7 +145,6 @@
 <body>
     <div id="toast">Notificación</div>
 
-    <!-- SPLASH SCREEN -->
     <div id="splash-screen">
         <div id="start-box" style="text-align: center;">
             <div class="splash-logo-container"><img src="logo.png" alt="SJ Systemweb"></div><br>
@@ -156,7 +155,6 @@
         <button id="skip-btn" onclick="closeSplash()">Omitir intro</button>
     </div>
     
-    <!-- LOGIN SCREEN -->
     <div id="login-screen">
         <div class="login-box">
             <div class="login-logo-header"><img src="logo.png" alt="SJ Systemweb"></div>
@@ -174,7 +172,6 @@
     
     <div id="loading"><div class="spinner">☁️</div><h2 id="loading-text">Sincronizando...</h2></div>
 
-    <!-- MODAL NUEVA TAREA -->
     <div id="modal-tarea" class="modal">
         <div class="modal-content" style="max-width:500px;">
             <span class="close-btn" onclick="document.getElementById('modal-tarea').style.display='none'">&times;</span>
@@ -193,7 +190,6 @@
         </div>
     </div>
 
-    <!-- MODALES HOJA DE VIDA HERRAMIENTAS Y CONTENEDORES -->
     <div id="modal-cv-her" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="cerrarCV('modal-cv-her')">&times;</span>
@@ -233,7 +229,6 @@
         </div>
     </div>
 
-    <!-- MENÚ LATERAL -->
     <div class="sidebar no-print" id="app-sidebar">
         <div class="sidebar-header"><img src="logo.png" alt="SJ Systemweb"></div>
         <div class="user-info">
@@ -289,27 +284,31 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content" id="app-main">
         
-        <!-- INICIO (DASHBOARD NUEVO) -->
         <div id="inicio" class="section active">
             <h1>Panel de Control Principal</h1>
             
             <div class="card no-print" style="border-left: 5px solid #f39c12; background:#fffdf5; padding: 15px 20px;">
                 <h2 style="margin-top:0; color:#e67e22; font-size:1.3rem; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ffeaa7; padding-bottom:10px; margin-bottom:15px;">
                     🔔 Tareas Pendientes
-                    <button class="btn btn-secondary btn-small" style="background:#f39c12;" onclick="showSection('calendario', document.getElementById('btn-nav-cal'))">Ir al Calendario Completo</button>
+                    <button class="btn btn-secondary btn-small" style="background:#f39c12;" onclick="showSection('calendario', document.getElementById('btn-nav-cal'))">Ir al Calendario</button>
                 </h2>
                 <div id="inicio-tareas-lista" style="max-height: 250px; overflow-y:auto;"></div>
             </div>
 
-            <!-- CAJA DE SOLICITUDES (Admin) -->
             <div class="card no-print" id="traslados-card" style="border-left: 5px solid #3498db; background:#f0f8ff; padding: 15px 20px; display:none;">
                 <h2 style="margin-top:0; color:#2980b9; font-size:1.3rem; border-bottom: 1px solid #b3e5fc; padding-bottom:10px; margin-bottom:15px;">
-                    🔄 Solicitudes de Traslado Pendientes (Bodegueros)
+                    🔄 Solicitudes de Traslado / Mantención
                 </h2>
                 <div id="inicio-traslados-lista" style="max-height: 250px; overflow-y:auto;"></div>
+            </div>
+
+            <div class="card no-print" id="mant-card" style="border-left: 5px solid #e74c3c; background:#fff0f0; padding: 15px 20px; display:none;">
+                <h2 style="margin-top:0; color:#c0392b; font-size:1.3rem; border-bottom: 1px solid #fadbd8; padding-bottom:10px; margin-bottom:15px;">
+                    🛠️ Herramientas en Taller / Reparación
+                </h2>
+                <div id="inicio-mantencion-lista" style="max-height: 250px; overflow-y:auto;"></div>
             </div>
 
             <h2 style="color:var(--primary); font-size:1.2rem; border-bottom:2px solid #ddd; padding-bottom:5px; margin-bottom:15px;">Resumen de Activos Fijos</h2>
@@ -319,7 +318,6 @@
             <div class="stats-grid-small" id="inicio-cont-stats"></div>
         </div>
 
-        <!-- CALENDARIO -->
         <div id="calendario" class="section">
             <h1>Calendario Mensual</h1>
             <div class="filter-container no-print">
@@ -334,21 +332,13 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ Imprimir</button>
                 </div>
             </div>
-            
             <div id="print-cal-header"><h2 id="print-cal-title">Calendario</h2></div>
-
             <div class="calendar-grid">
-                <div class="calendar-day-header">Lunes</div>
-                <div class="calendar-day-header">Martes</div>
-                <div class="calendar-day-header">Miércoles</div>
-                <div class="calendar-day-header">Jueves</div>
-                <div class="calendar-day-header">Viernes</div>
-                <div class="calendar-day-header">Sábado</div>
-                <div class="calendar-day-header">Domingo</div>
+                <div class="calendar-day-header">Lunes</div><div class="calendar-day-header">Martes</div><div class="calendar-day-header">Miércoles</div>
+                <div class="calendar-day-header">Jueves</div><div class="calendar-day-header">Viernes</div><div class="calendar-day-header">Sábado</div><div class="calendar-day-header">Domingo</div>
             </div>
         </div>
 
-        <!-- RESUMEN GLOBAL COMPRAS -->
         <div id="dashboard" class="section">
             <h1>Resumen Global de Materiales</h1>
             <div class="filter-container">
@@ -367,74 +357,36 @@
             <div id="print-details"><h3>📑 Detalle de Registros de Ingreso</h3><table><thead><tr><th>Obra</th><th>OC</th><th>Guía</th><th>Proveedor</th><th>Material</th><th>Cant</th></tr></thead><tbody id="print-details-body"></tbody></table></div>
         </div>
 
-        <!-- BODEGAS INTERNAS - INVENTARIO -->
         <div id="bodegas-inv" class="section">
             <h1 id="bodega-view-title">Inventario</h1>
-            
             <div class="card no-print">
                 <form onsubmit="event.preventDefault(); addInvBodega();">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nombre del Material / Ítem</label>
-                            <input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas / Foco Led">
-                        </div>
-                        <div class="form-group">
-                            <label>Categoría</label>
-                            <select id="bi-cat" required>
-                                <option value="Material">📦 Material (Consumible)</option>
-                                <option value="Faena">🚧 Faena (Instalación)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Unidad de Medida</label>
-                            <select id="bi-uni" required>
-                                <option value="Uni">Unidad (Uni)</option>
-                                <option value="Kg">Kilogramos (Kg)</option>
-                                <option value="Mts">Metros (Mts)</option>
-                                <option value="Roll">Rollo (Roll)</option>
-                                <option value="Lts">Litros (Lts)</option>
-                                <option value="Caj">Caja (Caj)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Cantidad a Ingresar</label>
-                            <input type="number" step="0.01" id="bi-cant" required>
-                        </div>
+                        <div class="form-group"><label>Nombre del Material / Ítem</label><input type="text" id="bi-mat" required placeholder="Ej: Clavos 2 pulgadas / Foco Led"></div>
+                        <div class="form-group"><label>Categoría</label><select id="bi-cat" required><option value="Material">📦 Material (Consumible)</option><option value="Faena">🚧 Faena (Instalación)</option></select></div>
+                        <div class="form-group"><label>Unidad de Medida</label><select id="bi-uni" required><option value="Uni">Unidad (Uni)</option><option value="Kg">Kilogramos (Kg)</option><option value="Mts">Metros (Mts)</option><option value="Roll">Rollo (Roll)</option><option value="Lts">Litros (Lts)</option><option value="Caj">Caja (Caj)</option></select></div>
+                        <div class="form-group"><label>Cantidad a Ingresar</label><input type="number" step="0.01" id="bi-cant" required></div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Comentario / Detalle (Opcional)</label>
-                            <input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4...">
-                        </div>
-                        <div class="form-group">
-                            <label>Adjuntar Archivo/Foto (Opcional)</label>
-                            <input type="file" id="bi-file" accept=".pdf,image/*">
-                        </div>
+                        <div class="form-group"><label>Comentario / Detalle (Opcional)</label><input type="text" id="bi-com" placeholder="Ej: Marca Rex, lote 4..."></div>
+                        <div class="form-group"><label>Adjuntar Archivo/Foto (Opcional)</label><input type="file" id="bi-file" accept=".pdf,image/*"></div>
                     </div>
                     <button class="btn btn-primary">Ingresar Material a esta Bodega</button>
                 </form>
             </div>
-
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
-                    <label style="font-weight:bold;">🔍 Buscar Ítem:</label>
-                    <input type="text" id="search-bod-inv" placeholder="Escribe el nombre del material o faena..." onkeyup="renderBodegaInv()" style="padding:10px; border-radius:5px; border:1px solid #ccc; flex:1;">
+                    <label style="font-weight:bold;">🔍 Buscar Ítem:</label><input type="text" id="search-bod-inv" placeholder="Escribe el nombre del material o faena..." onkeyup="renderBodegaInv()" style="padding:10px; border-radius:5px; border:1px solid #ccc; flex:1;">
                 </div>
                 <div style="display:flex; gap:10px; align-items:flex-end;">
                     <button class="btn btn-success" onclick="exportExcelBodegaInv()">📊 Excel</button>
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-bodegas-inv-header"><h2 id="print-bi-name">Inventario Bodega</h2></div>
-
-            <table>
-                <thead><tr><th>Ítem / Nombre</th><th>Categoría</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead>
-                <tbody id="table-bod-inv-body"></tbody>
-            </table>
+            <table><thead><tr><th>Ítem / Nombre</th><th>Categoría</th><th>Unidad</th><th>T. Ingresado</th><th>T. Despachado</th><th>Stock Actual</th><th class="no-print">Acción</th></tr></thead><tbody id="table-bod-inv-body"></tbody></table>
         </div>
 
-        <!-- BODEGAS INTERNAS - SALIDAS -->
         <div id="bodegas-salidas" class="section">
             <h1>Despacho desde Bodegas Internas</h1>
             <div class="card" id="form-bod-sal-card">
@@ -443,31 +395,24 @@
                     <div class="form-group"><label>N° Guía de Despacho</label><input type="text" id="bs-guia" required></div>
                     <div class="form-group"><label>Adjuntar PDF Respaldo</label><input type="file" id="bs-file" accept=".pdf"></div>
                 </div>
-                
                 <div class="form-grid" style="background:#f1f2f6; padding:15px; border-radius:5px; border-left: 4px solid #f1c40f;">
                     <div class="form-group"><label>Extraer desde Bodega:</label>
                         <select id="bs-origen" onchange="updateBodSalMatSelect()">
-                            <option value="">Selecciona Bodega...</option>
-                            <option value="Bodega 1">Bodega 1</option><option value="Bodega 2">Bodega 2</option><option value="Bodega 3">Bodega 3</option>
-                            <option value="Pumalal 1">Pumalal 1</option><option value="Pumalal 2">Pumalal 2</option><option value="Pumalal Patio">Pumalal Patio</option>
+                            <option value="">Selecciona Bodega...</option><option value="Bodega 1">Bodega 1</option><option value="Bodega 2">Bodega 2</option><option value="Bodega 3">Bodega 3</option><option value="Pumalal 1">Pumalal 1</option><option value="Pumalal 2">Pumalal 2</option><option value="Pumalal Patio">Pumalal Patio</option>
                         </select></div>
                     <div class="form-group"><label>Material Disponible</label><select id="bs-mat"></select></div>
                     <div class="form-group"><label>Cantidad a Despachar</label><input type="number" step="0.01" id="bs-cant"></div>
                     <button class="btn btn-primary" onclick="addToDraftBod()" style="background:#f1c40f; color:#333;">+ Añadir a la Lista</button>
                 </div>
-                
                 <table class="draft-table"><thead><tr><th>Origen</th><th>Ítem</th><th>Cantidad</th><th>X</th></tr></thead><tbody id="bod-draft"></tbody></table>
                 <button class="btn btn-success" style="width:100%; margin-top:15px;" onclick="saveFinalBod()">Confirmar Despacho a Obra</button>
             </div>
-            
             <h2 style="margin-top:30px; margin-bottom:15px; color:var(--primary);">Historial de Despachos</h2>
             <table><thead><tr><th>Fecha</th><th>Guía</th><th>Obra Destino</th><th>Total Items</th><th>Acción</th></tr></thead><tbody id="table-bod-sal-body"></tbody></table>
         </div>
 
-        <!-- BODEGAS INTERNAS - REPORTE -->
         <div id="bodegas-reporte" class="section">
             <h1 class="no-print">Reporte de Entregas por Obra</h1>
-            
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">Generar Reporte para la Obra:</label>
@@ -478,17 +423,13 @@
                     <button class="btn btn-secondary" style="background:#34495e; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-bodegas-report"><h2 id="print-bod-title">Reporte de Entregas - Seleccione Obra</h2></div>
             <table><thead><tr><th>Fecha</th><th>Guía Despacho</th><th>Bodega Origen</th><th>Ítem Entregado</th><th>Cantidad</th><th>Unidad</th><th class="no-print">PDF</th></tr></thead><tbody id="table-bod-rep-body"></tbody></table>
         </div>
 
-        <!-- HERRAMIENTAS -->
         <div id="herramientas" class="section">
             <h1>Inventario de Herramientas y Maquinaria</h1>
-            
             <div class="stats-grid" id="h-stats"></div>
-
             <div class="card" id="form-her-card">
                 <form onsubmit="event.preventDefault(); addHerramienta();">
                     <div class="form-grid">
@@ -505,8 +446,6 @@
                     <button class="btn btn-primary">Registrar Herramienta a la Nube</button>
                 </form>
             </div>
-            
-            <!-- BOTONES DE EXPORTACIÓN Y BÚSQUEDA HERRAMIENTAS -->
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex: 1; min-width: 250px;">
                     <label style="font-weight:bold;">📍 Filtrar Ubicación:</label>
@@ -521,11 +460,8 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-            
             <div id="print-herramientas-header"><h2 id="print-her-obra-name">Inventario de Herramientas</h2></div>
-
             <table><thead><tr><th>Equipo (Nombre Genérico)</th><th>Total Unidades</th><th class="no-print">Acción</th></tr></thead><tbody id="table-herramientas-body"></tbody></table>
-            
             <h2 style="margin-top:50px; color:var(--danger); border-bottom: 2px solid var(--danger); display:inline-block; padding-bottom:5px;">🗑️ Herramientas Dadas de Baja</h2>
             <table style="opacity: 0.85; margin-top:15px;">
                 <thead style="background:#e74c3c; color:white;"><tr><th>Equipo</th><th>Marca / Modelo</th><th>Serie</th><th>Fecha y Motivo de Baja</th><th class="no-print">Acción</th></tr></thead>
@@ -533,11 +469,9 @@
             </table>
         </div>
 
-        <!-- CONTENEDORES -->
         <div id="contenedores" class="section">
             <h1>Inventario de Contenedores</h1>
             <div class="stats-grid-small" id="c-stats"></div>
-            
             <div class="card" id="form-cont-card">
                 <form onsubmit="event.preventDefault(); addContenedor();">
                     <div class="form-grid">
@@ -554,7 +488,6 @@
                     <button class="btn btn-primary">Registrar Contenedor</button>
                 </form>
             </div>
-
             <div class="filter-container no-print">
                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                     <label style="font-weight:bold;">📍 Filtrar por Obra:</label>
@@ -565,9 +498,7 @@
                     <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ PDF</button>
                 </div>
             </div>
-
             <div id="print-contenedores-header"><h2 id="print-con-obra-name">Inventario de Contenedores</h2></div>
-
             <table><thead><tr><th>Ubicación / Obra</th><th>Detalle por Tipo</th><th>Total</th><th class="no-print">Acción</th></tr></thead><tbody id="table-contenedores-body"></tbody></table>
         </div>
 
@@ -579,7 +510,6 @@
         <div id="salidas" class="section"><h1>Despachos / Salidas a Terreno</h1><div class="card" id="form-sal-card"><div class="form-grid"><div class="form-group"><label>N° Vale Despacho</label><input type="text" id="sal-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="sal-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Buscar por OC</label><select id="sal-oc-select" onchange="updateSalMaterialSelect()"></select></div><div class="form-group"><label>Material en Stock</label><select id="sal-mat-select"></select></div><div class="form-group"><label>Cantidad a Sacar</label><input type="number" id="sal-cant"></div><button class="btn btn-primary" onclick="addToDraft('sal')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Cantidad Extraída</th><th>X</th></tr></thead><tbody id="sal-draft"></tbody></table><button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="saveFinal('sal')">Confirmar Salida Definitiva</button></div><table id="table-salidas"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Despachos</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
     </div>
 
-    <!-- SCRIPTS DE LÓGICA -->
     <script>
         // =========================================================================================
         // PEGA AQUÍ TU URL DE GOOGLE (ENTRE LAS COMILLAS)
@@ -636,7 +566,7 @@
             setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); 
         }
 
-        // --- CARGA DE DATOS EVITANDO CACHÉ ---
+        // --- CARGA DE DATOS ---
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Falta configurar URL de Google."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { 
@@ -686,7 +616,7 @@
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS SILENCIOSA ---
+        // --- BASE DE DATOS DIRECTA Y SEGURA ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { 
@@ -695,7 +625,7 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action:'saveDB', db: db }) 
                 }); 
-            } catch (e) { console.warn("Guardado completado."); } 
+            } catch (e) { console.warn("Guardado finalizado"); } 
             document.getElementById('loading').style.display = 'none'; 
             renderAll(); 
         }
@@ -858,26 +788,44 @@
             link.click();
         }
 
-        // --- SOLICITUDES DE TRASLADO (ADMIN) ---
+        // --- SOLICITUDES DE TRASLADO / MANTENCION (ADMIN) ---
         function aprobarTraslado(reqId) {
-            if(!confirm("¿Aprobar este traslado?")) return;
+            if(!confirm("¿Aprobar esta solicitud?")) return;
             const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId);
             if(reqIdx === -1) return;
             const req = db.trasladosPendientes[reqIdx];
             
             const hIdx = db.herramientas.findIndex(h => h.id_unico === req.herramienta_id);
             if(hIdx !== -1) {
-                db.herramientas[hIdx].obra = req.destino;
-                db.herramientas[hIdx].historial.push({
-                    fecha: new Date().toISOString().split('T')[0],
-                    ubicacion: req.destino,
-                    detalle: `Traslado Aprobado (Solicitado por ${req.solicitante}): ${req.motivo}`,
-                    proveedor: ""
-                });
+                if (req.tipo_mov === 'MANTENCION') {
+                    db.herramientas[hIdx].en_mantencion = {
+                        fecha: new Date().toISOString().split('T')[0],
+                        taller: req.taller,
+                        motivo: req.motivo
+                    };
+                    if(!db.herramientas[hIdx].historial) db.herramientas[hIdx].historial = [];
+                    db.herramientas[hIdx].historial.push({
+                        fecha: new Date().toISOString().split('T')[0],
+                        ubicacion: req.origen, 
+                        detalle: `Enviado a Mantención (Taller: ${req.taller}). Motivo: ${req.motivo} (Aprobado)`,
+                        proveedor: req.taller
+                    });
+                } else {
+                    // DEVOLUCION A CENTRAL
+                    db.herramientas[hIdx].obra = 'B-CEN';
+                    db.herramientas[hIdx].en_mantencion = null;
+                    if(!db.herramientas[hIdx].historial) db.herramientas[hIdx].historial = [];
+                    db.herramientas[hIdx].historial.push({
+                        fecha: new Date().toISOString().split('T')[0],
+                        ubicacion: 'B-CEN',
+                        detalle: `Devolución a Central (De: ${getObraNameById(req.origen)}). Motivo: ${req.motivo} (Aprobado)`,
+                        proveedor: ""
+                    });
+                }
             }
             db.trasladosPendientes.splice(reqIdx, 1);
             saveDatabase(true);
-            showToast("Traslado Aprobado y Registrado.");
+            showToast("Solicitud Aprobada y Procesada.");
         }
 
         function rechazarTraslado(reqId) {
@@ -917,14 +865,17 @@
                 document.getElementById('traslados-card').style.display = 'block';
                 let trHtml = '';
                 db.trasladosPendientes.forEach(req => {
+                    const esMant = req.tipo_mov === 'MANTENCION';
                     trHtml += `
                     <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:5px;">
                         <div>
-                            <span class="badge bg-info">${req.fecha.split('-').reverse().join('/')}</span>
+                            <span class="badge ${esMant ? 'bg-err' : 'bg-info'}">${req.fecha.split('-').reverse().join('/')}</span>
+                            <span class="badge ${esMant ? 'bg-warn' : 'bg-ok'}">${esMant ? 'Envío a Mantención' : 'Devolución a Central'}</span>
                             <b style="margin-left:10px;">${req.herramienta_nombre} (Serie: ${req.herramienta_serie})</b><br>
                             <span style="font-size:0.85rem; color:#555; margin-top:5px; display:inline-block;">
-                                Solicita: <b>${req.solicitante}</b> | De: <b>${getObraNameById(req.origen)}</b> ➡️ Para: <b>${getObraNameById(req.destino)}</b><br>
-                                Motivo: <i>${req.motivo}</i>
+                                Solicita: <b>${req.solicitante}</b> | Obra Actual: <b>${getObraNameById(req.origen)}</b>
+                                ${esMant ? ` | Taller: <b>${req.taller || 'No especificado'}</b>` : ''}
+                                <br>Motivo: <i>${req.motivo}</i>
                             </span>
                         </div>
                         <div style="display:flex; gap:10px;">
@@ -939,11 +890,36 @@
                 if(card) card.style.display = 'none';
             }
 
-            // 3. Resumen de Herramientas
+            // 3. Herramientas en Mantencion Activa (Para todos)
+            const mantH = db.herramientas.filter(h => h.en_mantencion || h.obra === 'MAN-01' || h.obra === 'REP-01');
+            if (mantH.length > 0) {
+                document.getElementById('mant-card').style.display = 'block';
+                let mHtml = '';
+                mantH.forEach(h => {
+                    const fIni = h.en_mantencion ? h.en_mantencion.fecha : (h.historial.length ? h.historial[h.historial.length-1].fecha : new Date().toISOString().split('T')[0]);
+                    const diffTime = Math.abs(new Date() - new Date(fIni));
+                    const dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1; 
+                    const tll = h.en_mantencion ? h.en_mantencion.taller : '-';
+                    mHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #fadbd8;">
+                        <div>
+                            <b style="color:var(--primary);">${h.nombre} (Serie: ${h.serie})</b>
+                            <span style="font-size:0.85rem; color:#7f8c8d; margin-left:10px;">Cargo: ${getObraNameById(h.obra)} | Taller: <b>${tll}</b></span>
+                        </div>
+                        <span class="badge bg-err">⏱️ ${dias > 0 ? dias : 0} días fuera</span>
+                    </div>`;
+                });
+                document.getElementById('inicio-mantencion-lista').innerHTML = mHtml;
+            } else {
+                const card = document.getElementById('mant-card');
+                if(card) card.style.display = 'none';
+            }
+
+            // 4. Resumen de Herramientas (Estadisticas)
             let actH = db.herramientas.filter(h => h.obra !== 'BAJ-01');
             let tDisp = 0, tObr = 0, tRep = 0;
             actH.forEach(h => { 
-                const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra); 
+                const e = getEstadoHerramienta(h); 
                 if(e.txt.includes('Disponible')) tDisp++; 
                 else if(e.txt.includes('Mantención')) tRep++; 
                 else tObr++; 
@@ -955,7 +931,7 @@
                 <div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>
             `;
 
-            // 4. Resumen de Contenedores
+            // 5. Resumen de Contenedores
             let tO=0, tB=0, tBa=0, tD=0, tM=0; 
             db.contenedores.forEach(c => { 
                 if(c.tipo==='Oficina') tO++; 
@@ -1185,7 +1161,18 @@
         }
 
         // --- HERRAMIENTAS ACTUALIZADO CON FLUJO DE APROBACIÓN ---
-        function getEstadoHerramienta(n, id) { if (id === 'BAJ-01') return { txt: '⚫ Baja', cls: 'bg-dark' }; const l = n.toLowerCase(); if (l.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' }; if (l.includes('reparaci') || l.includes('mantenci') || l.includes('taller') || id === 'MAN-01') return { txt: '🔴 En Mantención', cls: 'bg-err' }; return { txt: '🟡 En Obra', cls: 'bg-warn' }; }
+        function getEstadoHerramienta(h) { 
+            if (h.obra === 'BAJ-01') return { txt: '⚫ Baja', cls: 'bg-dark' }; 
+            if (h.en_mantencion) {
+                const diffTime = Math.abs(new Date() - new Date(h.en_mantencion.fecha));
+                const dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+                return { txt: `🔴 Mantención (${dias > 0 ? dias : 0} días)`, cls: 'bg-err' };
+            }
+            if (h.obra === 'MAN-01' || h.obra === 'REP-01') return { txt: '🔴 En Mantención', cls: 'bg-err' }; 
+            const l = getObraNameById(h.obra).toLowerCase(); 
+            if (l.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' }; 
+            return { txt: '🟡 En Obra', cls: 'bg-warn' }; 
+        }
         
         async function addHerramienta() { 
             const modInput = document.getElementById('h-mod').value.trim().toUpperCase();
@@ -1263,7 +1250,7 @@
             if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ));
             
             let tTot = act.length; let tDisp = 0; let tObr = 0; let tRep = 0; 
-            act.forEach(h => { const e = getEstadoHerramienta(getObraNameById(h.obra), h.obra); if(e.txt.includes('Disponible')) tDisp++; else if(e.txt.includes('Mantención')) tRep++; else tObr++; });
+            act.forEach(h => { const e = getEstadoHerramienta(h); if(e.txt.includes('Disponible')) tDisp++; else if(e.txt.includes('Mantención')) tRep++; else tObr++; });
             document.getElementById('h-stats').innerHTML = `<div class="stat-card" style="border-left-color:#3498db;"><h3>${tTot}</h3><p>Activos</p></div><div class="stat-card" style="border-left-color:#27ae60;"><h3>${tDisp}</h3><p>Central</p></div><div class="stat-card" style="border-left-color:#f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color:#e74c3c;"><h3>${tRep}</h3><p>Mantención</p></div>`;
             
             const printTitle = (fV !== "ALL") ? `Inventario Herramientas: ${getObraNameById(fV)}` : (currentUser.rol === 'bodeguero' ? `Inventario Herramientas: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Herramientas");
@@ -1273,10 +1260,16 @@
             let h = ''; let gi = 0; 
             for (const k in gr) { 
                 const sid = 'h_g_'+gi++; 
-                h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${k}</b></td><td><b>${gr[k].length}</b> unid.</td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Marca / Mod</th><th>Serie</th><th>Ubicación</th><th>Estado</th><th>Prov.</th><th class="no-print">Acción</th></tr></thead><tbody>${gr[k].map(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${p}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.oIdx}); event.stopPropagation();">Hoja Vida</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`; }).join('')}</tbody></table></td></tr>`; 
+                h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${k}</b></td><td><b>${gr[k].length}</b> unid.</td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Marca / Mod</th><th>Serie</th><th>Ubicación</th><th>Estado</th><th>Prov.</th><th class="no-print">Acción</th></tr></thead><tbody>${gr[k].map(u => { const est = getEstadoHerramienta(u); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${p}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.oIdx}); event.stopPropagation();">Hoja Vida</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`; }).join('')}</tbody></table></td></tr>`; 
             }
-            document.querySelector('#table-herramientas-body').innerHTML = h || '<tr><td colspan="3" style="text-align:center;">No hay herramientas registradas.</td></tr>';
+            document.querySelector('#table-herramientas-body').innerHTML = h || '<tr><td colspan="3" style="text-align:center; padding:15px;">No hay herramientas registradas.</td></tr>';
             document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
+        }
+
+        function toggleSolProv() {
+            const t = document.getElementById('cv-her-sol-tipo').value;
+            const d = document.getElementById('div-sol-prov');
+            if(d) d.style.display = t === 'MANTENCION' ? 'block' : 'none';
         }
 
         function toggleProveedorTaller() {
@@ -1300,7 +1293,7 @@
                 const h = db.herramientas[idx];
                 document.getElementById('cv-her-titulo').innerText = `Herramienta: ${h.nombre}`;
                 
-                const est = getEstadoHerramienta(getObraNameById(h.obra), h.obra);
+                const est = getEstadoHerramienta(h);
                 document.getElementById('cv-her-datos').innerHTML = `
                     <div class="cv-item"><b>Categoría</b> ${h.cat}</div>
                     <div class="cv-item"><b>Marca/Modelo</b> ${h.marca} ${h.modelo}</div>
@@ -1327,20 +1320,25 @@
                 if (h.obra === 'BAJ-01') { 
                     bx.style.display = 'none'; 
                 } else if (currentUser.rol === 'bodeguero') {
-                    // MODO BODEGUERO: SOLICITAR TRASLADO
+                    // MODO BODEGUERO: SOLICITAR TRASLADO / DEVOLUCION
                     bx.style.display = 'block';
                     bx.innerHTML = `
-                        <h4 style="margin-bottom:10px; color:var(--primary);">Solicitar Traslado de Equipo</h4>
+                        <h4 style="margin-bottom:10px; color:var(--primary);">Solicitar Movimiento de Equipo</h4>
                         <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
                             <div style="flex:1; min-width: 200px;">
-                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Destino Solicitado:</label>
-                                <select id="cv-her-sol-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
-                                    ${getObrasOptionsHtml(false, null)}
+                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Tipo de Solicitud:</label>
+                                <select id="cv-her-sol-tipo" onchange="toggleSolProv()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                    <option value="DEVOLUCION">Devolución a Bodega Central</option>
+                                    <option value="MANTENCION">Envío a Taller / Mantención</option>
                                 </select>
                             </div>
+                            <div id="div-sol-prov" style="flex:1; min-width: 200px; display:none;">
+                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Taller / Proveedor:</label>
+                                <input type="text" id="cv-her-sol-prov" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                            </div>
                             <div style="flex:2; min-width: 250px;">
-                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Tarea:</label>
-                                <input type="text" id="cv-her-sol-com" placeholder="Ej: Se necesita para corte de cerámica..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Observación:</label>
+                                <input type="text" id="cv-her-sol-com" placeholder="Ej: Termino de faena, Falla eléctrica..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
                             </div>
                             <button class="btn btn-warn" style="background:#f39c12; color:white; padding:10px 20px;" onclick="solicitarTrasladoHerramienta()">Enviar Solicitud</button>
                         </div>
@@ -1348,7 +1346,8 @@
                 } else {
                     // MODO ADMIN / JEFE
                     bx.style.display = 'block';
-                    if (est.txt.includes('Mantención')) {
+                    const isMant = h.en_mantencion || h.obra === 'MAN-01';
+                    if (isMant) {
                         bx.innerHTML = `
                             <h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -1384,23 +1383,36 @@
                     } else {
                         bx.innerHTML = `
                             <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Nuevo Movimiento</h4>
-                            <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
-                                <div style="flex:1; min-width: 200px;">
-                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
-                                    <select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                                <div style="flex:1;">
+                                    <label style="font-weight:bold; font-size:0.85rem;">Destino</label>
+                                    <select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:8px;">
                                         ${getObrasOptionsHtml(false, null)}
-                                        <option value="MAN-01">🛠️ Taller / En Mantención</option>
+                                        <option value="MAN-01">🛠️ Taller / Mantención</option>
                                     </select>
                                 </div>
-                                <div id="div-prov-taller" style="flex:1; min-width: 200px; display:none;">
-                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Proveedor / Taller:</label>
-                                    <input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                <div style="flex:1;">
+                                    <label style="font-weight:bold; font-size:0.85rem;">Comentario</label>
+                                    <input type="text" id="cv-her-com" style="width:100%; padding:8px;" placeholder="Ej: Traslado / Falla general...">
                                 </div>
-                                <div style="flex:2; min-width: 250px;">
-                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label>
-                                    <input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla de motor" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                <button class="btn btn-primary" onclick="registrarMovimientoHerramienta()">Registrar</button>
+                            </div>
+                            <div id="div-prov-taller" style="display:none; background:#e8f4f8; padding:15px; border-radius:5px; border-left:4px solid #3498db; margin-top:15px;">
+                                <h5 style="margin-top:0; margin-bottom:10px; color:#2980b9;">📋 Datos de Ingreso a Taller</h5>
+                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                    <div style="flex:1; min-width:150px;">
+                                        <label style="font-size:0.8rem; font-weight:bold;">Taller / Proveedor:</label>
+                                        <input type="text" id="cv-her-prov" placeholder="Nombre del taller..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                                    </div>
+                                    <div style="flex:1; min-width:150px;">
+                                        <label style="font-size:0.8rem; font-weight:bold;">N° de Recepción:</label>
+                                        <input type="text" id="cv-her-recepcion" placeholder="Ej: REC-1234" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                                    </div>
+                                    <div style="flex:1; min-width:200px;">
+                                        <label style="font-size:0.8rem; font-weight:bold;">Hoja de Recepción (Foto/PDF):</label>
+                                        <input type="file" id="cv-her-mant-file" accept=".pdf,image/*" style="width:100%; padding:6px; background:white; border:1px solid #ccc; border-radius:4px;">
+                                    </div>
                                 </div>
-                                <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button>
                             </div>
                         `;
                     }
@@ -1441,43 +1453,95 @@
             cvActivoIndex = null; 
         }
 
-        function registrarMovimientoHerramienta() {
+        async function registrarMovimientoHerramienta() {
             if(!cvActivoIndex) return; 
             const idx = cvActivoIndex.idx;
             
             const nuevaUb = document.getElementById('cv-her-nueva-ub').value;
-            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación/estado";
-            const provDiv = document.getElementById('div-prov-taller');
-            const prov = (document.getElementById('cv-her-proveedor') && provDiv && provDiv.style.display !== 'none') ? document.getElementById('cv-her-proveedor').value.trim() : "";
-            const fechaHoy = new Date().toISOString().split('T')[0];
+            const comentario = document.getElementById('cv-her-com').value.trim() || "Cambio de ubicación/estado";
             
-            let detFinal = comentario; 
-            if (prov) detFinal += ` | Proveedor: ${prov}`;
+            const provDiv = document.getElementById('div-prov-taller');
+            const isTaller = (nuevaUb === 'MAN-01' || nuevaUb === 'REP-01') && provDiv && provDiv.style.display !== 'none';
+            
+            const prov = isTaller ? document.getElementById('cv-her-prov').value.trim() : "";
+            const rec = isTaller && document.getElementById('cv-her-recepcion') ? document.getElementById('cv-her-recepcion').value.trim() : "";
+            
+            const fileInput = isTaller ? document.getElementById('cv-her-mant-file') : null;
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo..." : null;
 
-            db.herramientas[idx].obra = nuevaUb;
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            let detFinal = comentario; 
+            
             if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
-            db.herramientas[idx].historial.push({ 
-                fecha: fechaHoy, 
-                ubicacion: nuevaUb, 
-                detalle: detFinal, 
-                proveedor: prov,
-                pdfUrl: null
-            });
+
+            if (isTaller || nuevaUb === 'MAN-01') {
+                if (prov) detFinal += ` | Proveedor: ${prov}`;
+                if (rec) detFinal += ` | N° Rec: ${rec}`;
+                
+                db.herramientas[idx].en_mantencion = {
+                    fecha: fechaHoy,
+                    taller: prov,
+                    motivo: comentario
+                };
+                
+                // Mantiene la obra actual, solo se le agrega la etiqueta "en_mantencion"
+                db.herramientas[idx].historial.push({ 
+                    fecha: fechaHoy, 
+                    ubicacion: db.herramientas[idx].obra, 
+                    detalle: `Enviado a Taller: ${prov||'No especificado'}. Motivo: ${comentario} ${rec?`| Rec: ${rec}`:''}`, 
+                    proveedor: prov,
+                    pdfUrl: placeholder
+                });
+            } else {
+                db.herramientas[idx].obra = nuevaUb;
+                db.herramientas[idx].en_mantencion = null;
+                db.herramientas[idx].historial.push({ 
+                    fecha: fechaHoy, 
+                    ubicacion: nuevaUb, 
+                    detalle: detFinal, 
+                    proveedor: prov,
+                    pdfUrl: placeholder
+                });
+            }
+
             const mIdx = db.herramientas[idx].historial.length - 1;
             
             saveDatabase(true); 
             cerrarCV('modal-cv-her');
             showToast("Movimiento registrado"); 
             renderHerramientas();
+
+            if (file) {
+                const r = new FileReader(); 
+                r.readAsDataURL(file);
+                r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; 
+                    const ext = file.name.split('.').pop();
+                    const docId = `MANT_ING_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`;
+                    try {
+                        const resp = await fetch(API_URL, { 
+                            method: 'POST', 
+                            body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
+                        }); 
+                        const url = await resp.text(); 
+                        if(db.herramientas[idx].historial[mIdx]) { 
+                            db.herramientas[idx].historial[mIdx].pdfUrl = url; 
+                            saveDatabase(true); 
+                        }
+                    } catch(e) { console.warn("Archivo subido en segundo plano"); }
+                };
+            }
         }
 
         function solicitarTrasladoHerramienta() {
             const idx = cvActivoIndex.idx;
             const h = db.herramientas[idx];
-            const destino = document.getElementById('cv-her-sol-ub').value;
+            const tipo = document.getElementById('cv-her-sol-tipo').value;
             const motivo = document.getElementById('cv-her-sol-com').value.trim();
+            const prov = document.getElementById('cv-her-sol-prov') ? document.getElementById('cv-her-sol-prov').value.trim() : "";
             
-            if(!destino || !motivo) return alert("Selecciona un destino y escribe un motivo para el traslado.");
+            if(!motivo) return alert("Escribe un motivo u observación para el movimiento.");
 
             if (!db.trasladosPendientes) db.trasladosPendientes = [];
             db.trasladosPendientes.push({
@@ -1486,7 +1550,8 @@
                 herramienta_nombre: h.nombre,
                 herramienta_serie: h.serie,
                 origen: h.obra,
-                destino: destino,
+                tipo_mov: tipo,
+                taller: prov,
                 motivo: motivo,
                 solicitante: currentUser.nombre,
                 fecha: new Date().toISOString().split('T')[0]
@@ -1521,6 +1586,7 @@
             const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
             let placeholder = file ? "⏳ Subiendo..." : null;
 
+            db.herramientas[idx].en_mantencion = null;
             db.herramientas[idx].obra = nuevaUb;
             db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder });
             const movIdx = db.herramientas[idx].historial.length - 1;
@@ -1556,68 +1622,17 @@
             if(!confirm("¿Eliminar este movimiento del historial?")) return;
             const hIdx = cvActivoIndex.idx; 
             db.herramientas[hIdx].historial.splice(movIdx, 1);
+            
+            // Re-evaluar estado (si eliminó el último, quizás ya no está en mantención)
+            db.herramientas[hIdx].en_mantencion = null; 
+            
             const lastMov = db.herramientas[hIdx].historial[db.herramientas[hIdx].historial.length - 1];
             db.herramientas[hIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN';
+            
             saveDatabase(true); 
             abrirCV('herramientas', hIdx); 
             renderHerramientas(); 
             showToast("Movimiento eliminado");
-        }
-
-        function renderContenedores() {
-            const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL";
-            
-            // Inyectar el índice para no perderlo al filtrar
-            let list = db.contenedores.map((c, i) => ({...c, oIdx: i})); 
-            
-            if (currentUser && currentUser.rol === 'bodeguero') {
-                list = list.filter(c => c.obra === currentUser.obraId);
-            } else if (fV !== "ALL") {
-                list = list.filter(c => c.obra === fV);
-            }
-            
-            let tT=0, tO=0, tB=0, tBa=0, tD=0, tM=0; 
-            list.forEach(c => { 
-                tT++; 
-                if(c.tipo==='Oficina') tO++; 
-                else if(c.tipo==='Bodega') tB++; 
-                else if(c.tipo==='Baños') tBa++; 
-                else if(c.tipo==='Duchas') tD++; 
-                else tM++; 
-            });
-            
-            const statsEl = document.getElementById('c-stats');
-            if (statsEl) {
-                statsEl.innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
-            }
-            
-            const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser && currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
-            const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
-
-            const gr = {}; 
-            list.forEach(c => { 
-                if (!gr[c.obra]) gr[c.obra] = { n: getObraNameById(c.obra), it: [], c: {} }; 
-                gr[c.obra].it.push(c); 
-                const t = c.tipo || 'Otro'; 
-                gr[c.obra].c[t] = (gr[c.obra].c[t]||0)+1; 
-            });
-            
-            let h = ''; 
-            let gi = 0; 
-            for (const o in gr) { 
-                const g = gr[o]; 
-                const sid = 'c_g_'+gi++; 
-                let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); 
-                
-                h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')">
-                    <td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td>
-                </tr>
-                <tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>
-                ${g.it.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white; border:none;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser && currentUser.rol !=='bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}
-                </tbody></table></td></tr>`; 
-            }
-            
-            document.querySelector('#table-contenedores-body').innerHTML = h || '<tr><td colspan="4" style="text-align:center; padding:15px;">No hay contenedores registrados.</td></tr>';
         }
 
         async function registrarMovimientoContenedor() { 
@@ -1631,7 +1646,7 @@
             let placeholder = file ? "⏳ Subiendo..." : null;
 
             db.contenedores[idx].obra = ub; 
-            if (!db.contenedores[idx].historial) db.contenedores[idx].historial = [];
+            if(!db.contenedores[idx].historial) db.contenedores[idx].historial = [];
             db.contenedores[idx].historial.push({ fecha: f, ubicacion: ub, detalle: c, pdfUrl: placeholder }); 
             const mI = db.contenedores[idx].historial.length - 1;
 
@@ -1659,7 +1674,7 @@
         function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
         // --- EXPORTACIONES ---
-        function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
+        function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(u); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
         function exportExcelContenedores() { const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL"; let list = db.contenedores; if (fV !== "ALL") list = list.filter(c => c.obra === fV); else if (currentUser.rol === 'bodeguero') list = list.filter(c => c.obra === currentUser.obraId); let csv = "\uFEFFUbicación/Obra;Tipo;N° Contenedor;Detalle Exterior;Detalle Interior\n"; list.forEach(c => { csv += `${getObraNameById(c.obra)};${c.tipo};${c.num};${c.detExt};${c.detInt}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Contenedores.csv`); link.click(); }
         function exportExcelBodegaInv() { const sQ = document.getElementById('search-bod-inv').value.toLowerCase().trim(); const gr = {}; db.invBodegas.filter(i => i.bodega === currentBodegaName).forEach(i => { const cat = i.categoria || 'Material'; const k = `${i.material}_${i.unidad}_${cat}`; if(!gr[k]) gr[k] = { m: i.material, u: i.unidad, cat: cat, c: [] }; if(i.comentario) gr[k].c.push(`${i.fecha}: ${i.comentario}`); }); let ls = Object.values(gr); if(sQ) ls = ls.filter(x => x.m.toLowerCase().includes(sQ)); let csv = `\uFEFFInventario Bodega: ${currentBodegaName}\nÍtem/Material;Categoría;Unidad;T. Ingresado;T. Despachado;Stock Actual;Comentarios\n`; ls.forEach(x => { const s = getStockBodega(currentBodegaName, x.m, x.u, x.cat); const cm = x.c.length > 0 ? x.c.join(' | ') : '-'; csv += `${x.m};${x.cat};${x.u};${s.ing};${s.sal};${s.stock};${cm}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_${currentBodegaName}.csv`); link.click(); }
         function exportExcelBodegasReporte() { const selObra = document.getElementById('filter-bod-rep-obra'); const obraId = selObra.value; if(!obraId) return; let csv = `\uFEFFReporte de Entregas Internas - Obra: ${getObraNameById(obraId)}\nFecha;Guía Despacho;Bodega Origen;Categoría;Ítem Entregado;Cantidad;Unidad\n`; db.despachosBodegas.filter(d => d.obra === obraId).forEach(d => { d.items.forEach(it => { const cat = it.categoria || 'Material'; csv += `${d.fecha};${d.guia};${it.bodega};${cat};${it.material};${it.cant};${it.unidad}\n`; }); }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Reporte_Entregas_${getObraNameById(obraId)}.csv`); link.click(); }
