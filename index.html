@@ -193,7 +193,7 @@
         </div>
     </div>
 
-    <!-- MODAL HOJA DE VIDA HERRAMIENTAS -->
+    <!-- MODALES HOJA DE VIDA HERRAMIENTAS Y CONTENEDORES -->
     <div id="modal-cv-her" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="cerrarCV('modal-cv-her')">&times;</span>
@@ -208,7 +208,6 @@
         </div>
     </div>
 
-    <!-- MODAL HOJA DE VIDA CONTENEDORES -->
     <div id="modal-cv-cont" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="cerrarCV('modal-cv-cont')">&times;</span>
@@ -601,12 +600,17 @@
         };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
-        // --- ESCUDO PROTECTOR DE DATOS ---
+        // --- ESCUDO PROTECTOR DE DATOS (NUEVO Y MEJORADO) ---
         function sanitizeDB() {
             if (!db) db = {};
             const arrs = ['obras', 'ocs', 'ingresos', 'salidas', 'usuarios', 'herramientas', 'contenedores', 'invBodegas', 'despachosBodegas', 'tareas', 'trasladosPendientes'];
             arrs.forEach(a => { 
-                if (!db[a] || !Array.isArray(db[a])) db[a] = []; 
+                if (!db[a]) {
+                    db[a] = []; 
+                } else if (!Array.isArray(db[a])) {
+                    // Si Google lo convirtió en objeto por error, lo restauramos a lista
+                    db[a] = Object.values(db[a]);
+                }
                 db[a] = db[a].filter(x => x !== null && x !== undefined); 
             });
             if (!db.obras.some(o => o.id === 'B-CEN')) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
@@ -632,6 +636,7 @@
             setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; loadDataForLogin(); }, 800); 
         }
 
+        // --- CARGA DE DATOS EVITANDO CACHÉ ---
         async function loadDataForLogin() {
             if(API_URL.includes("AQUI_PEGARAS")) { alert("Falta configurar URL de Google."); document.getElementById('login-screen').style.display = 'flex'; return; }
             try { 
@@ -656,6 +661,7 @@
             } catch (e) { document.getElementById('loading').style.display = 'none'; }
         }
 
+        // --- LOGIN Y SEGURIDAD ---
         function procesarLogin() {
             const uI = document.getElementById('login-user').value.toLowerCase().trim(); const pI = document.getElementById('login-pass').value;
             let f = db.usuarios.find(u => u.user.toLowerCase() === uI && u.pass === pI);
@@ -680,7 +686,7 @@
         }
         function logout() { location.reload(); }
 
-        // --- BASE DE DATOS DIRECTA ---
+        // --- BASE DE DATOS SILENCIOSA ---
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
             try { 
@@ -689,7 +695,7 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action:'saveDB', db: db }) 
                 }); 
-            } catch (e) { console.warn("Guardado finalizado"); } 
+            } catch (e) { console.warn("Guardado completado."); } 
             document.getElementById('loading').style.display = 'none'; 
             renderAll(); 
         }
@@ -786,6 +792,7 @@
             }
         }
 
+        // *** EXCEL VISUAL (CALENDARIO) ***
         function exportExcelCalendario() {
             const mNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const title = `Calendario de Tareas - ${mNames[calMonth]} ${calYear}`;
@@ -861,7 +868,6 @@
             const hIdx = db.herramientas.findIndex(h => h.id_unico === req.herramienta_id);
             if(hIdx !== -1) {
                 db.herramientas[hIdx].obra = req.destino;
-                if(!db.herramientas[hIdx].historial) db.herramientas[hIdx].historial = [];
                 db.herramientas[hIdx].historial.push({
                     fecha: new Date().toISOString().split('T')[0],
                     ubicacion: req.destino,
@@ -990,7 +996,7 @@
         function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
 
         // ==========================================
-        // MÓDULO BODEGAS INTERNAS
+        // MÓDULO BODEGAS INTERNAS (NUEVO CAMPO: CATEGORÍA)
         // ==========================================
 
         function openBodegaView(nombreBodega, btn) {
@@ -1178,15 +1184,19 @@
             document.getElementById('table-bod-rep-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No hay entregas para esta obra.</td></tr>';
         }
 
-        // --- HERRAMIENTAS ---
+        // --- HERRAMIENTAS ACTUALIZADO CON FLUJO DE APROBACIÓN ---
         function getEstadoHerramienta(n, id) { if (id === 'BAJ-01') return { txt: '⚫ Baja', cls: 'bg-dark' }; const l = n.toLowerCase(); if (l.includes('central')) return { txt: '🟢 Disponible', cls: 'bg-ok' }; if (l.includes('reparaci') || l.includes('mantenci') || l.includes('taller') || id === 'MAN-01') return { txt: '🔴 En Mantención', cls: 'bg-err' }; return { txt: '🟡 En Obra', cls: 'bg-warn' }; }
         
         async function addHerramienta() { 
             const modInput = document.getElementById('h-mod').value.trim().toUpperCase();
             const serInput = document.getElementById('h-ser').value.trim().toUpperCase();
 
+            // VALIDACIÓN: Evitar misma herramienta/modelo con mismo número de serie
             const existe = db.herramientas.find(h => h.modelo === modInput && h.serie === serInput);
-            if (existe) { alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`); return; }
+            if (existe) {
+                alert(`⚠️ No se puede guardar: Ya existe una herramienta modelo "${modInput}" con el número de serie "${serInput}".`);
+                return;
+            }
 
             const id_unico = Date.now().toString();
             const fileInput = document.getElementById('h-file');
@@ -1194,28 +1204,46 @@
             let placeholder = file ? "⏳ Subiendo..." : null;
 
             const h = { 
-                id_unico: id_unico, nombre: document.getElementById('h-nom').value.trim().toUpperCase(), 
-                cat: document.getElementById('h-cat').value, marca: document.getElementById('h-mar').value.trim().toUpperCase(), 
-                modelo: modInput, serie: serInput, obra: document.getElementById('h-obr').value, 
-                fecha: document.getElementById('h-fec').value, valor: parseFloat(document.getElementById('h-val').value), 
+                id_unico: id_unico, 
+                nombre: document.getElementById('h-nom').value.trim().toUpperCase(), 
+                cat: document.getElementById('h-cat').value, 
+                marca: document.getElementById('h-mar').value.trim().toUpperCase(), 
+                modelo: modInput, 
+                serie: serInput, 
+                obra: document.getElementById('h-obr').value, 
+                fecha: document.getElementById('h-fec').value, 
+                valor: parseFloat(document.getElementById('h-val').value), 
                 historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial", pdfUrl: placeholder }] 
             }; 
             
-            db.herramientas.push(h); const hIdx = db.herramientas.length - 1;
+            db.herramientas.push(h); 
+            const hIdx = db.herramientas.length - 1;
 
             saveDatabase(true); 
             ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); 
-            if(fileInput) fileInput.value = ''; showToast("Herramienta Registrada"); renderHerramientas();
+            if(fileInput) fileInput.value = '';
+            showToast("Herramienta Registrada"); 
+            renderHerramientas();
 
             if (file) {
-                const r = new FileReader(); r.readAsDataURL(file);
+                const r = new FileReader(); 
+                r.readAsDataURL(file);
                 r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
+                    const b64 = r.result.split(',')[1]; 
+                    const ext = file.name.split('.').pop();
+                    const docId = `HERR_${id_unico}_${Date.now()}.${ext}`;
                     try {
-                        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                        const resp = await fetch(API_URL, { 
+                            method: 'POST', 
+                            body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) 
+                        }); 
                         const url = await resp.text(); 
-                        if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { db.herramientas[hIdx].historial[0].pdfUrl = url; saveDatabase(true); renderHerramientas(); }
-                    } catch(e) {}
+                        if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { 
+                            db.herramientas[hIdx].historial[0].pdfUrl = url; 
+                            saveDatabase(true); 
+                            renderHerramientas(); 
+                        }
+                    } catch(e) { console.warn("Archivo de herramienta subido"); }
                 };
             }
         }
@@ -1223,7 +1251,9 @@
         function renderHerramientas() {
             const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim();
             
+            // Inyectamos índice para no perder la referencia original al filtrar
             let all = db.herramientas.map((h, i) => ({...h, oIdx: i})); 
+            
             let act = all.filter(h => h.obra !== 'BAJ-01'); 
             let baj = all.filter(h => h.obra === 'BAJ-01');
             
@@ -1245,11 +1275,10 @@
                 const sid = 'h_g_'+gi++; 
                 h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${k}</b></td><td><b>${gr[k].length}</b> unid.</td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Marca / Mod</th><th>Serie</th><th>Ubicación</th><th>Estado</th><th>Prov.</th><th class="no-print">Acción</th></tr></thead><tbody>${gr[k].map(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${p}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.oIdx}); event.stopPropagation();">Hoja Vida</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`; }).join('')}</tbody></table></td></tr>`; 
             }
-            document.querySelector('#table-herramientas-body').innerHTML = h;
+            document.querySelector('#table-herramientas-body').innerHTML = h || '<tr><td colspan="3" style="text-align:center;">No hay herramientas registradas.</td></tr>';
             document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
         }
 
-        // --- SISTEMA HOJA DE VIDA HERRAMIENTAS Y MANTENCION ---
         function toggleProveedorTaller() {
             const ub = document.getElementById('cv-her-nueva-ub').value;
             const provDiv = document.getElementById('div-prov-taller');
@@ -1427,7 +1456,14 @@
 
             db.herramientas[idx].obra = nuevaUb;
             if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
-            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detFinal, proveedor: prov });
+            db.herramientas[idx].historial.push({ 
+                fecha: fechaHoy, 
+                ubicacion: nuevaUb, 
+                detalle: detFinal, 
+                proveedor: prov,
+                pdfUrl: null
+            });
+            const mIdx = db.herramientas[idx].historial.length - 1;
             
             saveDatabase(true); 
             cerrarCV('modal-cv-her');
@@ -1528,6 +1564,62 @@
             showToast("Movimiento eliminado");
         }
 
+        function renderContenedores() {
+            const fV = document.getElementById('filter-cont-obra') ? document.getElementById('filter-cont-obra').value : "ALL";
+            
+            // Inyectar el índice para no perderlo al filtrar
+            let list = db.contenedores.map((c, i) => ({...c, oIdx: i})); 
+            
+            if (currentUser && currentUser.rol === 'bodeguero') {
+                list = list.filter(c => c.obra === currentUser.obraId);
+            } else if (fV !== "ALL") {
+                list = list.filter(c => c.obra === fV);
+            }
+            
+            let tT=0, tO=0, tB=0, tBa=0, tD=0, tM=0; 
+            list.forEach(c => { 
+                tT++; 
+                if(c.tipo==='Oficina') tO++; 
+                else if(c.tipo==='Bodega') tB++; 
+                else if(c.tipo==='Baños') tBa++; 
+                else if(c.tipo==='Duchas') tD++; 
+                else tM++; 
+            });
+            
+            const statsEl = document.getElementById('c-stats');
+            if (statsEl) {
+                statsEl.innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
+            }
+            
+            const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser && currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
+            const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
+
+            const gr = {}; 
+            list.forEach(c => { 
+                if (!gr[c.obra]) gr[c.obra] = { n: getObraNameById(c.obra), it: [], c: {} }; 
+                gr[c.obra].it.push(c); 
+                const t = c.tipo || 'Otro'; 
+                gr[c.obra].c[t] = (gr[c.obra].c[t]||0)+1; 
+            });
+            
+            let h = ''; 
+            let gi = 0; 
+            for (const o in gr) { 
+                const g = gr[o]; 
+                const sid = 'c_g_'+gi++; 
+                let brk = Object.entries(g.c).map(([t, q]) => `<b>${t}:</b> ${q}`).join(' | '); 
+                
+                h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')">
+                    <td><b>${g.n}</b></td><td style="font-size:0.85rem;">${brk}</td><td><b>${g.it.length}</b></td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td>
+                </tr>
+                <tr id="${sid}" style="display:none;"><td colspan="4"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Tipo / N°</th><th>Ext</th><th>Int</th><th class="no-print">Acción</th></tr></thead><tbody>
+                ${g.it.map(u => `<tr><td><b>${u.tipo || '-'}</b> - ${u.num || '-'}</td><td>${u.detExt || '-'}</td><td>${u.detInt || '-'}</td><td class="no-print"><button class="btn btn-small" style="background:#3498db; color:white; border:none;" onclick="abrirCV('contenedores', ${u.oIdx}); event.stopPropagation();">🚚 Trasladar</button> ${currentUser && currentUser.rol !=='bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('contenedores', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`).join('')}
+                </tbody></table></td></tr>`; 
+            }
+            
+            document.querySelector('#table-contenedores-body').innerHTML = h || '<tr><td colspan="4" style="text-align:center; padding:15px;">No hay contenedores registrados.</td></tr>';
+        }
+
         async function registrarMovimientoContenedor() { 
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const ub = document.getElementById(`cv-cont-nueva-ub`).value; 
@@ -1539,6 +1631,7 @@
             let placeholder = file ? "⏳ Subiendo..." : null;
 
             db.contenedores[idx].obra = ub; 
+            if (!db.contenedores[idx].historial) db.contenedores[idx].historial = [];
             db.contenedores[idx].historial.push({ fecha: f, ubicacion: ub, detalle: c, pdfUrl: placeholder }); 
             const mI = db.contenedores[idx].historial.length - 1;
 
@@ -1563,17 +1656,7 @@
                 };
             }
         }
-
-        function eliminarMovCon(mI) { 
-            if(!confirm("¿Eliminar?")) return; 
-            const i = cvActivoIndex.idx; 
-            db.contenedores[i].historial.splice(mI, 1); 
-            const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; 
-            db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; 
-            saveDatabase(true); 
-            abrirCV('contenedores', i); 
-            renderContenedores(); 
-        }
+        function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
         // --- EXPORTACIONES ---
         function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => h.nombre.toLowerCase().includes(sQ) || h.marca.toLowerCase().includes(sQ) || h.modelo.toLowerCase().includes(sQ) || h.serie.toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(getObraNameById(u.obra), u.obra); const p = (est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'; csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
@@ -1657,9 +1740,7 @@
             renderInicio();
             renderResumenMateriales(); 
             renderHerramientas(); 
-            
-            // EL ESCUDO: Si no hay contenedores, dibuja la tabla vacía en vez de romperse.
-            try { renderContenedores(); } catch(e) { document.querySelector('#table-contenedores-body').innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay contenedores registrados.</td></tr>'; }
+            renderContenedores();
 
             if(document.getElementById('bodegas-inv') && document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
             if(document.getElementById('bodegas-salidas') && document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
