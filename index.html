@@ -565,8 +565,9 @@
             const arrs = ['obras', 'ocs', 'ingresos', 'salidas', 'usuarios', 'herramientas', 'contenedores', 'invBodegas', 'despachosBodegas', 'tareas', 'trasladosPendientes'];
             arrs.forEach(a => { 
                 if (!db[a]) { db[a] = []; } 
+                else if (typeof db[a] === 'string' && db[a].trim() === '') { db[a] = []; }
                 else if (!Array.isArray(db[a])) { db[a] = Object.values(db[a]); }
-                db[a] = db[a].filter(x => x !== null && x !== undefined); 
+                db[a] = db[a].filter(x => x !== null && x !== undefined && typeof x === 'object'); 
             });
             if (!db.obras.some(o => o.id === 'B-CEN')) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
         }
@@ -706,14 +707,22 @@
             const blob = new Blob([html], { type: 'application/vnd.ms-excel' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Calendario_${mNames[calMonth]}_${calYear}.xls`); link.click();
         }
 
+        function getObraNameById(id) { 
+            if (!id) return 'Sin Asignar';
+            if (id === 'MAN-01') return 'Taller / En Mantención'; 
+            if (id === 'BAJ-01') return 'Dada de Baja'; 
+            const o = db.obras.find(x => x.id === id); 
+            return o ? o.nombre : String(id); 
+        }
+
         // --- SOLICITUDES DE TRASLADO (ADMIN) ---
         function aprobarTraslado(reqId) {
-            if(!confirm("¿Aprobar esta solicitud?")) return;
             const reqIdx = db.trasladosPendientes.findIndex(r => r.id_solicitud === reqId);
             if(reqIdx === -1) return;
             const req = db.trasladosPendientes[reqIdx];
             
             if (req.tipo_mov === 'DEVOLUCION') {
+                if(!confirm("¿Aprobar devolución a Bodega Central?")) return;
                 const hIdx = db.herramientas.findIndex(h => h.id_unico === req.herramienta_id);
                 if(hIdx !== -1) {
                     db.herramientas[hIdx].obra = 'B-CEN';
@@ -764,6 +773,7 @@
         function renderInicio() {
             const isBodeguero = currentUser && currentUser.rol === 'bodeguero';
 
+            // SOLICITUDES DE TRASLADO (SOLO ADMIN / JEFE)
             if (!isBodeguero && db.trasladosPendientes && db.trasladosPendientes.length > 0) {
                 document.getElementById('traslados-card').style.display = 'block'; let trHtml = '';
                 db.trasladosPendientes.forEach(req => {
@@ -772,6 +782,7 @@
                 }); document.getElementById('inicio-traslados-lista').innerHTML = trHtml;
             } else { const card = document.getElementById('traslados-card'); if(card) card.style.display = 'none'; }
 
+            // HERRAMIENTAS EN MANTENCION (FILTRADO POR OBRA SI ES BODEGUERO)
             let mantH = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.en_mantencion || h.obra === 'MAN-01' || h.obra === 'REP-01');
             
             if (isBodeguero) {
@@ -790,39 +801,38 @@
             if (mantH.length > 0) {
                 document.getElementById('mant-card').style.display = 'block'; let mHtml = '';
                 mantH.forEach(h => {
-                    const fIni = h.en_mantencion ? h.en_mantencion.fecha : (h.historial.length ? h.historial[h.historial.length-1].fecha : new Date().toISOString().split('T')[0]);
-                    const diffTime = Math.abs(new Date() - new Date(fIni)); const dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1; 
+                    const fIni = h.en_mantencion ? h.en_mantencion.fecha : ((h.historial && h.historial.length) ? h.historial[h.historial.length-1].fecha : new Date().toISOString().split('T')[0]);
+                    const diffTime = Math.abs(new Date() - new Date(fIni)); const dias = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
                     const tll = h.en_mantencion ? h.en_mantencion.taller : '-';
+                    
                     let btnReparada = '';
                     if (!isBodeguero) {
                         btnReparada = `<button class="btn btn-success btn-small" style="margin-left: 15px;" onclick="abrirCV('herramientas', ${h.oIdx})">🛠️ Reparada</button>`;
                     }
+                    
                     mHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #fadbd8;"><div><b style="color:var(--primary);">${h.nombre} (Serie: ${h.serie})</b><span style="font-size:0.85rem; color:#7f8c8d; margin-left:10px;">Cargo: ${getObraNameById(h.obra)} | Taller: <b>${tll}</b></span></div><div><span class="badge bg-err">⏱️ ${dias > 0 ? dias : 0} días fuera</span>${btnReparada}</div></div>`;
                 }); document.getElementById('inicio-mantencion-lista').innerHTML = mHtml;
             } else { const card = document.getElementById('mant-card'); if(card) card.style.display = 'none'; }
 
+            // ESTADISTICAS HERRAMIENTAS
             let actH = db.herramientas.filter(h => h.obra !== 'BAJ-01'); 
-            if (isBodeguero) {
-                actH = actH.filter(h => h.obra === currentUser.obraId);
-            }
+            if (isBodeguero) { actH = actH.filter(h => h.obra === currentUser.obraId); }
             let tDisp = 0, tObr = 0, tRep = 0;
             actH.forEach(h => { const e = getEstadoHerramienta(h); if(e.txt.includes('Disponible')) tDisp++; else if(e.txt.includes('Mantención')) tRep++; else tObr++; });
             document.getElementById('inicio-herr-stats').innerHTML = `<div class="stat-card" style="border-left-color: #3498db;"><h3>${actH.length}</h3><p>Total Herramientas</p></div><div class="stat-card" style="border-left-color: #27ae60;"><h3>${tDisp}</h3><p>En Central</p></div><div class="stat-card" style="border-left-color: #f39c12;"><h3>${tObr}</h3><p>En Obra</p></div><div class="stat-card" style="border-left-color: #e74c3c;"><h3>${tRep}</h3><p>En Mantención</p></div>`;
 
-            let contList = db.contenedores;
-            if (isBodeguero) {
-                contList = contList.filter(c => c.obra === currentUser.obraId);
-            }
+            // ESTADISTICAS CONTENEDORES
+            let contList = db.contenedores || [];
+            if (isBodeguero) { contList = contList.filter(c => c.obra === currentUser.obraId); }
             let tO=0, tB=0, tBa=0, tD=0, tM=0; 
             contList.forEach(c => { if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
             document.getElementById('inicio-cont-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${contList.length}</h3><p>Total Contenedores</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
         }
 
+        // --- ORDENAMIENTO Y BÚSQUEDA OBRAS ---
         function getSortedObras() { return [...db.obras].sort((a, b) => { let aCen = a.nombre.toLowerCase().includes('central'); let bCen = b.nombre.toLowerCase().includes('central'); if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0; }); }
         function getObrasOptionsHtml(includeAll = false, filteredId = null) { let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : ''; const sortedObras = getSortedObras(); if (filteredId) { let fObra = sortedObras.find(o => o.id === filteredId); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); } return html; }
-        function getObraNameById(id) { if (id === 'MAN-01') return 'Taller / En Mantención'; if (id === 'BAJ-01') return 'Dada de Baja'; const o = db.obras.find(x => x.id === id); return o ? o.nombre : id; }
-        function getObraNameByOcId(id) { const o = db.ocs.find(x => x.id === id); return o ? getObraNameById(o.obra) : '-'; }
-
+        
         function openBodegaView(nombreBodega, btn) { currentBodegaName = nombreBodega; document.getElementById('bodega-view-title').innerText = `Inventario: ${nombreBodega}`; showSection('bodegas-inv', btn); renderBodegaInv(); }
         async function addInvBodega() {
             const mat = document.getElementById('bi-mat').value.trim().toUpperCase(); const cat = document.getElementById('bi-cat').value; const uni = document.getElementById('bi-uni').value; const cant = parseFloat(document.getElementById('bi-cant').value); const com = document.getElementById('bi-com').value.trim(); const fec = new Date().toISOString().split('T')[0]; const id_unico = Date.now().toString();
@@ -912,7 +922,7 @@
             const gr = {}; act.forEach(h => { if (!gr[h.nombre]) gr[h.nombre] = []; gr[h.nombre].push(h); }); let h = ''; let gi = 0; 
             for (const k in gr) { const sid = 'h_g_'+gi++; h += `<tr style="background:#ecf0f1; cursor:pointer;" onclick="toggleOCDetails('${sid}')"><td><b>${k}</b></td><td><b>${gr[k].length}</b> unid.</td><td class="no-print"><button class="btn btn-primary btn-small">Ver Detalles</button></td></tr><tr id="${sid}" style="display:none;"><td colspan="3"><table style="background:white; border:1px solid #ddd; width:100%;"><thead style="background:#34495e; color:white;"><tr><th>Marca / Mod</th><th>Serie</th><th>Ubicación</th><th>Estado</th><th>Prov.</th><th class="no-print">Acción</th></tr></thead><tbody>${gr[k].map(u => { const est = getEstadoHerramienta(u); const p = u.en_mantencion ? u.en_mantencion.taller : ((est.txt.includes('Mantención') && u.historial && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'); return `<tr><td>${u.marca} / ${u.modelo}</td><td>${u.serie}</td><td><b>${getObraNameById(u.obra)}</b></td><td><span class="badge ${est.cls}">${est.txt}</span></td><td>${p}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${u.oIdx}); event.stopPropagation();">Hoja Vida</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${u.oIdx}); event.stopPropagation();">X</button>` : ''}</td></tr>`; }).join('')}</tbody></table></td></tr>`; }
             document.querySelector('#table-herramientas-body').innerHTML = h || '<tr><td colspan="3" style="text-align:center; padding:15px;">No hay herramientas registradas.</td></tr>';
-            document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${b.historial.length?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
+            document.getElementById('table-herramientas-bajas-body').innerHTML = baj.map(b => `<tr><td><b>${b.nombre}</b></td><td>${b.marca}/${b.modelo}</td><td>${b.serie}</td><td style="font-size:0.85rem;">${(b.historial && b.historial.length)?b.historial[b.historial.length-1].detalle:'-'}</td><td class="no-print"><button class="btn btn-success btn-small" onclick="abrirCV('herramientas', ${b.oIdx})">Ver</button> ${currentUser.rol !== 'bodeguero' ? `<button class="btn btn-danger btn-small" style="margin-left:5px;" onclick="deleteRecord('herramientas', ${b.oIdx}); renderHerramientas();">X</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Vacio</td></tr>';
         }
 
         function toggleResolucion() { const res = document.getElementById('cv-res-tipo').value; ['div-res-ub','div-res-val','div-res-pdf'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = res === 'BAJA' ? 'none' : 'block';}); }
@@ -935,7 +945,7 @@
                 } else {
                     bx.style.display = 'block';
                     if (est.txt.includes('Mantención')) {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label>Acción</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Baja</option></select></div><div id="div-res-ub"><label>A Obra</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label>Detalle Técnico</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label>Costo ($)</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label>PDF Respaldo</label><input type="file" id="cv-her-file" style="width:100%; padding:8px;" accept=".pdf,image/*"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procRes()">Guardar Resolución</button>`;
+                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-comentario-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-valor" placeholder="0" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf,image/*" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
                         setTimeout(toggleResolucion, 50);
                     } else {
                         bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Movimiento / Devolución</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a:</label><select id="cv-her-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}</select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Devolucion" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Movimiento</button></div>`;
@@ -955,7 +965,9 @@
         function registrarMovimientoHerramienta() {
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; const nuevaUb = document.getElementById('cv-her-nueva-ub').value; const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación"; const fechaHoy = new Date().toISOString().split('T')[0];
             db.herramientas[idx].obra = nuevaUb; db.herramientas[idx].en_mantencion = null; if(!db.herramientas[idx].historial) db.herramientas[idx].historial = []; db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: comentario, proveedor: "" });
-            saveDatabase(true); cerrarCV('modal-cv-her'); showToast("Movimiento registrado"); renderHerramientas(); renderInicio();
+            
+            cerrarCV('modal-cv-her'); showToast("Movimiento registrado"); renderHerramientas(); renderInicio();
+            saveDatabase(true); 
         }
 
         function solicitarTrasladoHerramienta() {
@@ -964,21 +976,80 @@
             if(!motivo) return alert("Escribe un motivo u observación para el movimiento.");
             if (!db.trasladosPendientes) db.trasladosPendientes = [];
             db.trasladosPendientes.push({ id_solicitud: Date.now().toString(), herramienta_id: h.id_unico, herramienta_nombre: h.nombre, herramienta_serie: h.serie, origen: h.obra, tipo_mov: tipo, motivo: motivo, solicitante: currentUser.nombre, fecha: new Date().toISOString().split('T')[0] });
-            saveDatabase(true); cerrarCV('modal-cv-her'); showToast("Solicitud enviada a Administración.");
+            
+            cerrarCV('modal-cv-her'); showToast("Solicitud enviada a Administración.");
+            saveDatabase(true); 
         }
 
-        async function procesarResolucionMantencion() {
-            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
-            const res = document.getElementById('cv-res-tipo').value; const comentario = document.getElementById('cv-her-comentario-res').value.trim(); const fechaHoy = new Date().toISOString().split('T')[0];
+        function procesarResolucionMantencion() {
+            if(!cvActivoIndex) return; 
+            const idx = cvActivoIndex.idx;
+            const res = document.getElementById('cv-res-tipo').value; 
+            const comentario = document.getElementById('cv-her-comentario-res').value.trim(); 
+            const fechaHoy = new Date().toISOString().split('T')[0];
+
             let nuevaUb = ''; let detalleFinal = '';
-            if (res === 'BAJA') { if(!comentario) return alert("Debes ingresar el motivo de la baja."); nuevaUb = 'BAJ-01'; detalleFinal = `DADA DE BAJA: ${comentario}`; } else { nuevaUb = document.getElementById('cv-res-nueva-ub').value; const valorRep = parseFloat(document.getElementById('cv-her-valor').value) || 0; detalleFinal = `REPARADA: ${comentario} | Costo: $${valorRep}`; }
-            const fileInput = document.getElementById('cv-her-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
-            db.herramientas[idx].en_mantencion = null; db.herramientas[idx].obra = nuevaUb; db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder }); const movIdx = db.herramientas[idx].historial.length - 1;
-            await saveDatabase(true); cerrarCV('modal-cv-her'); showToast("Resolución guardada"); renderHerramientas(); renderInicio();
-            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); if(db.herramientas[idx].historial[movIdx]) { db.herramientas[idx].historial[movIdx].pdfUrl = url; saveDatabase(true); } } catch(e) {} }; }
+            if (res === 'BAJA') { 
+                if(!comentario) return alert("Debes ingresar el motivo de la baja."); 
+                nuevaUb = 'BAJ-01'; detalleFinal = `DADA DE BAJA: ${comentario}`; 
+            } else { 
+                nuevaUb = document.getElementById('cv-res-nueva-ub').value; 
+                const valorRep = parseFloat(document.getElementById('cv-her-valor').value) || 0; 
+                detalleFinal = `REPARADA: ${comentario} | Costo: $${valorRep}`; 
+            }
+
+            const fileInput = document.getElementById('cv-her-file'); 
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; 
+            let placeholder = file ? "⏳ Subiendo..." : null;
+            
+            if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
+            db.herramientas[idx].en_mantencion = null; 
+            db.herramientas[idx].obra = nuevaUb; 
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder }); 
+            const movIdx = db.herramientas[idx].historial.length - 1;
+            
+            // CIERRE INMEDIATO
+            cerrarCV('modal-cv-her'); 
+            showToast("Resolución guardada"); 
+            renderHerramientas(); 
+            renderInicio();
+
+            // GUARDADO EN SEGUNDO PLANO
+            saveDatabase(true).then(() => {
+                if (file) { 
+                    const r = new FileReader(); 
+                    r.readAsDataURL(file); 
+                    r.onload = async () => { 
+                        const b64 = r.result.split(',')[1]; 
+                        const ext = file.name.split('.').pop(); 
+                        const docId = `REP_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; 
+                        try { 
+                            const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
+                            const url = await resp.text(); 
+                            if(db.herramientas[idx].historial[movIdx]) { 
+                                db.herramientas[idx].historial[movIdx].pdfUrl = url; 
+                                saveDatabase(true); 
+                            } 
+                        } catch(e) { console.warn("Archivo subido en segundo plano"); } 
+                    }; 
+                }
+            }).catch(e => console.error(e));
         }
 
-        function eliminarMovHer(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.herramientas[i].historial.splice(mI, 1); db.herramientas[i].en_mantencion = null; const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('herramientas', i); renderHerramientas(); renderInicio(); }
+        function eliminarMovHer(mI) { 
+            if(!confirm("¿Eliminar?")) return; 
+            const i = cvActivoIndex.idx; 
+            db.herramientas[i].historial.splice(mI, 1); 
+            db.herramientas[i].en_mantencion = null; 
+            const l = db.herramientas[i].historial[db.herramientas[i].historial.length-1]; 
+            db.herramientas[i].obra = l ? l.ubicacion : 'B-CEN'; 
+            
+            cerrarCV('modal-cv-her');
+            showToast("Movimiento eliminado");
+            renderHerramientas(); 
+            renderInicio();
+            saveDatabase(true); 
+        }
 
         // --- CONTENEDORES ---
         function addContenedor() { const c = { id_unico: Date.now().toString(), tipo: document.getElementById('c-tip').value, num: document.getElementById('c-num').value.trim().toUpperCase(), obra: document.getElementById('c-obr').value, detExt: document.getElementById('c-ext').value.trim(), detInt: document.getElementById('c-int').value.trim(), historial: [{ fecha: new Date().toISOString().split('T')[0], ubicacion: document.getElementById('c-obr').value, detalle: "Ingreso inicial" }] }; db.contenedores.push(c); saveDatabase(true); ['c-num','c-ext','c-int'].forEach(id => document.getElementById(id).value = ''); showToast("✅ Contenedor registrado"); renderContenedores(); }
@@ -997,7 +1068,7 @@
             list.forEach(c => { tT++; if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
             
             const statsEl = document.getElementById('c-stats');
-            if (statsEl) statsEl.innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
+            if (statsEl) { statsEl.innerHTML = `<div class="stat-card-small" style="border-left-color:#3498db;"><h3>${tT}</h3><p>Total</p></div><div class="stat-card-small" style="border-left-color:#2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color:#e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color:#9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color:#34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color:#e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`; }
             
             const printTitle = (fV !== "ALL") ? `Inventario Contenedores: ${getObraNameById(fV)}` : (currentUser && currentUser.rol === 'bodeguero' ? `Inventario Contenedores: ${getObraNameById(currentUser.obraId)}` : "Inventario General de Contenedores");
             const ph = document.getElementById('print-con-obra-name'); if(ph) ph.innerText = printTitle;
@@ -1017,8 +1088,17 @@
             const fileInput = document.getElementById('cv-cont-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
             db.contenedores[idx].obra = ub; if(!db.contenedores[idx].historial) db.contenedores[idx].historial = []; db.contenedores[idx].historial.push({ fecha: f, ubicacion: ub, detalle: c, pdfUrl: placeholder }); const mI = db.contenedores[idx].historial.length - 1;
             document.getElementById(`cv-cont-comentario`).value = ''; if(fileInput) fileInput.value = '';
-            saveDatabase(true); cerrarCV('modal-cv-cont'); showToast("Traslado actualizado"); renderContenedores(); 
-            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`; try { const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await res.text(); if(db.contenedores[idx].historial[mI]) { db.contenedores[idx].historial[mI].pdfUrl = url; saveDatabase(true); } } catch(e) {} }; }
+            
+            cerrarCV('modal-cv-cont'); showToast("Traslado actualizado"); renderContenedores(); 
+            
+            saveDatabase(true).then(() => {
+                if (file) { 
+                    const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { 
+                        const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`; 
+                        try { const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await res.text(); if(db.contenedores[idx].historial[mI]) { db.contenedores[idx].historial[mI].pdfUrl = url; saveDatabase(true); } } catch(e) {} 
+                    }; 
+                }
+            });
         }
         function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
 
