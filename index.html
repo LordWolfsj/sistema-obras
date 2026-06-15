@@ -538,28 +538,21 @@
         let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [] };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
-        let isSaving = false; // FLAG DE SEGURIDAD
-
         // --- MOTOR DE SINCRONIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO ---
         let autoSyncTimer = null;
+        let isSaving = false;
 
         async function silentAutoUpdate() {
             const modalsOpen = Array.from(document.querySelectorAll('.modal')).some(m => m.style.display === 'block');
             const activeTag = document.activeElement ? document.activeElement.tagName : '';
             const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag);
             
-            // Si está guardando, escribiendo o con una ventana abierta, pausamos la sincronización.
             if (modalsOpen || isTyping || !currentUser || isSaving) return;
 
             try {
                 const r = await fetch(API_URL + "?t=" + new Date().getTime());
                 const newData = await r.json();
-                
-                // ESCUDO ANTI-BORRADO: Asegurar que Google mandó información válida y no vacía
-                if (newData && newData.obras && newData.obras.length > 0) { 
-                    if (db.herramientas && db.herramientas.length > 0 && (!newData.herramientas || newData.herramientas.length === 0)) {
-                        return; // Datos corruptos, ignorar actualización
-                    }
+                if (newData && newData.obras) { 
                     db = newData;
                     sanitizeDB();
                     renderAll();
@@ -567,6 +560,7 @@
             } catch (e) {}
         }
 
+        // --- ESCUDO PROTECTOR DE DATOS ---
         function sanitizeDB() {
             if (!db) db = {};
             const arrs = ['obras', 'ocs', 'ingresos', 'salidas', 'usuarios', 'herramientas', 'contenedores', 'invBodegas', 'despachosBodegas', 'tareas', 'trasladosPendientes'];
@@ -576,22 +570,6 @@
                 else if (!Array.isArray(db[a])) { db[a] = Object.values(db[a]); }
                 db[a] = db[a].filter(x => x !== null && x !== undefined && typeof x === 'object'); 
             });
-
-            if (db.herramientas) {
-                db.herramientas.forEach(h => {
-                    if (h.historial && !Array.isArray(h.historial)) h.historial = Object.values(h.historial);
-                    if (!h.historial) h.historial = [];
-                    h.historial = h.historial.filter(x => x !== null && x !== undefined && typeof x === 'object');
-                });
-            }
-            if (db.contenedores) {
-                db.contenedores.forEach(c => {
-                    if (c.historial && !Array.isArray(c.historial)) c.historial = Object.values(c.historial);
-                    if (!c.historial) c.historial = [];
-                    c.historial = c.historial.filter(x => x !== null && x !== undefined && typeof x === 'object');
-                });
-            }
-
             if (!db.obras.some(o => o.id === 'B-CEN')) { db.obras.unshift({ id: 'B-CEN', nombre: 'Bodega Central', ub: 'Sede Principal' }); }
         }
 
@@ -651,8 +629,6 @@
                 document.getElementById('inicio').classList.add('active');
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('app-main').style.display = 'block';
                 renderAll();
-                
-                // INICIAR ACTUALIZACIÓN AUTOMÁTICA CADA 60 SEGUNDOS
                 if(!autoSyncTimer) autoSyncTimer = setInterval(silentAutoUpdate, 60000);
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
@@ -663,16 +639,15 @@
 
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
-            isSaving = true; // Activa seguro
+            isSaving = true;
             try { 
                 await fetch(API_URL, { 
-                    method:'POST',
-                    mode: 'no-cors', // Seguro para ignorar bloqueos de respuesta de Google
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    method:'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action:'saveDB', db: db }) 
                 }); 
-            } catch (e) {} 
-            isSaving = false; // Desactiva seguro
+            } catch (e) { console.warn("Guardado finalizado"); } 
+            isSaving = false;
             document.getElementById('loading').style.display = 'none'; 
             renderAll(); 
         }
@@ -740,9 +715,6 @@
             const blob = new Blob([html], { type: 'application/vnd.ms-excel' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Calendario_${mNames[calMonth]}_${calYear}.xls`); link.click();
         }
 
-        function getSortedObras() { return [...db.obras].sort((a, b) => { let aCen = (a.nombre || '').toLowerCase().includes('central'); let bCen = (b.nombre || '').toLowerCase().includes('central'); if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0; }); }
-        function getObrasOptionsHtml(includeAll = false, filteredId = null) { let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : ''; const sortedObras = getSortedObras(); if (filteredId) { let fObra = sortedObras.find(o => o.id === filteredId); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); } return html; }
-        
         function getObraNameById(id) { 
             if (!id) return 'Sin Asignar';
             if (id === 'MAN-01') return 'Taller / En Mantención'; 
@@ -783,7 +755,7 @@
             }
         }
 
-        function confirmarMantencionAdmin() {
+        async function confirmarMantencionAdmin() {
             const reqId = document.getElementById('am-req-id').value; const taller = document.getElementById('am-taller').value.trim(); const boletin = document.getElementById('am-boletin').value.trim();
             const fileInput = document.getElementById('am-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
 
@@ -795,18 +767,13 @@
                 db.herramientas[hIdx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: req.origen, detalle: `Enviado a Mantención (Taller: ${taller}). Motivo: ${req.motivo} (Aprobado) ${boletin ? '| Bol: '+boletin : ''}`, proveedor: taller, pdfUrl: placeholder });
             }
             
-            db.trasladosPendientes.splice(reqIdx, 1); document.getElementById('modal-aprobar-mantencion').style.display = 'none'; showToast("Mantención Aprobada.");
-            renderInicio();
-            renderHerramientas();
-            
-            saveDatabase(true).then(() => {
-                if(file && hIdx !== -1) {
-                    const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { 
-                        const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `MANT_ING_${db.herramientas[hIdx].id_unico}_${Date.now()}.${ext}`;
-                        try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); const lastHistIdx = db.herramientas[hIdx].historial.length - 1; if(db.herramientas[hIdx].historial[lastHistIdx]) { db.herramientas[hIdx].historial[lastHistIdx].pdfUrl = url; saveDatabase(true); } } catch(e) {}
-                    };
-                }
-            });
+            db.trasladosPendientes.splice(reqIdx, 1); document.getElementById('modal-aprobar-mantencion').style.display = 'none'; saveDatabase(true); showToast("Mantención Aprobada.");
+            if(file && hIdx !== -1) {
+                const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { 
+                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `MANT_ING_${db.herramientas[hIdx].id_unico}_${Date.now()}.${ext}`;
+                    try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); const lastHistIdx = db.herramientas[hIdx].historial.length - 1; if(db.herramientas[hIdx].historial[lastHistIdx]) { db.herramientas[hIdx].historial[lastHistIdx].pdfUrl = url; saveDatabase(true); } } catch(e) {}
+                };
+            }
         }
 
         function rechazarTraslado(reqId) {
@@ -852,7 +819,7 @@
                     if (!isBodeguero) {
                         btnReparada = `<button class="btn btn-success btn-small" style="margin-left: 15px;" onclick="abrirCV('herramientas', ${h.oIdx})">🛠️ Reparada</button>`;
                     }
-                    mHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #fadbd8;"><div><b style="color:var(--primary);">${h.nombre} (Serie: ${h.serie})</b><span style="font-size:0.85rem; color:#7f8c8d; margin-left:10px;">Cargo Original: ${getObraNameById(h.obra)} | Taller: <b>${tll}</b></span></div><div><span class="badge bg-err">⏱️ ${dias > 0 ? dias : 0} días fuera</span>${btnReparada}</div></div>`;
+                    mHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #fadbd8;"><div><b style="color:var(--primary);">${h.nombre} (Serie: ${h.serie})</b><span style="font-size:0.85rem; color:#7f8c8d; margin-left:10px;">Cargo: ${getObraNameById(h.obra)} | Taller: <b>${tll}</b></span></div><div><span class="badge bg-err">⏱️ ${dias > 0 ? dias : 0} días fuera</span>${btnReparada}</div></div>`;
                 }); document.getElementById('inicio-mantencion-lista').innerHTML = mHtml;
             } else { const card = document.getElementById('mant-card'); if(card) card.style.display = 'none'; }
 
@@ -868,6 +835,9 @@
             contList.forEach(c => { if(c.tipo==='Oficina') tO++; else if(c.tipo==='Bodega') tB++; else if(c.tipo==='Baños') tBa++; else if(c.tipo==='Duchas') tD++; else tM++; });
             document.getElementById('inicio-cont-stats').innerHTML = `<div class="stat-card-small" style="border-left-color: #3498db;"><h3>${contList.length}</h3><p>Total Contenedores</p></div><div class="stat-card-small" style="border-left-color: #2ecc71;"><h3>${tO}</h3><p>Oficinas</p></div><div class="stat-card-small" style="border-left-color: #e67e22;"><h3>${tB}</h3><p>Bodegas</p></div><div class="stat-card-small" style="border-left-color: #9b59b6;"><h3>${tBa}</h3><p>Baños</p></div><div class="stat-card-small" style="border-left-color: #34495e;"><h3>${tD}</h3><p>Duchas</p></div><div class="stat-card-small" style="border-left-color: #e74c3c;"><h3>${tM}</h3><p>Mixtos</p></div>`;
         }
+
+        function getSortedObras() { return [...db.obras].sort((a, b) => { let aCen = (a.nombre || '').toLowerCase().includes('central'); let bCen = (b.nombre || '').toLowerCase().includes('central'); if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0; }); }
+        function getObrasOptionsHtml(includeAll = false, filteredId = null) { let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : ''; const sortedObras = getSortedObras(); if (filteredId) { let fObra = sortedObras.find(o => o.id === filteredId); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); } return html; }
         
         function openBodegaView(nombreBodega, btn) { currentBodegaName = nombreBodega; document.getElementById('bodega-view-title').innerText = `Inventario: ${nombreBodega}`; showSection('bodegas-inv', btn); renderBodegaInv(); }
         async function addInvBodega() {
@@ -942,7 +912,7 @@
             const id_unico = Date.now().toString(); const fileInput = document.getElementById('h-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
             const h = { id_unico: id_unico, nombre: document.getElementById('h-nom').value.trim().toUpperCase(), cat: document.getElementById('h-cat').value, marca: document.getElementById('h-mar').value.trim().toUpperCase(), modelo: modInput, serie: serInput, obra: document.getElementById('h-obr').value, fecha: document.getElementById('h-fec').value, valor: parseFloat(document.getElementById('h-val').value), historial: [{ fecha: document.getElementById('h-fec').value, ubicacion: document.getElementById('h-obr').value, detalle: "Ingreso inicial", pdfUrl: placeholder }] }; 
             db.herramientas.push(h); const hIdx = db.herramientas.length - 1; saveDatabase(true); 
-            ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); if(fileInput) fileInput.value = ''; showToast("Herramienta Registrada"); renderHerramientas(); renderInicio();
+            ['h-nom','h-mar','h-mod','h-ser','h-fec','h-val'].forEach(id => document.getElementById(id).value = ''); if(fileInput) fileInput.value = ''; showToast("Herramienta Registrada"); renderHerramientas();
             if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `HERR_${id_unico}_${Date.now()}.${ext}`; try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); if(db.herramientas[hIdx] && db.herramientas[hIdx].historial[0]) { db.herramientas[hIdx].historial[0].pdfUrl = url; saveDatabase(true); renderHerramientas(); } } catch(e) { console.warn("Archivo de herramienta subido"); } }; }
         }
 
@@ -984,10 +954,44 @@
                 } else {
                     bx.style.display = 'block';
                     if (est.txt.includes('Mantención')) {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;" placeholder="Ej: Cambio de carbones / Motor quemado"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;" placeholder="0"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf,image/*" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
+                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-com-res" placeholder="Ej: Cambio de carbones / Motor quemado" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-val" placeholder="0" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf,image/*" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
                         setTimeout(toggleResolucion, 50);
                     } else {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Movimiento / Devolución</h4><div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Destino / Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01" style="color:#e67e22; font-weight:bold;">🛠️ Enviar a Mantención</option><option value="BAJ-01" style="color:#e74c3c; font-weight:bold;">🗑️ Dar de Baja</option></select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios / Motivo:</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Devolucion" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:8px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Cambios</button></div><div id="div-prov-taller" style="display:none; background:#e8f4f8; padding:15px; border-radius:5px; border-left:4px solid #3498db; margin-top:15px;"><h5 style="margin-top:0; margin-bottom:10px; color:#2980b9;">📋 Datos de Ingreso a Taller</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1; min-width:150px;"><label style="font-size:0.8rem; font-weight:bold;">Taller / Proveedor:</label><input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div><div style="flex:1; min-width:150px;"><label style="font-size:0.8rem; font-weight:bold;">N° de Recepción:</label><input type="text" id="cv-her-recepcion" placeholder="Ej: REC-1234" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div><div style="flex:1; min-width:200px;"><label style="font-size:0.8rem; font-weight:bold;">Hoja de Recepción (Foto/PDF):</label><input type="file" id="cv-her-mant-file" accept=".pdf,image/*" style="width:100%; padding:6px; background:white; border:1px solid #ccc; border-radius:4px;"></div></div></div>`;
+                        bx.innerHTML = `
+                            <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Movimiento / Devolución</h4>
+                            <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
+                                <div style="flex:1; min-width: 200px;">
+                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label>
+                                    <select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                        ${getObrasOptionsHtml(false, null)}
+                                        <option value="MAN-01" style="color:#e67e22; font-weight:bold;">🛠️ Enviar a Mantención</option>
+                                        <option value="BAJ-01" style="color:#e74c3c; font-weight:bold;">🗑️ Dar de Baja</option>
+                                    </select>
+                                </div>
+                                <div style="flex:2; min-width: 250px;">
+                                    <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios / Motivo:</label>
+                                    <input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Devolucion" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                                </div>
+                                <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Cambios</button>
+                            </div>
+                            <div id="div-prov-taller" style="display:none; background:#e8f4f8; padding:15px; border-radius:5px; border-left:4px solid #3498db; margin-top:15px;">
+                                <h5 style="margin-top:0; margin-bottom:10px; color:#2980b9;">📋 Datos de Ingreso a Taller</h5>
+                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                    <div style="flex:1; min-width:150px;">
+                                        <label style="font-size:0.8rem; font-weight:bold;">Taller / Proveedor:</label>
+                                        <input type="text" id="cv-her-proveedor" placeholder="Nombre del taller..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                                    </div>
+                                    <div style="flex:1; min-width:150px;">
+                                        <label style="font-size:0.8rem; font-weight:bold;">N° de Recepción / Boletín:</label>
+                                        <input type="text" id="cv-her-recepcion" placeholder="Ej: REC-1234" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                                    </div>
+                                    <div style="flex:1; min-width:200px;">
+                                        <label style="font-size:0.8rem; font-weight:bold;">Hoja de Recepción (Foto/PDF):</label>
+                                        <input type="file" id="cv-her-mant-file" accept=".pdf,image/*" style="width:100%; padding:6px; background:white; border:1px solid #ccc; border-radius:4px;">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     }
                 }
                 document.getElementById('modal-cv-her').style.display = 'block';
@@ -1001,50 +1005,53 @@
         }
         function cerrarCV(modalId) { document.getElementById(modalId).style.display = 'none'; cvActivoIndex = null; }
 
-        function registrarMovimientoHerramienta() {
+        async function registrarMovimientoHerramienta() {
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const nuevaUb = document.getElementById('cv-her-nueva-ub').value; 
-            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación"; 
+            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación/estado"; 
+            
+            const provDiv = document.getElementById('div-prov-taller');
+            const isTaller = (nuevaUb === 'MAN-01' && provDiv && provDiv.style.display !== 'none');
+            const prov = isTaller ? document.getElementById('cv-her-proveedor').value.trim() : "";
+            const rec = isTaller && document.getElementById('cv-her-recepcion') ? document.getElementById('cv-her-recepcion').value.trim() : "";
+            const fileInput = isTaller ? document.getElementById('cv-her-mant-file') : null;
+            const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+            let placeholder = file ? "⏳ Subiendo..." : null;
+
             const fechaHoy = new Date().toISOString().split('T')[0];
             
-            const pD = document.getElementById('div-prov-taller');
-            let p = ""; let rec = ""; let file = null; let placeholder = null; 
-            if (pD && pD.style.display !== 'none') { 
-                p = document.getElementById('cv-her-proveedor') ? document.getElementById('cv-her-proveedor').value.trim() : ""; 
-                rec = document.getElementById('cv-her-recepcion') ? document.getElementById('cv-her-recepcion').value.trim() : ""; 
-                const fileInput = document.getElementById('cv-her-mant-file'); 
-                file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; 
-                placeholder = file ? "⏳ Subiendo..." : null; 
-            } 
-            
             let detFinal = comentario; 
-            if (nuevaUb === 'BAJ-01') { 
-                detFinal = `DADA DE BAJA: ${comentario}`; 
-            } else if (nuevaUb === 'MAN-01') { 
-                detFinal = `Enviado a Mantención. Motivo: ${comentario}`; 
-                if (p) detFinal += ` | Taller: ${p}`; 
-                if (rec) detFinal += ` | Rec: ${rec}`; 
-            } 
+            if (nuevaUb === 'BAJ-01') {
+                detFinal = `DADA DE BAJA: ${comentario}`;
+            } else if (isTaller) {
+                detFinal = `Enviado a Mantención. Motivo: ${comentario}`;
+                if (prov) detFinal += ` | Taller: ${prov}`;
+                if (rec) detFinal += ` | Rec: ${rec}`;
+            }
+
+            db.herramientas[idx].obra = nuevaUb;
+            if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detFinal, proveedor: prov, pdfUrl: placeholder });
             
-            db.herramientas[idx].obra = nuevaUb; 
-            if(!db.herramientas[idx].historial) db.herramientas[idx].historial = []; 
-            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detFinal, proveedor: p, pdfUrl: placeholder }); 
-            const mIdx = db.herramientas[idx].historial.length - 1; 
+            const mIdx = db.herramientas[idx].historial.length - 1;
             
-            cerrarCV('modal-cv-her'); showToast("Movimiento registrado"); renderHerramientas(); renderInicio();
-            saveDatabase(true); 
-            
-            if (file) { 
-                const r = new FileReader(); r.readAsDataURL(file); 
+            cerrarCV('modal-cv-her');
+            showToast("Movimiento registrado"); 
+            renderHerramientas();
+            saveDatabase(true);
+
+            if (file) {
+                const r = new FileReader(); r.readAsDataURL(file);
                 r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `MANT_ING_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`; 
-                    try { 
+                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop();
+                    const docId = `MANT_ING_${db.herramientas[idx].id_unico}_${Date.now()}.${ext}`;
+                    try {
                         const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); 
                         const url = await resp.text(); 
-                        if(db.herramientas[idx].historial[mIdx]) { db.herramientas[idx].historial[mIdx].pdfUrl = url; saveDatabase(true); } 
-                    } catch(e) {} 
-                }; 
-            } 
+                        if(db.herramientas[idx].historial[mIdx]) { db.herramientas[idx].historial[mIdx].pdfUrl = url; saveDatabase(true); }
+                    } catch(e) {}
+                };
+            }
         }
 
         function solicitarTrasladoHerramienta() {
@@ -1147,7 +1154,7 @@
                 if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`; try { const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await res.text(); if(db.contenedores[idx].historial[mI]) { db.contenedores[idx].historial[mI].pdfUrl = url; saveDatabase(true); } } catch(e) {} }; }
             });
         }
-        function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
+        function eliminarMovimientoContenedor(mI) { if(!confirm("¿Eliminar este movimiento del historial?")) return; const cIdx = cvActivoIndex.idx; db.contenedores[cIdx].historial.splice(mI, 1); const lastMov = db.contenedores[cIdx].historial[db.contenedores[cIdx].historial.length - 1]; db.contenedores[cIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN'; cerrarCV('modal-cv-cont'); showToast("Movimiento eliminado"); renderContenedores(); saveDatabase(true); }
 
         // --- EXPORTACIONES ---
         function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => (h.nombre||'').toLowerCase().includes(sQ) || (h.marca||'').toLowerCase().includes(sQ) || (h.modelo||'').toLowerCase().includes(sQ) || (h.serie||'').toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(u); const p = u.en_mantencion ? u.en_mantencion.taller : ((est.txt.includes('Mantención') && Array.isArray(u.historial) && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'); csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
