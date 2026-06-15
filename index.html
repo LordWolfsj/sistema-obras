@@ -548,16 +548,17 @@
             const activeTag = document.activeElement ? document.activeElement.tagName : '';
             const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag);
             
+            // Si está guardando, escribiendo o con una ventana abierta, pausamos la sincronización.
             if (modalsOpen || isTyping || !currentUser || isSaving) return;
 
             try {
                 const r = await fetch(API_URL + "?t=" + new Date().getTime());
                 const newData = await r.json();
                 
-                // ESCUDO ANTI-BORRADO
-                if (newData && newData.obras) { 
+                // ESCUDO ANTI-BORRADO: Asegurar que Google mandó información válida y no vacía
+                if (newData && newData.obras && newData.obras.length > 0) { 
                     if (db.herramientas && db.herramientas.length > 0 && (!newData.herramientas || newData.herramientas.length === 0)) {
-                        return; // Datos corruptos, ignorar
+                        return; // Datos corruptos, ignorar actualización
                     }
                     db = newData;
                     sanitizeDB();
@@ -635,6 +636,7 @@
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('app-main').style.display = 'block';
                 renderAll();
                 
+                // INICIAR ACTUALIZACIÓN AUTOMÁTICA CADA 60 SEGUNDOS
                 if(!autoSyncTimer) autoSyncTimer = setInterval(silentAutoUpdate, 60000);
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
@@ -645,11 +647,16 @@
 
         async function saveDatabase(silent = false) {
             if(!silent) document.getElementById('loading').style.display = 'flex';
-            isSaving = true; 
+            isSaving = true; // Activa seguro
             try { 
-                await fetch(API_URL, { method:'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action:'saveDB', db: db }) }); 
+                await fetch(API_URL, { 
+                    method:'POST',
+                    mode: 'no-cors', // Seguro para ignorar bloqueos de respuesta de Google
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify({ action:'saveDB', db: db }) 
+                }); 
             } catch (e) {} 
-            isSaving = false; 
+            isSaving = false; // Desactiva seguro
             document.getElementById('loading').style.display = 'none'; 
             renderAll(); 
         }
@@ -752,7 +759,7 @@
             }
         }
 
-        async function confirmarMantencionAdmin() {
+        function confirmarMantencionAdmin() {
             const reqId = document.getElementById('am-req-id').value; const taller = document.getElementById('am-taller').value.trim(); const boletin = document.getElementById('am-boletin').value.trim();
             const fileInput = document.getElementById('am-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
 
@@ -764,13 +771,20 @@
                 db.herramientas[hIdx].historial.push({ fecha: new Date().toISOString().split('T')[0], ubicacion: req.origen, detalle: `Enviado a Mantención (Taller: ${taller}). Motivo: ${req.motivo} (Aprobado) ${boletin ? '| Bol: '+boletin : ''}`, proveedor: taller, pdfUrl: placeholder });
             }
             
-            db.trasladosPendientes.splice(reqIdx, 1); document.getElementById('modal-aprobar-mantencion').style.display = 'none'; saveDatabase(true); showToast("Mantención Aprobada.");
-            if(file && hIdx !== -1) {
-                const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { 
-                    const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `MANT_ING_${db.herramientas[hIdx].id_unico}_${Date.now()}.${ext}`;
-                    try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); const lastHistIdx = db.herramientas[hIdx].historial.length - 1; if(db.herramientas[hIdx].historial[lastHistIdx]) { db.herramientas[hIdx].historial[lastHistIdx].pdfUrl = url; saveDatabase(true); } } catch(e) {}
-                };
-            }
+            db.trasladosPendientes.splice(reqIdx, 1); 
+            document.getElementById('modal-aprobar-mantencion').style.display = 'none'; 
+            
+            showToast("Mantención Aprobada.");
+            renderInicio();
+            
+            saveDatabase(true).then(() => {
+                if(file && hIdx !== -1) {
+                    const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { 
+                        const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `MANT_ING_${db.herramientas[hIdx].id_unico}_${Date.now()}.${ext}`;
+                        try { const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await resp.text(); const lastHistIdx = db.herramientas[hIdx].historial.length - 1; if(db.herramientas[hIdx].historial[lastHistIdx]) { db.herramientas[hIdx].historial[lastHistIdx].pdfUrl = url; saveDatabase(true); } } catch(e) {}
+                    };
+                }
+            });
         }
 
         function rechazarTraslado(reqId) {
@@ -950,7 +964,7 @@
                 } else {
                     bx.style.display = 'block';
                     if (est.txt.includes('Mantención')) {
-                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label>Acción</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Baja</option></select></div><div id="div-res-ub"><label>A Obra</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label>Detalle Técnico</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label>Costo ($)</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label>PDF Respaldo</label><input type="file" id="cv-her-file" style="width:100%; padding:8px;" accept=".pdf,image/*"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
+                        bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Resolución Técnica</h4><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label style="font-weight:bold; font-size:0.8rem;">Resolución:</label><select id="cv-res-tipo" onchange="toggleResolucion()" style="width:100%; padding:8px;"><option value="REPARADO">🔧 Reparada (Reasignar a Obra)</option><option value="BAJA">🗑️ Dar de Baja (Irreparable)</option></select></div><div id="div-res-ub"><label style="font-weight:bold; font-size:0.8rem;">Enviar a:</label><select id="cv-res-nueva-ub" style="width:100%; padding:8px;">${getObrasOptionsHtml(false,null)}</select></div><div style="grid-column:1/-1;"><label style="font-weight:bold; font-size:0.8rem;">Detalle Técnico / Razón:</label><input type="text" id="cv-her-com-res" style="width:100%; padding:8px;"></div><div id="div-res-val"><label style="font-weight:bold; font-size:0.8rem;">Costo Reparación ($):</label><input type="number" id="cv-her-val" style="width:100%; padding:8px;"></div><div id="div-res-pdf"><label style="font-weight:bold; font-size:0.8rem;">Adjuntar PDF (Factura/Informe):</label><input type="file" id="cv-her-file" accept=".pdf,image/*" style="width:100%; padding:8px;"></div></div><button class="btn btn-primary" style="margin-top:15px; width:100%;" onclick="procesarResolucionMantencion()">Guardar Resolución</button>`;
                         setTimeout(toggleResolucion, 50);
                     } else {
                         bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Movimiento / Devolución</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a:</label><select id="cv-her-nueva-ub" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01" style="color:#e67e22; font-weight:bold;">🛠️ Enviar a Mantención</option><option value="BAJ-01" style="color:#e74c3c; font-weight:bold;">🗑️ Dar de Baja</option></select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Devolucion" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Cambios</button></div>`;
@@ -968,13 +982,9 @@
         function cerrarCV(modalId) { document.getElementById(modalId).style.display = 'none'; cvActivoIndex = null; }
 
         function registrarMovimientoHerramienta() {
-            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
-            const nuevaUb = document.getElementById('cv-her-nueva-ub').value; 
-            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación"; 
-            const fechaHoy = new Date().toISOString().split('T')[0];
-            
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; const nuevaUb = document.getElementById('cv-her-nueva-ub').value; const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación"; const fechaHoy = new Date().toISOString().split('T')[0];
             if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
-
+            
             if (nuevaUb === 'MAN-01') {
                 db.herramientas[idx].en_mantencion = { fecha: fechaHoy, taller: "", motivo: comentario };
                 db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: db.herramientas[idx].obra, detalle: `Enviado a Mantención. Motivo: ${comentario}`, proveedor: "" });
@@ -987,9 +997,7 @@
                 db.herramientas[idx].en_mantencion = null;
                 db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: comentario, proveedor: "" });
             }
-
-            cerrarCV('modal-cv-her'); showToast("Movimiento registrado"); renderHerramientas(); renderInicio();
-            saveDatabase(true); 
+            cerrarCV('modal-cv-her'); showToast("Movimiento registrado"); renderHerramientas(); renderInicio(); saveDatabase(true); 
         }
 
         function solicitarTrasladoHerramienta() {
@@ -998,9 +1006,7 @@
             if(!motivo) return alert("Escribe un motivo u observación para el movimiento.");
             if (!db.trasladosPendientes) db.trasladosPendientes = [];
             db.trasladosPendientes.push({ id_solicitud: Date.now().toString(), herramienta_id: h.id_unico, herramienta_nombre: h.nombre, herramienta_serie: h.serie, origen: h.obra, tipo_mov: tipo, motivo: motivo, solicitante: currentUser.nombre, fecha: new Date().toISOString().split('T')[0] });
-            
-            cerrarCV('modal-cv-her'); showToast("Solicitud enviada a Administración.");
-            saveDatabase(true); 
+            cerrarCV('modal-cv-her'); showToast("Solicitud enviada a Administración."); saveDatabase(true); 
         }
 
         function procesarResolucionMantencion() {
@@ -1075,7 +1081,7 @@
             tBody.innerHTML = h || '<tr><td colspan="4" style="text-align:center; padding:15px;">No hay contenedores registrados.</td></tr>';
         }
 
-        function registrarMovimientoContenedor() { 
+        async function registrarMovimientoContenedor() { 
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const ub = document.getElementById(`cv-cont-nueva-ub`).value; const c = document.getElementById(`cv-cont-comentario`).value.trim() || "Traslado"; const f = new Date().toISOString().split('T')[0];
             const fileInput = document.getElementById('cv-cont-file'); const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; let placeholder = file ? "⏳ Subiendo..." : null;
