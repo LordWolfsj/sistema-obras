@@ -653,7 +653,7 @@
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('app-main').style.display = 'block';
                 renderAll();
                 
-                if(!autoSyncTimer) autoSyncTimer = setInterval(silentAutoUpdate, 60000);
+                if(!autoSyncTimer) autoSyncTimer = setInterval(silentAutoUpdate, 300000);
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
         function logout() { 
