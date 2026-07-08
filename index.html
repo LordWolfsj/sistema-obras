@@ -213,6 +213,7 @@
         </div>
     </div>
 
+    <!-- MODALES HOJA DE VIDA HERRAMIENTAS Y CONTENEDORES -->
     <div id="modal-cv-her" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="cerrarCV('modal-cv-her')">&times;</span>
@@ -252,6 +253,7 @@
         </div>
     </div>
 
+    <!-- MENÚ LATERAL -->
     <div class="sidebar no-print" id="app-sidebar">
         <div class="sidebar-header"><img src="logo.png" alt="SJ Systemweb"></div>
         <div class="user-info">
@@ -525,6 +527,7 @@
         <div id="salidas" class="section"><h1>Despachos / Salidas a Terreno</h1><div class="card" id="form-sal-card"><div class="form-grid"><div class="form-group"><label>N° Vale Despacho</label><input type="text" id="sal-id"></div><div class="form-group"><label>PDF Respaldo</label><input type="file" id="sal-file" accept=".pdf"></div></div><div class="form-grid" style="background:#f1f2f6; padding:10px; border-radius:5px;"><div class="form-group"><label>Buscar por OC</label><select id="sal-oc-select" onchange="updateSalMaterialSelect()"></select></div><div class="form-group"><label>Material en Stock</label><select id="sal-mat-select"></select></div><div class="form-group"><label>Cantidad a Sacar</label><input type="number" id="sal-cant"></div><button class="btn btn-primary" onclick="addToDraft('sal')">+ Añadir a la Lista</button></div><table class="draft-table"><thead><tr><th>OC Vinculada</th><th>Material</th><th>Cantidad Extraída</th><th>X</th></tr></thead><tbody id="sal-draft"></tbody></table><button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="saveFinal('sal')">Confirmar Salida Definitiva</button></div><table id="table-salidas"><thead><tr><th>OC Vinculada</th><th>Obra Destino</th><th>Total Despachos</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
     </div>
 
+    <!-- SCRIPTS DE LÓGICA -->
     <script>
         // =========================================================================================
         // PEGA AQUÍ TU URL DE GOOGLE (ENTRE LAS COMILLAS)
@@ -538,10 +541,10 @@
         let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [] };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
-        let isSaving = false; // FLAG DE SEGURIDAD
-
-        // --- MOTOR DE SINCRONIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO ---
+        let isSaving = false; 
         let autoSyncTimer = null;
+
+        const feriadosChile = { "2025-01-01": "Año Nuevo", "2025-04-18": "Viernes Santo", "2025-04-19": "Sábado Santo", "2025-05-01": "Día del Trabajo", "2025-05-21": "Día de las Glorias Navales", "2025-06-20": "Pueblos Indígenas", "2025-06-29": "San Pedro y San Pablo", "2025-07-16": "Virgen del Carmen", "2025-08-15": "Asunción de la Virgen", "2025-09-18": "Independencia Nacional", "2025-09-19": "Glorias del Ejército", "2025-10-12": "Encuentro de Dos Mundos", "2025-10-31": "Iglesias Evangélicas", "2025-11-01": "Día de Todos los Santos", "2025-11-16": "Elecciones", "2025-12-08": "Inmaculada Concepción", "2025-12-14": "Elecciones (2da V.)", "2025-12-25": "Navidad", "2026-01-01": "Año Nuevo", "2026-04-03": "Viernes Santo", "2026-04-04": "Sábado Santo", "2026-05-01": "Día del Trabajo", "2026-05-21": "Día de las Glorias Navales", "2026-06-21": "Pueblos Indígenas", "2026-06-29": "San Pedro y San Pablo", "2026-07-16": "Virgen del Carmen", "2026-08-15": "Asunción de la Virgen", "2026-09-18": "Independencia Nacional", "2026-09-19": "Glorias del Ejército", "2026-10-12": "Encuentro de Dos Mundos", "2026-10-31": "Iglesias Evangélicas", "2026-11-01": "Día de Todos los Santos", "2026-12-08": "Inmaculada Concepción", "2026-12-25": "Navidad", "2027-01-01": "Año Nuevo", "2027-03-26": "Viernes Santo", "2027-03-27": "Sábado Santo", "2027-05-01": "Día del Trabajo", "2027-05-21": "Día de las Glorias Navales", "2027-06-21": "Pueblos Indígenas", "2027-06-28": "San Pedro y San Pablo", "2027-07-16": "Virgen del Carmen", "2027-08-15": "Asunción de la Virgen", "2027-09-18": "Independencia Nacional", "2027-09-19": "Glorias del Ejército", "2027-10-11": "Encuentro de Dos Mundos", "2027-10-31": "Iglesias Evangélicas", "2027-11-01": "Día de Todos los Santos", "2027-12-08": "Inmaculada Concepción", "2027-12-25": "Navidad" };
 
         async function silentAutoUpdate() {
             const modalsOpen = Array.from(document.querySelectorAll('.modal')).some(m => m.style.display === 'block');
@@ -554,10 +557,9 @@
                 const r = await fetch(API_URL + "?t=" + new Date().getTime());
                 const newData = await r.json();
                 
-                // ESCUDO ANTI-BORRADO
                 if (newData && newData.obras && newData.obras.length > 0) { 
                     if (db.herramientas && db.herramientas.length > 0 && (!newData.herramientas || newData.herramientas.length === 0)) {
-                        return; // Datos corruptos, ignorar actualización
+                        return; 
                     }
                     db = newData;
                     sanitizeDB();
@@ -651,7 +653,7 @@
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('app-main').style.display = 'block';
                 renderAll();
                 
-                if(!autoSyncTimer) autoSyncTimer = setInterval(silentAutoUpdate, 300000);
+                if(!autoSyncTimer) autoSyncTimer = setInterval(silentAutoUpdate, 60000);
             } else { alert("❌ Usuario o contraseña incorrectos."); }
         }
         function logout() { 
@@ -663,6 +665,7 @@
             return new Promise((resolve, reject) => {
                 if(!silent) document.getElementById('loading').style.display = 'flex';
                 isSaving = true;
+                
                 fetch(API_URL, { 
                     method: 'POST',
                     mode: 'no-cors',
@@ -678,7 +681,7 @@
                 .catch(error => {
                     isSaving = false;
                     document.getElementById('loading').style.display = 'none';
-                    resolve(error); // Evita crashear la promesa
+                    resolve(error); 
                 });
             });
         }
@@ -700,7 +703,6 @@
         function deleteRecord(t, i) { if (t === 'obras' && (db.obras[i].nombre||'').toLowerCase().includes('central')) return alert("⚠️ No puedes eliminar la Bodega Central."); if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } }
         function toggleOCDetails(id) { const el = document.getElementById(id); if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; }
 
-        // --- SISTEMA CALENDARIO Y TAREAS ---
         function renderCalendario() {
             const mNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             document.getElementById('mes-actual').innerText = `${mNames[calMonth]} ${calYear}`;
@@ -709,9 +711,16 @@
             let startDay = firstDay === 0 ? 7 : firstDay; let html = '';
             for (let i = 1; i < startDay; i++) html += `<div class="calendar-day empty"></div>`;
             for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const dayTasks = db.tareas.filter(t => t.fecha === dateStr);
+                const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; 
+                const dayTasks = db.tareas.filter(t => t.fecha === dateStr);
                 let tasksHtml = dayTasks.map(t => `<div class="task-badge ${t.completada ? 'done' : ''}" onclick="toggleTarea('${t.id}')"><span style="overflow:hidden; text-overflow:ellipsis;" title="${t.desc}">${t.desc}</span><span class="task-del no-print" onclick="eliminarTarea('${t.id}', event)">X</span></div>`).join('');
-                html += `<div class="calendar-day"><span class="day-num">${i}</span>${tasksHtml}</div>`;
+                
+                const fTxt = feriadosChile[dateStr];
+                const fHtml = fTxt ? `<div style="background:#e74c3c; color:white; padding:3px; border-radius:3px; font-size:0.65rem; text-align:center; font-weight:bold; margin-bottom:5px;">🇨🇱 ${fTxt}</div>` : '';
+                const bgStyle = fTxt ? 'background:#fff5f5; border-color:#fadbd8;' : '';
+                const numStyle = fTxt ? 'color:#c0392b;' : '';
+
+                html += `<div class="calendar-day" style="${bgStyle}">${fHtml}<span class="day-num" style="${numStyle}">${i}</span>${tasksHtml}</div>`;
             }
             const grid = document.querySelector('.calendar-grid'); const headers = Array.from(grid.querySelectorAll('.calendar-day-header'));
             grid.innerHTML = ''; headers.forEach(h => grid.appendChild(h)); grid.insertAdjacentHTML('beforeend', html);
@@ -736,9 +745,11 @@
             for (let i = 1; i < startDay; i++) { html += `<td style="background:#f9f9f9;"></td>`; currentCol++; }
             for (let i = 1; i <= daysInMonth; i++) {
                 const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const dayTasks = db.tareas.filter(t => t.fecha === dateStr);
-                let cellContent = `<div style="text-align:right; font-weight:bold; color:#7f8c8d; margin-bottom:5px;">${i}</div>`;
+                const fTxt = feriadosChile[dateStr];
+                let cellContent = `<div style="text-align:right; font-weight:bold; color:${fTxt ? '#c0392b' : '#7f8c8d'}; margin-bottom:5px;">${i}</div>`;
+                if(fTxt) cellContent += `<div style="color:#e74c3c; font-weight:bold; font-size:9pt; margin-bottom:5px;">🇨🇱 ${fTxt}</div>`;
                 dayTasks.forEach(t => { let decor = t.completada ? "text-decoration:line-through; color:#95a5a6;" : "color:#118180; font-weight:bold;"; cellContent += `<div style="${decor}">• ${t.desc}</div>`; });
-                html += `<td style="vertical-align:top; padding:10px; height:100px;">${cellContent}</td>`;
+                html += `<td style="vertical-align:top; padding:10px; height:100px; ${fTxt ? 'background:#fff5f5;' : ''}">${cellContent}</td>`;
                 if (currentCol === 7) { html += `</tr>`; if (i < daysInMonth) html += `<tr>`; currentCol = 1; } else { currentCol++; }
             }
             if (currentCol > 1) { for (let i = currentCol; i <= 7; i++) { html += `<td style="background:#f9f9f9;"></td>`; } html += `</tr>`; }
@@ -754,13 +765,11 @@
             return o ? (o.nombre || String(id)) : String(id); 
         }
 
-        // --- RESTITUCIÓN DE FUNCIÓN VITAL DE TRADUCCIÓN ---
         function getObraNameByOcId(id) { 
             const o = db.ocs.find(x => String(x.id) === String(id)); 
             return o ? getObraNameById(o.obra) : '-'; 
         }
 
-        // --- SOLICITUDES DE TRASLADO (ADMIN) ---
         function aprobarTraslado(reqId) {
             if(!confirm("¿Aprobar esta solicitud?")) return;
             const reqIdx = db.trasladosPendientes.findIndex(r => String(r.id_solicitud) === String(reqId));
@@ -818,7 +827,6 @@
             if(reqIdx !== -1) { db.trasladosPendientes.splice(reqIdx, 1); saveDatabase(true); showToast("Solicitud rechazada."); renderInicio(); }
         }
 
-        // --- DASHBOARD DE INICIO ---
         function renderInicio() {
             const isBodeguero = currentUser && currentUser.rol === 'bodeguero';
 
@@ -860,7 +868,7 @@
                     if (!isBodeguero) {
                         btnReparada = `<button class="btn btn-success btn-small" style="margin-left: 10px; padding:4px 10px; font-size:0.8rem;" onclick="abrirCV('herramientas', ${h.oIdx})">🛠️ Reparada</button>`;
                     }
-                    mHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #fadbd8;"><div><b style="color:var(--primary); font-size:0.95rem;">${h.nombre} (Serie: ${h.serie})</b><span style="font-size:0.85rem; color:#7f8c8d; margin-left:10px;">Cargo: ${getObraNameById(h.obra)} | Taller: <b>${tll}</b></span></div><div style="display:flex; align-items:center;"><span class="badge bg-err" style="padding:4px 8px; font-size:0.8rem;">⏱️ ${dias > 0 ? dias : 0} días fuera</span>${btnReparada}</div></div>`;
+                    mHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #fadbd8;"><div><b style="color:var(--primary); font-size:0.95rem;">${h.nombre} (Serie: ${h.serie})</b><span style="font-size:0.85rem; color:#7f8c8d; margin-left:10px;">Cargo Original: ${getObraNameById(h.obra)} | Taller: <b>${tll}</b></span></div><div style="display:flex; align-items:center;"><span class="badge bg-err" style="padding:4px 8px; font-size:0.8rem;">⏱️ ${dias > 0 ? dias : 0} días fuera</span>${btnReparada}</div></div>`;
                 }); document.getElementById('inicio-mantencion-lista').innerHTML = mHtml;
             } else { const card = document.getElementById('mant-card'); if(card) card.style.display = 'none'; }
 
@@ -879,7 +887,7 @@
 
         function getSortedObras() { return [...db.obras].sort((a, b) => { let aCen = (a.nombre || '').toLowerCase().includes('central'); let bCen = (b.nombre || '').toLowerCase().includes('central'); if (aCen && !bCen) return -1; if (!aCen && bCen) return 1; return 0; }); }
         function getObrasOptionsHtml(includeAll = false, filteredId = null) { let html = includeAll ? '<option value="ALL">Todas las Obras/Ubicaciones</option>' : ''; const sortedObras = getSortedObras(); if (filteredId) { let fObra = sortedObras.find(o => String(o.id) === String(filteredId)); if(fObra) html += `<option value="${fObra.id}">${fObra.nombre}</option>`; } else { sortedObras.forEach(o => html += `<option value="${o.id}">${o.nombre}</option>`); } return html; }
-        
+
         function openBodegaView(nombreBodega, btn) { currentBodegaName = nombreBodega; document.getElementById('bodega-view-title').innerText = `Inventario: ${nombreBodega}`; showSection('bodegas-inv', btn); renderBodegaInv(); }
         async function addInvBodega() {
             const mat = document.getElementById('bi-mat').value.trim().toUpperCase(); const cat = document.getElementById('bi-cat').value; const uni = document.getElementById('bi-uni').value; const cant = parseFloat(document.getElementById('bi-cant').value); const com = document.getElementById('bi-com').value.trim(); const fec = new Date().toISOString().split('T')[0]; const id_unico = Date.now().toString();
@@ -1023,8 +1031,8 @@
         function registrarMovimientoHerramienta() {
             if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
             const nuevaUb = document.getElementById('cv-her-nueva-ub').value; 
-            const comEl = document.getElementById('cv-her-comentario');
-            const comentario = comEl ? comEl.value.trim() : "Cambio de ubicación/estado"; 
+            const comentario = document.getElementById('cv-her-comentario').value.trim() || "Cambio de ubicación/estado"; 
+            const fechaHoy = new Date().toISOString().split('T')[0];
             
             const pD = document.getElementById('div-prov-taller');
             let p = ""; let rec = ""; let file = null; let placeholder = null; 
@@ -1038,25 +1046,18 @@
                 placeholder = file ? "⏳ Subiendo..." : null; 
             } 
             
-            const fechaHoy = new Date().toISOString().split('T')[0]; 
             let detFinal = comentario; 
-            
             if (nuevaUb === 'BAJ-01') { 
                 detFinal = `DADA DE BAJA: ${comentario}`; 
-                db.herramientas[idx].obra = nuevaUb;
-                db.herramientas[idx].en_mantencion = null;
             } else if (nuevaUb === 'MAN-01') { 
                 detFinal = `Enviado a Mantención. Motivo: ${comentario}`; 
                 if (p) detFinal += ` | Taller: ${p}`; 
                 if (rec) detFinal += ` | Rec: ${rec}`; 
-                db.herramientas[idx].en_mantencion = { fecha: fechaHoy, taller: p, motivo: comentario };
-            } else {
-                db.herramientas[idx].obra = nuevaUb;
-                db.herramientas[idx].en_mantencion = null;
-            }
+            } 
             
+            db.herramientas[idx].obra = nuevaUb; 
             if(!db.herramientas[idx].historial) db.herramientas[idx].historial = []; 
-            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: db.herramientas[idx].obra, detalle: detFinal, proveedor: p, pdfUrl: placeholder }); 
+            db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detFinal, proveedor: p, pdfUrl: placeholder }); 
             const mIdx = db.herramientas[idx].historial.length - 1; 
             
             cerrarCV('modal-cv-her'); showToast("Movimiento registrado"); renderHerramientas(); renderInicio();
@@ -1090,7 +1091,7 @@
                 if(!cvActivoIndex) return; const idx = cvActivoIndex.idx;
                 const resEl = document.getElementById('cv-res-tipo');
                 const comEl = document.getElementById('cv-her-com-res');
-                if(!resEl || !comEl) return alert("Error al leer el formulario");
+                if(!resEl || !comEl) return alert("Error leyendo el formulario");
 
                 const res = resEl.value; 
                 const comentario = comEl.value.trim(); 
@@ -1112,9 +1113,9 @@
                 const file = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null; 
                 let placeholder = file ? "⏳ Subiendo..." : null;
 
-                db.herramientas[idx].obra = nuevaUb; 
-                db.herramientas[idx].en_mantencion = null;
                 if(!db.herramientas[idx].historial) db.herramientas[idx].historial = [];
+                db.herramientas[idx].en_mantencion = null; 
+                db.herramientas[idx].obra = nuevaUb; 
                 db.herramientas[idx].historial.push({ fecha: fechaHoy, ubicacion: nuevaUb, detalle: detalleFinal, pdfUrl: placeholder }); 
                 const movIdx = db.herramientas[idx].historial.length - 1;
 
@@ -1177,7 +1178,7 @@
                 if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = async () => { const b64 = r.result.split(',')[1]; const ext = file.name.split('.').pop(); const docId = `CONT_TRAS_${db.contenedores[idx].id_unico}_${Date.now()}.${ext}`; try { const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadPDF', filename: docId, base64: b64 }) }); const url = await res.text(); if(db.contenedores[idx].historial[mI]) { db.contenedores[idx].historial[mI].pdfUrl = url; saveDatabase(true); } } catch(e) {} }; }
             });
         }
-        function eliminarMovCon(mI) { if(!confirm("¿Eliminar?")) return; const i = cvActivoIndex.idx; db.contenedores[i].historial.splice(mI, 1); const l = db.contenedores[i].historial[db.contenedores[i].historial.length-1]; db.contenedores[i].obra = l ? l.ubicacion : 'B-CEN'; saveDatabase(true); abrirCV('contenedores', i); renderContenedores(); }
+        function eliminarMovimientoContenedor(mI) { if(!confirm("¿Eliminar este movimiento del historial?")) return; const cIdx = cvActivoIndex.idx; db.contenedores[cIdx].historial.splice(mI, 1); const lastMov = db.contenedores[cIdx].historial[db.contenedores[cIdx].historial.length - 1]; db.contenedores[cIdx].obra = lastMov ? lastMov.ubicacion : 'B-CEN'; cerrarCV('modal-cv-cont'); showToast("Movimiento eliminado"); renderContenedores(); saveDatabase(true); }
 
         // --- EXPORTACIONES ---
         function exportExcelHerramientas() { const fV = document.getElementById('filter-her-obra').value; const sQ = document.getElementById('search-herramienta').value.toLowerCase().trim(); let act = db.herramientas.map((h, i) => ({...h, oIdx: i})).filter(h => h.obra !== 'BAJ-01'); if (fV !== "ALL") act = act.filter(h => h.obra === fV); else if (currentUser.rol === 'bodeguero') act = act.filter(h => h.obra === currentUser.obraId); if (sQ) act = act.filter(h => (h.nombre||'').toLowerCase().includes(sQ) || (h.marca||'').toLowerCase().includes(sQ) || (h.modelo||'').toLowerCase().includes(sQ) || (h.serie||'').toLowerCase().includes(sQ)); let csv = "\uFEFFEquipo;Marca/Modelo;N° Serie;Ubicación Actual;Estado;Taller/Proveedor\n"; act.forEach(u => { const est = getEstadoHerramienta(u); const p = u.en_mantencion ? u.en_mantencion.taller : ((est.txt.includes('Mantención') && Array.isArray(u.historial) && u.historial.length && u.historial[u.historial.length-1].proveedor) ? u.historial[u.historial.length-1].proveedor : '-'); csv += `${u.nombre};${u.marca} / ${u.modelo};${u.serie};${getObraNameById(u.obra)};${est.txt};${p}\n`; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Inventario_Herramientas.csv`); link.click(); }
