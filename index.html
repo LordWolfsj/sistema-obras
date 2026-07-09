@@ -264,6 +264,7 @@
         <button class="menu-category" onclick="toggleSubmenu('sub-plan')">📆 Planificación <span>▼</span></button>
         <div id="sub-plan" class="submenu">
             <button class="nav-btn" onclick="showSection('mis-tareas', this)">✅ Checklist de Tareas</button>
+            <button class="nav-btn" onclick="showSection('bitacora', this)">📓 Bitácora</button>
             <button class="nav-btn" id="btn-nav-cal" onclick="showSection('calendario', this)">📅 Calendario Personal</button>
         </div>
 
@@ -384,6 +385,42 @@
                     </tr>
                 </thead>
                 <tbody id="table-mis-tareas-body"></tbody>
+            </table>
+        </div>
+
+        <div id="bitacora" class="section">
+            <h1>📓 Bitácora de Obra / Notas</h1>
+            <div class="card no-print">
+                <form onsubmit="event.preventDefault(); addBitacora();">
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label>Nueva Entrada / Registro</label>
+                        <textarea id="b-nota" required placeholder="Escribe aquí el acontecimiento, nota o reporte del día..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ddd; min-height:80px; resize:vertical;"></textarea>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;">📝 Registrar en Bitácora</button>
+                </form>
+            </div>
+            
+            <div class="filter-container no-print">
+                <div style="display:flex; align-items:center; gap:15px; flex:1;">
+                    <label style="font-weight:bold;">🔍 Buscar en Bitácora:</label>
+                    <input type="text" id="search-bitacora" placeholder="Escribe una palabra clave..." onkeyup="renderBitacora()" style="padding:10px; border-radius:5px; border:1px solid #ccc; flex:1;">
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-end;">
+                    <button class="btn btn-secondary" style="background:#7f8c8d; color:white;" onclick="window.print()">🖨️ Imprimir Bitácora</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:100px;">Fecha</th>
+                        <th style="width:80px;">Hora</th>
+                        <th style="width:150px;">Usuario</th>
+                        <th>Registro / Nota</th>
+                        <th class="no-print" style="width:50px;">X</th>
+                    </tr>
+                </thead>
+                <tbody id="table-bitacora-body"></tbody>
             </table>
         </div>
 
@@ -589,7 +626,7 @@
         let currentUser = null; let cvActivoIndex = null; let currentBodegaName = "";
         let calMonth = new Date().getMonth(); let calYear = new Date().getFullYear();
 
-        let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [] };
+        let db = { obras: [], ocs: [], ingresos: [], salidas: [], usuarios: [], herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [], bitacora: [] };
         let drafts = { oc: [], ing: [], sal: [], bod: [] };
 
         let isSaving = false; 
@@ -621,7 +658,7 @@
 
         function sanitizeDB() {
             if (!db) db = {};
-            const arrs = ['obras', 'ocs', 'ingresos', 'salidas', 'usuarios', 'herramientas', 'contenedores', 'invBodegas', 'despachosBodegas', 'tareas', 'trasladosPendientes'];
+            const arrs = ['obras', 'ocs', 'ingresos', 'salidas', 'usuarios', 'herramientas', 'contenedores', 'invBodegas', 'despachosBodegas', 'tareas', 'trasladosPendientes', 'bitacora'];
             arrs.forEach(a => { 
                 if (!db[a]) { db[a] = []; } 
                 else if (typeof db[a] === 'string' && db[a].trim() === '') { db[a] = []; }
@@ -646,6 +683,11 @@
             if (db.tareas) {
                 db.tareas.forEach(t => {
                     if (!t.user) t.user = MASTER_ADMIN.user;
+                });
+            }
+            if (db.bitacora) {
+                db.bitacora.forEach(b => {
+                    if (!b.user) b.user = MASTER_ADMIN.user;
                 });
             }
 
@@ -745,7 +787,7 @@
         async function clearAll() {
             if (confirm("¿Limpiar historial? (Los usuarios creados y Bodega Central se mantendrán)")) {
                 const u = db.usuarios; const bCen = db.obras.find(o => (o.nombre||'').toLowerCase().includes('central'));
-                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [] }; 
+                db = { obras: bCen ? [bCen] : [], ocs: [], ingresos: [], salidas: [], usuarios: u, herramientas: [], contenedores: [], invBodegas: [], despachosBodegas: [], tareas: [], trasladosPendientes: [], bitacora: [] }; 
                 await saveDatabase();
             }
         }
@@ -754,6 +796,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
             if(id === 'mis-tareas') renderMisTareas();
+            if(id === 'bitacora') renderBitacora();
             if(id === 'bodegas-salidas') renderBodegasSalidas(); 
             if(id === 'bodegas-reporte') renderBodegasReporte(); 
             if(id === 'calendario') renderCalendario(); 
@@ -762,6 +805,63 @@
         
         function deleteRecord(t, i) { if (t === 'obras' && (db.obras[i].nombre||'').toLowerCase().includes('central')) return alert("⚠️ No puedes eliminar la Bodega Central."); if (confirm("¿Eliminar este registro permanentemente?")) { db[t].splice(i, 1); saveDatabase(); } }
         function toggleOCDetails(id) { const el = document.getElementById(id); if (el) el.style.display = (el.style.display === 'none') ? 'table-row' : 'none'; }
+
+        // --- SISTEMA BITÁCORA DE OBRA ---
+        function addBitacora() {
+            const nota = document.getElementById('b-nota').value.trim();
+            if (!nota) return;
+            const now = new Date();
+            const fecha = now.toISOString().split('T')[0];
+            const hora = now.toTimeString().split(' ')[0].substring(0,5); 
+            
+            db.bitacora.push({
+                id: Date.now().toString(),
+                user: currentUser.user,
+                fecha: fecha,
+                hora: hora,
+                usuario: currentUser.nombre,
+                nota: nota
+            });
+            saveDatabase(true);
+            document.getElementById('b-nota').value = '';
+            showToast("Registro guardado en Bitácora");
+            renderBitacora();
+        }
+
+        function renderBitacora() {
+            const sQ = document.getElementById('search-bitacora').value.toLowerCase().trim();
+            let myBitacora = db.bitacora.filter(b => b.user === currentUser.user);
+            
+            if (sQ) {
+                myBitacora = myBitacora.filter(b => 
+                    b.nota.toLowerCase().includes(sQ) || 
+                    b.fecha.includes(sQ)
+                );
+            }
+            
+            myBitacora.sort((a, b) => b.id - a.id);
+
+            let html = '';
+            myBitacora.forEach(b => {
+                html += `<tr>
+                    <td><b>${b.fecha.split('-').reverse().join('/')}</b></td>
+                    <td>${b.hora}</td>
+                    <td>${b.usuario}</td>
+                    <td>${b.nota}</td>
+                    <td class="no-print"><button class="btn btn-danger btn-small" onclick="eliminarBitacora('${b.id}')">X</button></td>
+                </tr>`;
+            });
+            
+            const tbody = document.getElementById('table-bitacora-body');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:20px;">No hay registros en tu bitácora.</td></tr>';
+        }
+
+        function eliminarBitacora(id) {
+            if (!confirm("¿Eliminar este registro de la bitácora?")) return;
+            db.bitacora = db.bitacora.filter(b => String(b.id) !== String(id));
+            saveDatabase(true);
+            renderBitacora();
+        }
 
         // --- SISTEMA CHECKLIST DE TAREAS Y CALENDARIO (PRIVADO) ---
         function addMiTarea() {
@@ -1016,7 +1116,6 @@
                 }); document.getElementById('inicio-mantencion-lista').innerHTML = mHtml;
             } else { const card = document.getElementById('mant-card'); if(card) card.style.display = 'none'; }
 
-            // TAREAS PENDIENTES PRIVADAS
             const pending = db.tareas.filter(t => !t.completada && t.user === currentUser.user).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
             let tHtml = '';
             if(pending.length === 0) {
@@ -1024,14 +1123,7 @@
             } else {
                 pending.forEach(t => {
                     const isOverdue = t.fecha < new Date().toISOString().split('T')[0];
-                    tHtml += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:5px;">
-                        <div>
-                            <span class="badge ${isOverdue ? 'bg-err' : 'bg-info'}">${t.fecha.split('-').reverse().join('/')}</span>
-                            <span style="margin-left:10px; font-weight:bold; color:var(--primary);">${t.desc}</span>
-                        </div>
-                        <button class="btn btn-success btn-small" onclick="toggleTarea('${t.id}')">✔ Completar</button>
-                    </div>`;
+                    tHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:5px;"><div><span class="badge ${isOverdue ? 'bg-err' : 'bg-info'}">${t.fecha.split('-').reverse().join('/')}</span><span style="margin-left:10px; font-weight:bold; color:var(--primary);">${t.desc}</span></div><button class="btn btn-success btn-small" onclick="toggleTarea('${t.id}')">✔ Completar</button></div>`;
                 });
             }
             document.getElementById('inicio-tareas-lista').innerHTML = tHtml;
@@ -1175,7 +1267,15 @@
                     bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Solicitar Movimiento de Equipo</h4><div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Tipo de Solicitud:</label><select id="cv-her-sol-tipo" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"><option value="DEVOLUCION">Devolución a Bodega Central</option><option value="MANTENCION">Envío a Taller / Mantención</option></select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Motivo / Observación:</label><input type="text" id="cv-her-sol-com" placeholder="Ej: Termino de faena, Falla eléctrica..." style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div><button class="btn btn-warn" style="background:#f39c12; color:white; padding:10px 20px;" onclick="solicitarTrasladoHerramienta()">Enviar Solicitud</button></div>`;
                 } else {
                     bx.style.display = 'block';
-                    bx.innerHTML = `<h4 style="margin-bottom:10px; color:var(--primary);">Registrar Movimiento / Devolución</h4><div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;"><div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Destino / Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01" style="color:#e67e22; font-weight:bold;">🛠️ Enviar a Mantención</option><option value="BAJ-01" style="color:#e74c3c; font-weight:bold;">🗑️ Dar de Baja</option></select></div><div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios / Motivo:</label><input type="text" id="cv-her-com" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" placeholder="Ej: Traslado a obra / Falla"></div><button class="btn btn-primary" style="padding:8px 20px;" onclick="regMovHer()">Registrar</button></div><div id="div-prov-taller" style="display:none; background:#e8f4f8; padding:15px; border-radius:5px; border-left:4px solid #3498db; margin-top:15px;"><h5 style="margin-top:0; margin-bottom:10px; color:#2980b9;">📋 Datos de Ingreso a Taller</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1; min-width:150px;"><label style="font-size:0.8rem; font-weight:bold;">Taller / Proveedor:</label><input type="text" id="cv-her-prov" placeholder="Nombre del taller..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div><div style="flex:1; min-width:150px;"><label style="font-size:0.8rem; font-weight:bold;">N° de Recepción / Boletín:</label><input type="text" id="cv-her-recepcion" placeholder="Ej: REC-1234" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div><div style="flex:1; min-width:200px;"><label style="font-size:0.8rem; font-weight:bold;">Hoja de Recepción (Foto/PDF):</label><input type="file" id="cv-her-mant-file" accept=".pdf,image/*" style="width:100%; padding:6px; background:white; border:1px solid #ccc; border-radius:4px;"></div></div></div>`;
+                    bx.innerHTML = `
+                    <h4 style="margin-bottom:10px; color:var(--primary);">Registrar Movimiento / Devolución</h4>
+                    <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap: wrap;">
+                        <div style="flex:1; min-width: 200px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Mover a / Cambiar Estado:</label><select id="cv-her-nueva-ub" onchange="toggleProveedorTaller()" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;">${getObrasOptionsHtml(false, null)}<option value="MAN-01" style="color:#e67e22; font-weight:bold;">🛠️ Enviar a Mantención</option><option value="BAJ-01" style="color:#e74c3c; font-weight:bold;">🗑️ Dar de Baja</option></select></div>
+                        <div style="flex:2; min-width: 250px;"><label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:5px;">Comentarios (Opcional):</label><input type="text" id="cv-her-comentario" placeholder="Ej: Traslado a obra / Falla" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc;"></div>
+                        <button class="btn btn-primary" style="padding:10px 20px;" onclick="registrarMovimientoHerramienta()">Guardar Cambios</button>
+                    </div>
+                    <div id="div-prov-taller" style="display:none; background:#e8f4f8; padding:15px; border-radius:5px; border-left:4px solid #3498db; margin-top:15px;"><h5 style="margin-top:0; margin-bottom:10px; color:#2980b9;">📋 Datos de Ingreso a Taller</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="flex:1; min-width:150px;"><label style="font-size:0.8rem; font-weight:bold;">Taller / Proveedor:</label><input type="text" id="cv-her-prov" placeholder="Nombre del taller..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div><div style="flex:1; min-width:150px;"><label style="font-size:0.8rem; font-weight:bold;">N° de Recepción / Boletín:</label><input type="text" id="cv-her-recepcion" placeholder="Ej: REC-1234" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div><div style="flex:1; min-width:200px;"><label style="font-size:0.8rem; font-weight:bold;">Hoja de Recepción (Foto/PDF):</label><input type="file" id="cv-her-mant-file" accept=".pdf,image/*" style="width:100%; padding:6px; background:white; border:1px solid #ccc; border-radius:4px;"></div></div></div>
+                    `;
                 }
                 document.getElementById('modal-cv-her').style.display = 'block';
             } else if (tipo === 'contenedores') {
@@ -1188,10 +1288,10 @@
         }
         function cerrarCV(modalId) { document.getElementById(modalId).style.display = 'none'; cvActivoIndex = null; }
 
-        function regMovHer() { 
-            const idx = cvActivoIndex.idx; 
-            const ub = document.getElementById('cv-her-nueva-ub').value; 
-            const comEl = document.getElementById('cv-her-com');
+        function registrarMovimientoHerramienta() {
+            if(!cvActivoIndex) return; const idx = cvActivoIndex.idx; 
+            const nuevaUb = document.getElementById('cv-her-nueva-ub').value; 
+            const comEl = document.getElementById('cv-her-comentario');
             const comentario = comEl ? comEl.value.trim() : "Cambio de ubicación/estado"; 
             
             const pD = document.getElementById('div-prov-taller');
@@ -1209,11 +1309,11 @@
             const fechaHoy = new Date().toISOString().split('T')[0]; 
             let detFinal = comentario; 
             
-            if (ub === 'BAJ-01') { 
+            if (nuevaUb === 'BAJ-01') { 
                 detFinal = `DADA DE BAJA: ${comentario}`; 
                 db.herramientas[idx].obra = nuevaUb;
                 db.herramientas[idx].en_mantencion = null;
-            } else if (ub === 'MAN-01') { 
+            } else if (nuevaUb === 'MAN-01') { 
                 detFinal = `Enviado a Mantención. Motivo: ${comentario}`; 
                 if (p) detFinal += ` | Taller: ${p}`; 
                 if (rec) detFinal += ` | Rec: ${rec}`; 
@@ -1433,6 +1533,7 @@
             try { renderContenedores(); } catch(e) { document.querySelector('#table-contenedores-body').innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay contenedores registrados.</td></tr>'; }
 
             if(document.getElementById('mis-tareas') && document.getElementById('mis-tareas').classList.contains('active')) renderMisTareas();
+            if(document.getElementById('bitacora') && document.getElementById('bitacora').classList.contains('active')) renderBitacora();
             if(document.getElementById('bodegas-inv') && document.getElementById('bodegas-inv').classList.contains('active')) renderBodegaInv();
             if(document.getElementById('bodegas-salidas') && document.getElementById('bodegas-salidas').classList.contains('active')) renderBodegasSalidas();
             if(document.getElementById('bodegas-reporte') && document.getElementById('bodegas-reporte').classList.contains('active')) renderBodegasReporte();
